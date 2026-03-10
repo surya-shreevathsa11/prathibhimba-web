@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Reviews — Summer Green</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/theme-yankees.css">
+  <style>
+    .reviews-page .section { display: block; }
+    .reviews-page .testimonials__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+    .reviews-page .testimonial { display: block; padding: 1.75rem; background: #fff; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.06); }
+    .reviews-page .testimonial__text { font-family: 'Montserrat', sans-serif; font-style: normal; font-size: 0.95rem; }
+  </style>
+</head>
+<body class="page-reviews">
+  <div class="blob-cursor" id="blobCursor" aria-hidden="true">
+    <div class="blob-cursor__main">
+      <div class="blob-cursor__blob"><span class="blob-cursor__inner"></span></div>
+    </div>
+  </div>
+  <!-- Navigation (same as main page: transparent until scroll, then blue .nav.scrolled) -->
+  <nav class="nav" id="nav">
+    <div class="nav__inner container">
+      <a href="/" class="nav__logo" aria-label="Summer Green Homestay">
+        <img src="/img/summary%20green.jpeg" alt="Summer Green Homestay" class="nav__logo-img" />
+      </a>
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="/#home">Home</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#rooms" id="navRoomsLink">Rooms</a></li>
+        <li><a href="/#gallery">Gallery</a></li>
+        <li><a href="/reviews">Reviews</a></li>
+        <li>
+          <a href="https://wa.me/919008188595" target="_blank" rel="noopener" aria-label="Contact on WhatsApp">Contact</a>
+        </li>
+      </ul>
+      <a href="/cart" class="nav__cart" id="navCart" aria-label="Booking cart">
+        <span class="nav__cart-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+        </span>
+        <span class="nav__cart-count" id="navCartCount" data-count="0">0</span>
+      </a>
+      <div class="nav__right">
+        <div class="nav__auth-wrap" data-auth-ui>
+          <button class="btn btn--outline nav__auth" id="authBtn">Sign In</button>
+          <div class="nav__profile" id="navProfile" aria-hidden="true">
+            <button type="button" class="nav__profile-trigger cursor-target" id="navProfileTrigger" aria-expanded="false" aria-haspopup="true" aria-label="Profile menu">
+              <img id="navProfileAvatar" class="nav__profile-avatar" src="/img/default-avatar.svg" alt="" width="36" height="36" />
+              <svg class="nav__profile-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path d="M2 4l4 4 4-4" />
+              </svg>
+            </button>
+            <div class="nav__profile-dropdown" id="navProfileDropdown">
+              <a href="/cart" class="nav__profile-item cursor-target" id="navProfileBookings">My Bookings</a>
+              <button type="button" class="nav__profile-item nav__profile-item--logout cursor-target" id="navProfileLogout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="reviews-page">
+    <header class="reviews-banner" style="position:relative;min-height:280px;background:linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0.2)), url('/img/designarena_image_1eyd2uq8.png') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 1rem;">
+      <a href="/#rooms" style="position:absolute;top:1rem;right:1rem;color:#fff;text-decoration:none;font-size:0.9rem;">← BACK TO ROOMS</a>
+      <h2 style="color:#fff;font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,4vw,2.25rem);font-weight:600;margin:0;">Reviews from Google, Airbnb &amp; Booking.com</h2>
+    </header>
+    <section class="section section--alt">
+      <div class="container">
+        <p class="section__subtitle">Guest Voices</p>
+        <h1 class="section__title">Reviews</h1>
+        <div class="divider"></div>
+        <p class="section__desc">What our guests say about their stay</p>
+        <div class="testimonials__grid">
+          <div class="testimonial">
+            <p style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary, #333);font-size:0.9rem;"></p>
+            <p class="testimonial__text">Best budget-friendly place to stay in Coorg, very close to Raja Seat and a few popular cafes. The property is well maintained, clean, and has a very friendly host who suggested places to visit. A tasty complimentary breakfast was served, and the available parking was a huge plus—totally loved the stay.</p>
+            <span class="testimonial__author"> Rash</span>
+          </div>
+          <div class="testimonial">
+            <p style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary, #333);font-size:0.9rem;"></p>
+            <p class="testimonial__text">We really enjoyed our stay at Summer Green Guest House. It was a very calm, peaceful place and Dinesh Ji, the host and his family were really friendly. I would highly recommend this stay to anyone who is looking for a calm and cozy gateway in Coorg.</p>
+            <span class="testimonial__author"> Kumar Ankit</span>
+          </div>
+          <div class="testimonial">
+            <p style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary, #333);font-size:0.9rem;"></p>
+            <p class="testimonial__text">The rooms were near and  clean. Clean washroom and very humble host/owner. They replied quickly and very helpful and will arrange for you what you need. This is just 2 km from the KSRTC bus stand and you can get auto easily by saying Govt ITI College near canara Bank. From the bus stand it will take 50 ₹only. The place was peaceful and calm and you can get an auto just outside your stay. It's situated on the main road.</p>
+            <span class="testimonial__author"> Akash Verma</span>
+          </div>
+          <div class="testimonial">
+            <p style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary, #333);font-size:0.9rem;"></p>
+            <p class="testimonial__text">The owners were very friendly and  kind. The rooms had a pretty good view and felt very homely and comfy. Loved my stay here and would recommend it. They had a very cute dog as well who played with us. They have parking too for cars and bikes. Thank you for the wonderful experience.</p>
+            <span class="testimonial__author" Pranav P A</span>
+          </div>
+          <div class="testimonial">
+            <p style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary, #333);font-size:0.6rem;"></p>
+            <p class="testimonial__text">Over all good experience. Safe and secure location. Good for families. Budget friendly home stay. Neat and clean . Hot water gezer.  For the info carry your own soaps and towels.  We booked for 4 days. Owner and staff are very helpful and supportive. Not far from krstc bus stand its 1.4km walkable distance as well. you will get rickshaw also.</p>
+            <span class="testimonial__author"> Meenakshi Thakur</span>
+          </div>
+          <div class="testimonial">
+            <p style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary, #333);font-size:0.9rem;"></p>
+            <p class="testimonial__text">We had a very pleasant stay at this property. The property is located within the town and hence close to many places especially eating joints. The host Mr Dinesh is very humble and down to earth . We were overwhelmed by his hospitality. He made us feel at home, providing all the necessities. He planned our 3 day trip such that we cover all the places conveniently. The rooms and bathrooms  were neat tidy. Overall a good budget room , awesome host and a wonderful Coorg ; that's what makes your vacation a beautiful memory.</p>
+            <span class="testimonial__author"> Abhay Gupta</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer (same as main page: VARA left, Summer Green + copyright center, Contact right; cursor contrast via .footer) -->
+  <footer class="footer">
+    <div class="footer__wrap">
+      <a href="https://www.instagram.com/vara_.2026?igsh=OHJkNWVxZjUzdDRq&utm_source=qr" target="_blank" rel="noopener" class="footer__vara" aria-label="VARA on Instagram">
+        <img src="/img/vara%20logo%20(green).jpeg" alt="VARA" class="footer__vara-img" width="48" height="48" />
+      </a>
+      <div class="footer__center">
+        <div class="footer__brand">
+          <img src="/img/summary%20green.jpeg" alt="Summer Green Homestay" class="footer__logo-img" />
+        </div>
+        <p class="footer__copyright">&copy; 2026 Summer Green. All rights reserved.</p>
+      </div>
+      <div class="footer__contact">
+        <h3 class="footer__contact-title">Contact</h3>
+        <p class="footer__contact-item">
+          <a href="tel:+919008188595">+91 90081 88595</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <a class="whatsapp-float" href="https://wa.me/919008188595" target="_blank" rel="noopener" aria-label="Contact us on WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+  <script src="/js/blob-cursor.js"></script>
+  <script>
+    (function () {
+      var navEl = document.getElementById("nav");
+      if (navEl) {
+        function updateNavScrolled() {
+          navEl.classList.toggle("scrolled", window.scrollY > 60);
+        }
+        updateNavScrolled();
+        window.addEventListener("scroll", updateNavScrolled);
+      }
+    })();
+  </script>
+</body>
+</html>

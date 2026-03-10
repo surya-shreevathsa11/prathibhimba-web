@@ -1,0 +1,48 @@
+# Node.js dependencies
+node_modules/
+# Optional npm cache directory
+.npm
+
+# Environment variables and sensitive files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build output directories
+build/
+dist/
+public/build/
+public/dist/
+
+# Logs and databases
+logs/
+*.log
+npm-debug.log*
+pids/
+*.pid
+*.seed
+.mongo/
+*.sock
+*.lock
+
+# OS and IDE specific files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Coverage and testing
+coverage/
+.nyc_output/
+
+# Misc
+.cache/
+.parcel-cache/
+.next/ # For Next.js in MERN
+.serverless/ # For serverless deployments

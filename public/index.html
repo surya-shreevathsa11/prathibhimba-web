@@ -51,7 +51,7 @@
           <li><a href="#about">About</a></li>
           <li><a href="#rooms" id="navRoomsLink">Rooms</a></li>
           <li><a href="#gallery">Gallery</a></li>
-          <li><a href="/reviews">Reviews</a></li>
+          <li><a href="#events">Events</a></li>
           <li>
             <a
               href="https://wa.me/919008188595"
@@ -288,6 +288,32 @@
         </div>
       </section>
 
+      <!-- Events — photos left, description right -->
+      <section class="section section--events" id="events">
+        <div class="container container--wide">
+          <div class="events__grid">
+            <div class="events__media" data-reveal="fade-up">
+              <div class="events__img-main" style="background-image: url(https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&h=1000&q=80);" aria-hidden="true"></div>
+              <div class="events__img-stack">
+                <div class="events__img-small" style="background-image: url(https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=400&h=500&q=80);" aria-hidden="true"></div>
+                <div class="events__img-small" style="background-image: url(https://images.unsplash.com/photo-1556745753-b2904692b3cd?auto=format&fit=crop&w=400&h=500&q=80);" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="events__content" data-reveal="fade-up" data-reveal-delay="120">
+              <span class="section__subtitle">What We Offer</span>
+              <h2 class="section__title section__title--left">Events at Prathibhimba</h2>
+              <div class="divider divider--left"></div>
+              <p class="events__text">
+                Host your special moments amid the serene hills of Coorg. From intimate gatherings to small celebrations, our retreat provides a peaceful backdrop and personalised support to make your event memorable.
+              </p>
+              <p class="events__text">
+                Whether it's a family reunion, a quiet anniversary, or a small corporate offsite, we work with you to arrange space, meals, and the little touches that matter. Get in touch to discuss your plans.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Rooms — Select Your Sanctuary -->
       <section class="section section--alt section--sanctuary" id="rooms">
         <div class="container">
@@ -299,92 +325,80 @@
         </div>
       </section>
 
-      <!-- Gallery — Immersive two-column FLIP swap (main 70% + stack 30%) -->
-      <section class="section section--experiences" id="gallery">
-        <div class="section__banner">
-          <h2 class="section__title section__title--light">Gallery</h2>
-        </div>
-        <div class="container container--no-pad">
-          <div class="immersive-gallery" id="immersiveGallery" role="region" aria-label="Immersive gallery">
-            <!-- Left: main display (~70%) — one active card -->
-            <div class="immersive-gallery__main">
-              <div class="gallery-card gallery-card--main" data-index="0" tabindex="0">
-                <div class="gallery-card__media">
-                  <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1600&h=1200&q=80" alt="Courtyard" />
-                </div>
-                <div class="gallery-card__overlay">
-                  <span class="gallery-card__number" aria-hidden="true">01</span>
-                  <h3 class="gallery-card__title">Courtyard</h3>
-                  <p class="gallery-card__date">Madikeri, Coorg</p>
-                  <button type="button" class="gallery-card__play" aria-label="View">View</button>
-                </div>
-                <span class="gallery-card__play-icon" aria-hidden="true"></span>
-              </div>
-            </div>
-            <!-- Right: thumbnail stack (~30%) — same card structure for FLIP -->
-            <div class="immersive-gallery__stack">
-              <div class="gallery-card" data-index="1" tabindex="0">
-                <div class="gallery-card__media">
-                  <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&h=1200&q=80" alt="Suite interior" />
-                </div>
-                <div class="gallery-card__overlay">
-                  <span class="gallery-card__number" aria-hidden="true">02</span>
-                  <h3 class="gallery-card__title">Suite Interior</h3>
-                  <p class="gallery-card__date">Madikeri, Coorg</p>
-                  <button type="button" class="gallery-card__play" aria-label="View">View</button>
-                </div>
-                <span class="gallery-card__play-icon" aria-hidden="true"></span>
-              </div>
-              <div class="gallery-card" data-index="2" tabindex="0">
-                <div class="gallery-card__media">
-                  <img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1600&h=1200&q=80" alt="Breakfast terrace" />
-                </div>
-                <div class="gallery-card__overlay">
-                  <span class="gallery-card__number" aria-hidden="true">03</span>
-                  <h3 class="gallery-card__title">Breakfast Terrace</h3>
-                  <p class="gallery-card__date">Madikeri, Coorg</p>
-                  <button type="button" class="gallery-card__play" aria-label="View">View</button>
-                </div>
-                <span class="gallery-card__play-icon" aria-hidden="true"></span>
-              </div>
-              <div class="gallery-card" data-index="3" tabindex="0">
-                <div class="gallery-card__media">
-                  <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=1600&h=1200&q=80" alt="Garden path" />
-                </div>
-                <div class="gallery-card__overlay">
-                  <span class="gallery-card__number" aria-hidden="true">04</span>
-                  <h3 class="gallery-card__title">Garden Path</h3>
-                  <p class="gallery-card__date">Madikeri, Coorg</p>
-                  <button type="button" class="gallery-card__play" aria-label="View">View</button>
-                </div>
-                <span class="gallery-card__play-icon" aria-hidden="true"></span>
-              </div>
-              <div class="gallery-card" data-index="4" tabindex="0">
-                <div class="gallery-card__media">
-                  <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1600&h=1200&q=80" alt="Room detail" />
-                </div>
-                <div class="gallery-card__overlay">
-                  <span class="gallery-card__number" aria-hidden="true">05</span>
-                  <h3 class="gallery-card__title">Room Detail</h3>
-                  <p class="gallery-card__date">Madikeri, Coorg</p>
-                  <button type="button" class="gallery-card__play" aria-label="View">View</button>
-                </div>
-                <span class="gallery-card__play-icon" aria-hidden="true"></span>
-              </div>
-              <div class="gallery-card" data-index="5" tabindex="0">
-                <div class="gallery-card__media">
-                  <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=1600&h=1200&q=80" alt="Wine cellar" />
-                </div>
-                <div class="gallery-card__overlay">
-                  <span class="gallery-card__number" aria-hidden="true">06</span>
-                  <h3 class="gallery-card__title">Wine Cellar</h3>
-                  <p class="gallery-card__date">Madikeri, Coorg</p>
-                  <button type="button" class="gallery-card__play" aria-label="View">View</button>
-                </div>
-                <span class="gallery-card__play-icon" aria-hidden="true"></span>
-              </div>
-            </div>
+      <!-- Gallery — horizontal reel with left/right navigation -->
+      <section class="section section--gallery" id="gallery">
+        <div class="container">
+          <div class="gallery-intro">
+            <span class="gallery-intro__eyebrow">Visual Journey</span>
+            <h2 class="gallery-intro__title">A Glimpse Into Our World</h2>
+            <div class="divider"></div>
+            <p class="gallery-intro__desc">Every corner of Prathibhimba tells a story — of nature's beauty, quiet luxury, and the warmth of home.</p>
           </div>
+        </div>
+
+        <div class="gallery-reel">
+          <button type="button" class="gallery-reel__nav gallery-reel__nav--prev" id="galleryReelPrev" aria-label="Previous photo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="gallery-reel__track" id="galleryReelTrack">
+            <article class="gallery-reel__slide" data-gallery-idx="0" tabindex="0">
+              <div class="gallery-reel__img-wrap">
+                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&h=600&q=80" alt="Courtyard" />
+              </div>
+              <div class="gallery-reel__overlay">
+                <span class="gallery-reel__title">Courtyard</span>
+                <span class="gallery-reel__meta">Madikeri, Coorg</span>
+              </div>
+            </article>
+            <article class="gallery-reel__slide" data-gallery-idx="1" tabindex="0">
+              <div class="gallery-reel__img-wrap">
+                <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&h=600&q=80" alt="Suite Interior" />
+              </div>
+              <div class="gallery-reel__overlay">
+                <span class="gallery-reel__title">Suite Interior</span>
+                <span class="gallery-reel__meta">Madikeri, Coorg</span>
+              </div>
+            </article>
+            <article class="gallery-reel__slide" data-gallery-idx="2" tabindex="0">
+              <div class="gallery-reel__img-wrap">
+                <img src="https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=900&h=600&q=80" alt="Breakfast Terrace" />
+              </div>
+              <div class="gallery-reel__overlay">
+                <span class="gallery-reel__title">Breakfast Terrace</span>
+                <span class="gallery-reel__meta">Madikeri, Coorg</span>
+              </div>
+            </article>
+            <article class="gallery-reel__slide" data-gallery-idx="3" tabindex="0">
+              <div class="gallery-reel__img-wrap">
+                <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=900&h=600&q=80" alt="Garden Path" />
+              </div>
+              <div class="gallery-reel__overlay">
+                <span class="gallery-reel__title">Garden Path</span>
+                <span class="gallery-reel__meta">Madikeri, Coorg</span>
+              </div>
+            </article>
+            <article class="gallery-reel__slide" data-gallery-idx="4" tabindex="0">
+              <div class="gallery-reel__img-wrap">
+                <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=900&h=600&q=80" alt="Room Detail" />
+              </div>
+              <div class="gallery-reel__overlay">
+                <span class="gallery-reel__title">Room Detail</span>
+                <span class="gallery-reel__meta">Madikeri, Coorg</span>
+              </div>
+            </article>
+            <article class="gallery-reel__slide" data-gallery-idx="5" tabindex="0">
+              <div class="gallery-reel__img-wrap">
+                <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=900&h=600&q=80" alt="Wine Cellar" />
+              </div>
+              <div class="gallery-reel__overlay">
+                <span class="gallery-reel__title">Wine Cellar</span>
+                <span class="gallery-reel__meta">Madikeri, Coorg</span>
+              </div>
+            </article>
+          </div>
+          <button type="button" class="gallery-reel__nav gallery-reel__nav--next" id="galleryReelNext" aria-label="Next photo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
         </div>
       </section>
 
@@ -417,6 +431,29 @@
               >
             </div>
           </a>
+        </div>
+      </section>
+
+      <!-- Reviews — 3 manual reviews -->
+      <section class="section section--reviews" id="reviews">
+        <div class="container">
+          <p class="section__subtitle" data-reveal="fade-up">Guest Stories</p>
+          <h2 class="section__title" data-reveal="clip">Reviews</h2>
+          <div class="divider" data-reveal="flow" data-reveal-delay="80"></div>
+          <div class="reviews__grid" data-reveal="fade-up" data-reveal-delay="120">
+            <div class="review-card">
+              <p class="review-card__text">Add your first review here. A few lines from a guest about their stay at Prathibhimba.</p>
+              <p class="review-card__author">— Guest Name</p>
+            </div>
+            <div class="review-card">
+              <p class="review-card__text">Add your second review here. Another short testimonial about the experience and hospitality.</p>
+              <p class="review-card__author">— Guest Name</p>
+            </div>
+            <div class="review-card">
+              <p class="review-card__text">Add your third review here. A final quote to round off the reviews section.</p>
+              <p class="review-card__author">— Guest Name</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -511,42 +548,14 @@
       </section>
     </main>
 
-    <!-- Footer — Dark multi-column (Wild Haven style) -->
-    <footer class="footer">
-      <div class="footer__wrap footer__wrap--grid">
-        <div class="footer__col footer__col--brand">
-          <div class="footer__brand">
-            <img src="/img/summary%20green.jpeg" alt="Prathibhimba Retreat" class="footer__logo-img" />
-          </div>
-          <p class="footer__tagline">Where nature meets luxury.</p>
+    <!-- Footer — compact: brand + copyright only -->
+    <footer class="footer footer--compact">
+      <div class="footer__wrap footer__wrap--compact">
+        <div class="footer__brand">
+          <img src="/img/summary%20green.jpeg" alt="Prathibhimba Retreat" class="footer__logo-img" />
         </div>
-        <div class="footer__col">
-          <h3 class="footer__heading">Quick Links</h3>
-          <ul class="footer__links">
-            <li><a href="#about">About</a></li>
-            <li><a href="#rooms">Accommodation</a></li>
-            <li><a href="#gallery">Gallery</a></li>
-            <li><a href="/reviews">Reviews</a></li>
-            <li><a href="#terms">Terms &amp; Conditions</a></li>
-          </ul>
-        </div>
-        <div class="footer__col">
-          <h3 class="footer__heading">Contact</h3>
-          <p class="footer__contact-item">
-            <a href="tel:+919008188595">+91 90081 88595</a>
-          </p>
-          <p class="footer__contact-item">
-            <a href="https://wa.me/919008188595" target="_blank" rel="noopener">WhatsApp</a>
-          </p>
-          <p class="footer__contact-item">
-            <a href="https://www.instagram.com/summergreen_stays?igsh=MWhpb2d1ZDB1cDAxNQ%3D%3D&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
-          </p>
-        </div>
-        <div class="footer__bottom">
-          <p class="footer__copyright">
-            &copy; 2026 Prathibhimba. All rights reserved.
-          </p>
-        </div>
+        <p class="footer__tagline">Where nature meets luxury.</p>
+        <p class="footer__copyright">&copy; 2026 Prathibhimba. All rights reserved.</p>
       </div>
     </footer>
 

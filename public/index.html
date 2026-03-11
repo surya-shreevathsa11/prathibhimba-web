@@ -323,7 +323,7 @@
       </section>
 
       <!-- Gallery — horizontal reel with left/right navigation -->
-      <section class="section section--gallery" id="gallery" data-nav-theme="dark">
+      <section class="section section--gallery" id="gallery" data-nav-theme="light">
         <div class="container">
           <div class="gallery-intro">
             <span class="gallery-intro__eyebrow">Visual Journey</span>
@@ -412,34 +412,23 @@
               <p class="directions__text">Add your directions content here — by road, nearest airport, or rail. You can describe the route from Bangalore, Mangalore, or other cities to Madikeri and then to Prathibhimba.</p>
               <p class="directions__text">Include landmarks, approximate drive time, and any tips for first-time visitors. This block stays on the left so the map photo remains on the right.</p>
             </div>
-            <a
-              class="location-card directions__card"
-              href="https://maps.app.goo.gl/LPeNLoTUop7FPFPGA"
-              target="_blank"
-              rel="noopener"
-              data-reveal="fade-up"
-              data-reveal-delay="120"
-            >
-              <div
-                class="location-card__img"
-                style="
-                  background-image: url(&quot;/img/designarena_image_1eyd2uq8.png&quot;);
-                "
-              ></div>
-              <div class="location-card__overlay">
-                <h3 class="location-card__title">Our Location</h3>
-                <p class="location-card__desc"></p>
-                <span class="location-card__cta"
-                  >Tap to view Prathibhimba on Google Maps</span
-                >
-              </div>
-            </a>
+            <div class="directions__map-wrap directions__card" data-reveal="fade-up" data-reveal-delay="120">
+              <iframe
+                class="directions__map-iframe"
+                src="https://www.google.com/maps?q=12.3529593,75.7930243&z=15&output=embed"
+                title="Prathibhimba Estate Stay Coorg on Google Maps"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+              <a href="https://www.google.com/maps/place/PRATHIBIMBA+ESTATE+STAY+COORG/@12.3529587,75.7745702,15z/data=!3m1!4b1!4m9!3m8!1s0x3ba5ab144b97ae0b:0x7df222a5090b1fd2!5m2!4m1!1i2!8m2!3d12.3529593!4d75.7930243!16s%2Fg%2F11twffnd3c?entry=ttu" target="_blank" rel="noopener" class="directions__map-link">Open in Google Maps</a>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Reviews — 3 manual reviews -->
-      <section class="section section--reviews" id="reviews" data-nav-theme="dark">
+      <section class="section section--reviews" id="reviews" data-nav-theme="light">
         <div class="container">
           <p class="section__subtitle" data-reveal="fade-up">Guest Stories</p>
           <h2 class="section__title" data-reveal="clip">Reviews</h2>

@@ -343,8 +343,8 @@ h1, h2, h3, h4 {
 .hero__title {
   font-family: 'Playfair Display', serif;
   font-style: normal;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: -0.04em;
   line-height: 1.05;
   color: var(--text-heading-on-dark);
 }
@@ -406,7 +406,7 @@ h1, h2, h3, h4 {
 }
 .section--events .section__title.events__title,
 .section--events .events__title {
-  color: #000;
+  color: var(--color-teal) !important;
 }
 .section--events .events__text {
   color: var(--text-primary);
@@ -414,19 +414,20 @@ h1, h2, h3, h4 {
 .section--events .divider {
   background: var(--color-teal);
 }
-/* Sanctuary (Rooms): distinct warm off-white so it doesn’t merge with Events */
+/* Sanctuary (Rooms): light green */
 .section--sanctuary {
-  background: #EDE9DC;
+  background: #6f9f8b;
 }
 .section--sanctuary .section__title,
 .section--sanctuary .section__desc {
-  color: var(--color-teal);
+  color: var(--text-heading-on-dark);
 }
 .section--sanctuary .section__title {
   margin-bottom: 0.5rem;
 }
 .section--sanctuary .section__desc {
   font-family: 'Montserrat', sans-serif;
+  color: var(--text-on-dark);
 }
 .section--sanctuary .room-card__name,
 .section--sanctuary .room-card__desc {
@@ -436,21 +437,33 @@ h1, h2, h3, h4 {
   color: rgba(8, 60, 58, 0.85);
 }
 .section--terms-cards {
-  background: #E8E4D8;
+  background: #6f9f8b;
 }
 .section--terms-cards .section__title,
 .section--terms-cards .terms-card__title {
-  color: var(--color-teal);
+  color: var(--text-heading-on-dark);
 }
 .section--terms-cards .terms-card {
-  border-color: rgba(8, 60, 58, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--panel-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .section--terms-cards .terms-card ul li {
-  color: var(--text-primary);
+  color: var(--text-on-dark);
 }
-/* Gallery: emerald */
+/* Gallery: cream */
 .section--gallery {
-  background: var(--color-emerald);
+  background: var(--color-cream);
+}
+.section--gallery .gallery-intro__eyebrow,
+.section--gallery .gallery-intro__title,
+.section--gallery .gallery-intro__desc {
+  color: var(--color-teal);
+}
+.section--gallery .gallery-intro__eyebrow::before,
+.section--gallery .gallery-intro__eyebrow::after {
+  background: var(--color-teal);
 }
 /* Directions: teal; left content text on dark */
 #directions.section {
@@ -462,27 +475,31 @@ h1, h2, h3, h4 {
 #directions .directions__text {
   color: var(--text-on-dark);
 }
-/* Reviews: emerald (distinct from Terms) */
+/* Reviews: cream */
 .section--reviews {
-  background: var(--color-emerald);
+  background: var(--color-cream);
 }
-.section--reviews .section__title {
-  color: var(--text-heading-on-dark);
+.section.section--reviews .section__title,
+.section.section--reviews .section__subtitle,
+.section.section--reviews .section__desc {
+  color: var(--color-teal) !important;
 }
-.section--reviews .section__subtitle {
-  color: var(--color-orange);
+.section.section--reviews .divider {
+  background: var(--color-teal);
 }
 .section--reviews .review-card {
-  background: var(--panel-glass);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid var(--panel-glass-border);
+  background: #EDE9DC !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(8, 60, 58, 0.12);
 }
-.section--reviews .review-card__text {
-  color: var(--text-on-dark);
+.section--reviews .review-card .review-card__text,
+.section.section--reviews .review-card__text {
+  color: #000 !important;
 }
-.section--reviews .review-card__author {
-  color: var(--color-orange);
+.section--reviews .review-card .review-card__author,
+.section.section--reviews .review-card__author {
+  color: #000 !important;
 }
 /* Terms: cream (distinct from Reviews) */
 .section__subtitle {

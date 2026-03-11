@@ -6,7 +6,7 @@
   position: relative;
   padding: 6rem 0 7rem;
   overflow: hidden;
-  background: var(--color-emerald, #0F4D47);
+  background: var(--color-cream, #E6E2D3);
 }
 
 .section--gallery::before {
@@ -60,7 +60,7 @@
   font-family: 'Playfair Display', serif;
   font-size: clamp(2rem, 4.5vw, 3rem);
   font-weight: 600;
-  color: var(--text-heading-on-dark, #E6E2D3);
+  color: var(--color-teal, #083C3A);
   line-height: 1.2;
   letter-spacing: -0.02em;
   margin: 0 0 0.75rem;
@@ -77,7 +77,7 @@
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   line-height: 1.7;
-  color: var(--text-on-dark, #D8D6C8);
+  color: var(--color-teal, #083C3A);
 }
 
 /* ----- Reel container ----- */

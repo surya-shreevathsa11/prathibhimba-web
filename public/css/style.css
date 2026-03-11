@@ -620,11 +620,11 @@ body[data-auth-disabled] [data-auth-ui] {
 .hero__title {
   font-size: clamp(3rem, 8vw, 6rem);
   font-style: normal;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--text-on-dark);
   line-height: 1.05;
   margin-bottom: 12px;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
 }
 .hero__desc {
   max-width: 500px;
@@ -962,7 +962,8 @@ main {
 
 .events__img-single {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 3;
+  max-height: 360px;
   background-size: cover;
   background-position: center;
   border-radius: 16px;
@@ -1168,11 +1169,17 @@ main {
 
 .review-card {
   padding: 1.5rem 1.25rem;
-  background: var(--color-urban-white);
+  background: #EDE9DC !important;
   border-radius: 1rem;
-  border: 1px solid var(--border-light);
+  border: 1px solid rgba(8, 60, 58, 0.12);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.review-card__text {
+  color: #000 !important;
+}
+.review-card__author {
+  color: #000 !important;
 }
 
 .review-card:hover {
@@ -1341,12 +1348,50 @@ main {
 .directions__card {
   margin-top: 0;
 }
+.directions__map-wrap {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  min-height: 320px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+  background: #0b0b0b;
+}
+.directions__map-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  filter: grayscale(1) invert(1) hue-rotate(180deg) brightness(0.72) contrast(1.15);
+}
+.directions__map-link {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  background: rgba(8, 60, 58, 0.9);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  z-index: 2;
+  transition: background 0.2s ease;
+}
+.directions__map-link:hover {
+  background: var(--color-teal);
+  color: #fff;
+}
 @media (max-width: 900px) {
   .directions__grid {
     grid-template-columns: 1fr;
   }
   .directions__card {
     order: -1;
+  }
+  .directions__map-wrap {
+    min-height: 280px;
   }
 }
 #directions .directions__card {

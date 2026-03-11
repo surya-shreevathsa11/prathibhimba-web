@@ -41,7 +41,7 @@
     var textSelector =
       "h1, h2, h3, h4, h5, h6, p, .hero__title, .hero__subtitle, .hero__desc, .section__title, .section__subtitle, .cart-page__title, .cart-step__heading";
     var hoverSelector =
-      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item, .cart__item-remove, .terms__accept, .modal__close';
+      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item, .gallery-card, .cart__item-remove, .terms__accept, .modal__close';
     window.addEventListener(
       "mousemove",
       function (e) {

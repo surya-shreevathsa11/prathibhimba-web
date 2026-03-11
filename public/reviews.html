@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Reviews — Summer Green</title>
+  <title>Reviews — Prathibhimba</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Great+Vibes&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/theme-yankees.css">
   <style>
     .reviews-page .section { display: block; }
     .reviews-page .testimonials__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-    .reviews-page .testimonial { display: block; padding: 1.75rem; background: #fff; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.06); }
-    .reviews-page .testimonial__text { font-family: 'Montserrat', sans-serif; font-style: normal; font-size: 0.95rem; }
+    .reviews-page .testimonial { display: block; padding: 1.75rem; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(39,41,50,0.06); border: 1px solid rgba(216,164,127,0.18); }
+    .reviews-page .testimonial__text { font-family: 'Inter', sans-serif; font-style: normal; font-size: 0.95rem; }
   </style>
 </head>
 <body class="page-reviews">
@@ -24,8 +25,8 @@
   <!-- Navigation (same as main page: transparent until scroll, then blue .nav.scrolled) -->
   <nav class="nav" id="nav">
     <div class="nav__inner container">
-      <a href="/" class="nav__logo" aria-label="Summer Green Homestay">
-        <img src="/img/summary%20green.jpeg" alt="Summer Green Homestay" class="nav__logo-img" />
+      <a href="/" class="nav__logo" aria-label="Prathibhimba Retreat">
+        <img src="/img/summary%20green.jpeg" alt="Prathibhimba Retreat" class="nav__logo-img" />
       </a>
       <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -71,9 +72,9 @@
   </nav>
 
   <main class="reviews-page">
-    <header class="reviews-banner" style="position:relative;min-height:280px;background:linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0.2)), url('/img/designarena_image_1eyd2uq8.png') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 1rem;">
-      <a href="/#rooms" style="position:absolute;top:1rem;right:1rem;color:#fff;text-decoration:none;font-size:0.9rem;">← BACK TO ROOMS</a>
-      <h2 style="color:#fff;font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,4vw,2.25rem);font-weight:600;margin:0;">Reviews from Google, Airbnb &amp; Booking.com</h2>
+    <header class="reviews-banner" style="position:relative;min-height:280px;background:linear-gradient(180deg, rgba(5,56,39,0.5), rgba(5,56,39,0.75)), url('/img/designarena_image_1eyd2uq8.png') center/cover no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:3rem 1rem;">
+      <a href="/#rooms" style="position:absolute;top:1rem;right:1rem;color:#FCC76B;text-decoration:none;font-size:0.9rem;">← BACK TO ROOMS</a>
+      <h2 style="color:#FCC76B;font-family:'Playfair Display',serif;font-size:clamp(1.5rem,4vw,2.25rem);font-weight:600;margin:0;">Reviews from Google, Airbnb &amp; Booking.com</h2>
     </header>
     <section class="section section--alt">
       <div class="container">
@@ -117,23 +118,39 @@
     </section>
   </main>
 
-  <!-- Footer (same as main page: VARA left, Summer Green + copyright center, Contact right; cursor contrast via .footer) -->
+  <!-- Footer — multi-column (matches main page) -->
   <footer class="footer">
-    <div class="footer__wrap">
-      <a href="https://www.instagram.com/vara_.2026?igsh=OHJkNWVxZjUzdDRq&utm_source=qr" target="_blank" rel="noopener" class="footer__vara" aria-label="VARA on Instagram">
-        <img src="/img/vara%20logo%20(green).jpeg" alt="VARA" class="footer__vara-img" width="48" height="48" />
-      </a>
-      <div class="footer__center">
+    <div class="footer__wrap footer__wrap--grid">
+      <div class="footer__col footer__col--brand">
         <div class="footer__brand">
-          <img src="/img/summary%20green.jpeg" alt="Summer Green Homestay" class="footer__logo-img" />
+          <img src="/img/summary%20green.jpeg" alt="Prathibhimba Retreat" class="footer__logo-img" />
         </div>
-        <p class="footer__copyright">&copy; 2026 Summer Green. All rights reserved.</p>
+        <p class="footer__tagline">Where nature meets luxury.</p>
       </div>
-      <div class="footer__contact">
-        <h3 class="footer__contact-title">Contact</h3>
+      <div class="footer__col">
+        <h3 class="footer__heading">Quick Links</h3>
+        <ul class="footer__links">
+          <li><a href="/#about">About</a></li>
+          <li><a href="/#rooms">Accommodation</a></li>
+          <li><a href="/#gallery">Gallery</a></li>
+          <li><a href="/reviews">Reviews</a></li>
+          <li><a href="/#terms">Terms &amp; Conditions</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h3 class="footer__heading">Contact</h3>
         <p class="footer__contact-item">
           <a href="tel:+919008188595">+91 90081 88595</a>
         </p>
+        <p class="footer__contact-item">
+          <a href="https://wa.me/919008188595" target="_blank" rel="noopener">WhatsApp</a>
+        </p>
+        <p class="footer__contact-item">
+          <a href="https://www.instagram.com/summergreen_stays?igsh=MWhpb2d1ZDB1cDAxNQ%3D%3D&utm_source=qr" target="_blank" rel="noopener">Instagram</a>
+        </p>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__copyright">&copy; 2026 Prathibhimba. All rights reserved.</p>
       </div>
     </div>
   </footer>

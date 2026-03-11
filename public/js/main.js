@@ -706,7 +706,7 @@
     var textSelector =
       "h1, h2, h3, h4, h5, h6, p, .hero__title, .hero__subtitle, .hero__desc, .section__title, .section__subtitle";
     var hoverSelector =
-      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item';
+      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item, .gallery-card';
     var headerSelector = ".nav, .admin__header, .footer";
     function isOverHeader(el) {
       return el && el.closest && el.closest(headerSelector);

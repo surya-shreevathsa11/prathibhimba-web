@@ -174,25 +174,31 @@ h1, h2, h3, h4 {
   margin-right: auto;
   padding: 0.45rem 1.25rem;
   border-radius: 999px;
-  transition: background 0.4s ease, box-shadow 0.4s ease, color 0.3s ease;
-  background: rgba(8, 60, 58, 0.72);
-  backdrop-filter: blur(14px) saturate(1.1);
+  transition: background 0.4s ease, box-shadow 0.4s ease, color 0.3s ease, border-color 0.4s ease;
+  background: rgba(8, 60, 58, 0.35);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .nav.scrolled .nav__inner {
-  background: rgba(8, 60, 58, 0.92);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  box-shadow: 0 2px 24px rgba(8, 60, 58, 0.35);
+  background: rgba(8, 60, 58, 0.38);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 .nav.scrolled {
   background: transparent;
 }
 /* Over dark sections (about, gallery, directions, reviews): nav = cream, text = dark */
 .nav.scrolled.nav--over-dark .nav__inner {
-  background: var(--color-cream);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  background: rgba(230, 226, 211, 0.42);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 .nav.scrolled.nav--over-dark .nav__links a,
 .nav.scrolled.nav--over-dark .nav__cart,
@@ -222,8 +228,11 @@ h1, h2, h3, h4 {
 }
 /* Over cream sections (events, rooms, terms): nav = dark green, text = light */
 .nav.scrolled.nav--over-light .nav__inner {
-  background: rgba(8, 60, 58, 0.95);
-  box-shadow: 0 2px 24px rgba(8, 60, 58, 0.4);
+  background: rgba(8, 60, 58, 0.38);
+  backdrop-filter: blur(28px) saturate(1.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 .nav.scrolled.nav--over-light .nav__links a,
 .nav.scrolled.nav--over-light .nav__cart,

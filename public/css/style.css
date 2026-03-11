@@ -20,7 +20,7 @@ html.lenis { height: auto; }
 
 body {
   min-height: 100%;
-  font-family: 'Inter', 'Manrope', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 400;
   background: var(--color-gallery-white);
   color: var(--text-secondary);
@@ -193,7 +193,7 @@ textarea {
   --text-on-dark: #f4f4f4;
   /* UI */
   --border-light: #e5e7eb;
-  --shadow-soft: rgba(0, 0, 0, 0.06);
+  --shadow-soft: rgba(0, 0, 0, 0.16);
   --overlay-dark: rgba(10, 10, 10, 0.28);
   /* Nav: dark background when scrolled */
   --nav-scrolled-bg: #1a1d24;
@@ -226,10 +226,10 @@ h4 {
   font-family: "Playfair Display", "Libre Baskerville", serif;
   font-weight: 600;
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
 }
 .eyebrow {
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-size: 0.75rem;
@@ -300,7 +300,7 @@ h4 {
   left: 0;
   width: 100%;
   z-index: 100;
-  padding: 1.25rem 0;
+  padding: 0.65rem 0;
   transition:
     background 0.35s ease,
     color 0.35s ease,
@@ -365,7 +365,7 @@ h4 {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.75);
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
   margin-top: 0.1rem;
 }
@@ -667,8 +667,9 @@ main {
   font-size: clamp(2rem, 4.5vw, 3rem);
   font-style: normal;
   font-weight: 600;
+  font-family: "Playfair Display", serif;
   color: var(--text-primary);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
 }
 .section__desc {
   font-size: 0.95rem;
@@ -710,7 +711,10 @@ main {
   width: 100%;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(39, 41, 50, 0.12);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.about__img-wrap:hover .about__img {
+  transform: scale(1.08);
 }
 .about__img {
   width: 100%;
@@ -718,6 +722,7 @@ main {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .about__content {
   padding: 0 0 0 0.5rem;
@@ -741,7 +746,7 @@ main {
   max-width: 340px;
   background: var(--color-urban-white);
   border-radius: 20px;
-  box-shadow: 0 24px 56px rgba(39, 41, 50, 0.2);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(216, 164, 127, 0.2);
   overflow: hidden;
   z-index: 2;
@@ -753,12 +758,16 @@ main {
   overflow: hidden;
   border-radius: 20px 20px 0 0;
 }
+.about__media-card:hover .about__media-card-img img {
+  transform: scale(1.08);
+}
 .about__media-card-img img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .about__media-card-icon {
   position: absolute;
@@ -788,7 +797,7 @@ main {
   text-transform: uppercase;
   color: var(--color-burnt-copper);
   margin-bottom: 0.35rem;
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 500;
 }
 .about__media-title {
@@ -842,7 +851,7 @@ main {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text-muted);
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 
 /* ========== ROOMS ========== */
@@ -860,7 +869,7 @@ main {
   text-align: left;
   border-radius: 1rem;
   border: 1px solid var(--border-light);
-  box-shadow: 0 4px 20px var(--shadow-soft);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
   transition:
     transform 0.3s,
     box-shadow 0.3s,
@@ -949,36 +958,20 @@ main {
 
 .events__media {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 0.75rem;
 }
 
-.events__img-main {
-  grid-column: 1;
-  grid-row: 1 / -1;
+.events__img-single {
+  width: 100%;
   aspect-ratio: 3 / 4;
   background-size: cover;
   background-position: center;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.2);
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-
-.events__img-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.events__img-small {
-  flex: 1;
-  min-height: 140px;
-  background-size: cover;
-  background-position: center;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+.events__media:hover .events__img-single {
+  transform: scale(1.04);
 }
 
 .events__content {
@@ -1001,7 +994,11 @@ main {
 }
 
 .events__text:last-child {
-  margin-bottom: 0;
+  margin-bottom: 1.25rem;
+}
+
+.events__brochure-btn {
+  margin-top: 0.5rem;
 }
 
 @media (max-width: 900px) {
@@ -1010,11 +1007,7 @@ main {
     gap: 2rem;
   }
 
-  .events__media {
-    order: -1;
-  }
-
-  .events__img-main {
+  .events__img-single {
     aspect-ratio: 4 / 3;
   }
 }
@@ -1091,13 +1084,13 @@ main {
   border: 1px solid var(--border-light);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s;
-  box-shadow: 0 2px 12px var(--shadow-soft);
+  box-shadow: 0 6px 20px var(--shadow-soft);
   position: relative;
   cursor: pointer;
 }
 .gallery__item:hover {
   transform: translateY(-4px) scale(1.04);
-  box-shadow: 0 20px 50px var(--shadow-soft);
+  box-shadow: 0 24px 48px var(--shadow-soft);
 }
 .gallery__item.hidden {
   display: none;
@@ -1141,14 +1134,14 @@ main {
   background: var(--color-urban-white);
   border-radius: 1rem;
   border: 1px solid var(--border-light);
-  box-shadow: 0 4px 20px var(--shadow-soft);
+  box-shadow: 0 8px 24px var(--shadow-soft);
   transition:
     border-color 0.3s,
     box-shadow 0.3s;
 }
 .testimonial:hover {
   border-color: var(--color-burnt-copper);
-  box-shadow: 0 12px 32px var(--shadow-soft);
+  box-shadow: 0 16px 40px var(--shadow-soft);
 }
 .testimonial__text {
   font-family: "Playfair Display", serif;
@@ -1178,13 +1171,13 @@ main {
   background: var(--color-urban-white);
   border-radius: 1rem;
   border: 1px solid var(--border-light);
-  box-shadow: 0 4px 20px var(--shadow-soft);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .review-card:hover {
   border-color: var(--color-burnt-copper);
-  box-shadow: 0 12px 32px var(--shadow-soft);
+  box-shadow: 0 16px 40px var(--shadow-soft);
 }
 
 .review-card__text {
@@ -1233,7 +1226,7 @@ main {
   text-transform: uppercase;
   color: var(--color-burnt-copper);
   margin-bottom: 0.35rem;
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 500;
 }
 .contact__item p {
@@ -1285,7 +1278,7 @@ main {
   background: var(--color-urban-white);
   border-radius: 0.75rem;
   padding: 1.5rem 1.25rem;
-  box-shadow: 0 2px 12px var(--shadow-soft);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-light);
 }
 .terms-card__title {
@@ -1316,12 +1309,51 @@ main {
 }
 .terms-card a:hover { opacity: 0.85; }
 
-/* ========== DIRECTIONS (clickable location card — slightly enlarged, semi-urban) ========== */
-#directions .container .location-card {
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+/* ========== DIRECTIONS — left content, right photo card ========== */
+.directions__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+  margin-top: 2rem;
 }
+.directions__content {
+  text-align: left;
+  padding-top: 1.5rem;
+}
+.directions__heading {
+  font-family: "Playfair Display", serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: inherit;
+  margin-bottom: 1rem;
+  margin-top: 0;
+}
+.directions__text {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+.directions__text:last-child {
+  margin-bottom: 0;
+}
+.directions__card {
+  margin-top: 0;
+}
+@media (max-width: 900px) {
+  .directions__grid {
+    grid-template-columns: 1fr;
+  }
+  .directions__card {
+    order: -1;
+  }
+}
+#directions .directions__card {
+  max-width: 100%;
+}
+
+/* ========== LOCATION CARD ========== */
 .location-card {
   display: block;
   position: relative;
@@ -1330,13 +1362,13 @@ main {
   margin-top: 2rem;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 10px 40px var(--shadow-soft);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-light);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .location-card:hover {
   transform: translateY(-4px) scale(1.04);
-  box-shadow: 0 20px 50px var(--shadow-soft);
+  box-shadow: 0 24px 48px var(--shadow-soft);
 }
 .location-card__img {
   width: 100%;
@@ -1520,9 +1552,37 @@ main {
 
 .footer__wrap--compact {
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
   gap: 0.5rem 1.5rem;
   min-height: 0;
+}
+
+.footer__instagram-logo {
+  display: block;
+  flex-shrink: 0;
+  line-height: 0;
+}
+.footer__instagram-img {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.footer__instagram-logo:hover .footer__instagram-img {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.footer__brand-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
 }
 
 .footer__wrap--compact .footer__brand {
@@ -1583,7 +1643,7 @@ main {
   text-transform: uppercase;
   color: rgba(248, 248, 248, 0.7);
   margin-bottom: 1rem;
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 500;
 }
 .footer__links {
@@ -1641,7 +1701,7 @@ main {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.75);
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
   margin-top: 0.1rem;
 }
@@ -1656,7 +1716,7 @@ main {
   text-transform: uppercase;
   color: rgba(248, 248, 248, 0.7);
   margin-bottom: 0.5rem;
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 500;
 }
 .footer__contact-item {
@@ -1671,6 +1731,30 @@ main {
 .footer__contact-item a:hover { text-decoration: underline; }
 
 /* ========== FLOATING WHATSAPP ========== */
+.chatbot-float {
+  position: fixed;
+  bottom: calc(1.5rem + 56px + 0.75rem);
+  right: 1.5rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--color-teal, #083C3A);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  z-index: 999;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.chatbot-float:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+}
+.chatbot-float svg { flex-shrink: 0; }
+
 .whatsapp-float {
   position: fixed;
   bottom: 1.5rem;
@@ -1683,13 +1767,13 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.5);
+  box-shadow: 0 6px 24px rgba(37, 211, 102, 0.5);
   z-index: 999;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .whatsapp-float:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 24px rgba(37, 211, 102, 0.6);
+  box-shadow: 0 8px 28px rgba(37, 211, 102, 0.6);
 }
 .whatsapp-float svg { flex-shrink: 0; }
 
@@ -1779,7 +1863,7 @@ main {
   text-transform: uppercase;
   color: var(--text-muted);
   margin-bottom: 0.4rem;
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
 }
 .form__group input {
   width: 100%;
@@ -2038,7 +2122,7 @@ body.page-cart .nav {
   font-size: 1.1rem;
   color: var(--text-primary);
   margin-bottom: 1rem;
-  font-family: "Inter", sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-weight: 500;
 }
 .terms__scroll--page { max-height: 280px; }
@@ -2317,6 +2401,10 @@ body.page-cart .nav {
     margin-top: auto;
     padding: 0.5rem 1.25rem;
     font-size: 0.85rem;
+  }
+  .chatbot-float {
+    bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 56px + 0.75rem);
+    right: max(1rem, env(safe-area-inset-right));
   }
   .whatsapp-float {
     bottom: max(1rem, env(safe-area-inset-bottom));

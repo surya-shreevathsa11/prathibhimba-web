@@ -4,12 +4,46 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
-  // --- Nav scroll ---
+  // --- Nav scroll + contrast by section (cream vs dark green) ---
   var navEl = $("#nav");
   if (navEl) {
     window.addEventListener("scroll", () => {
       navEl.classList.toggle("scrolled", window.scrollY > 60);
     });
+
+    var sections = $$("section[data-nav-theme]");
+    var heroEl = $(".hero");
+    function updateNavTheme() {
+      if (!navEl.classList.contains("scrolled")) {
+        navEl.classList.remove("nav--over-dark", "nav--over-light");
+        return;
+      }
+      var viewportMid = window.scrollY + window.innerHeight * 0.4;
+      var current = null;
+      var currentTop = -1;
+      if (heroEl && window.scrollY < heroEl.offsetHeight * 0.8) {
+        navEl.classList.remove("nav--over-light");
+        navEl.classList.add("nav--over-dark");
+        return;
+      }
+      sections.forEach(function (sec) {
+        var top = sec.offsetTop;
+        var bottom = top + sec.offsetHeight;
+        if (viewportMid >= top && viewportMid <= bottom && top > currentTop) {
+          current = sec;
+          currentTop = top;
+        }
+      });
+      navEl.classList.remove("nav--over-dark", "nav--over-light");
+      if (current && current.getAttribute("data-nav-theme") === "light") {
+        navEl.classList.add("nav--over-light");
+      } else {
+        navEl.classList.add("nav--over-dark");
+      }
+    }
+    window.addEventListener("scroll", updateNavTheme, { passive: true });
+    window.addEventListener("resize", updateNavTheme);
+    updateNavTheme();
   }
 
   // --- Mobile nav toggle ---

@@ -74,7 +74,7 @@
 
 /* ===== GLOBAL — 60% dark green base, 10% white text on dark ===== */
 body {
-  font-family: 'Inter', 'Manrope', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background: var(--color-green);
   color: var(--text-on-dark);
 }
@@ -95,7 +95,7 @@ body::after {
 h1, h2, h3, h4 {
   font-family: 'Playfair Display', 'Libre Baskerville', serif;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   color: var(--color-deep-black);
 }
 
@@ -112,7 +112,7 @@ h1, h2, h3, h4 {
 .eyebrow,
 .section__subtitle,
 .hero__subtitle {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--color-orange);
   font-weight: 500;
   letter-spacing: 0.18em;
@@ -128,7 +128,7 @@ h1, h2, h3, h4 {
 /* ===== BUTTONS — Muted gold, strong contrast ===== */
 .btn {
   border-radius: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 500;
   letter-spacing: 0.08em;
   transition: transform 0.25s ease, background 0.3s ease, color 0.3s ease,
@@ -162,9 +162,9 @@ h1, h2, h3, h4 {
   box-shadow: 0 4px 16px rgba(200, 169, 106, 0.2);
 }
 
-/* ===== NAVIGATION — Floating pill, semi-transparent dark green (reference) ===== */
+/* ===== NAVIGATION — Reduced height; contrast by section ===== */
 .nav {
-  padding: 0.75rem 0;
+  padding: 0.5rem 0;
   background: transparent;
   transition: background 0.4s ease, box-shadow 0.4s ease, backdrop-filter 0.4s ease;
 }
@@ -172,9 +172,9 @@ h1, h2, h3, h4 {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  padding: 0.6rem 1.5rem;
+  padding: 0.45rem 1.25rem;
   border-radius: 999px;
-  transition: background 0.4s ease, box-shadow 0.4s ease;
+  transition: background 0.4s ease, box-shadow 0.4s ease, color 0.3s ease;
   background: rgba(8, 60, 58, 0.72);
   backdrop-filter: blur(14px) saturate(1.1);
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
@@ -189,6 +189,69 @@ h1, h2, h3, h4 {
 .nav.scrolled {
   background: transparent;
 }
+/* Over dark sections (about, gallery, directions, reviews): nav = cream, text = dark */
+.nav.scrolled.nav--over-dark .nav__inner {
+  background: var(--color-cream);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+}
+.nav.scrolled.nav--over-dark .nav__links a,
+.nav.scrolled.nav--over-dark .nav__cart,
+.nav.scrolled.nav--over-dark .nav__toggle span,
+.nav.scrolled.nav--over-dark .nav__auth,
+.nav.scrolled.nav--over-dark .nav__profile-trigger {
+  color: var(--color-teal);
+}
+.nav.scrolled.nav--over-dark .nav__links a:hover {
+  color: var(--color-emerald);
+}
+.nav.scrolled.nav--over-dark .nav__links a::after {
+  background: var(--color-teal);
+}
+.nav.scrolled.nav--over-dark .nav__auth {
+  border-color: var(--color-teal);
+  color: var(--color-teal);
+}
+.nav.scrolled.nav--over-dark .nav__auth:hover {
+  background: var(--color-teal);
+  border-color: var(--color-teal);
+  color: var(--color-cream);
+}
+.nav.scrolled.nav--over-dark .nav__cart-count {
+  background: var(--color-teal);
+  color: var(--color-cream);
+}
+/* Over cream sections (events, rooms, terms): nav = dark green, text = light */
+.nav.scrolled.nav--over-light .nav__inner {
+  background: rgba(8, 60, 58, 0.95);
+  box-shadow: 0 2px 24px rgba(8, 60, 58, 0.4);
+}
+.nav.scrolled.nav--over-light .nav__links a,
+.nav.scrolled.nav--over-light .nav__cart,
+.nav.scrolled.nav--over-light .nav__toggle span,
+.nav.scrolled.nav--over-light .nav__auth,
+.nav.scrolled.nav--over-light .nav__profile-trigger {
+  color: var(--text-on-dark);
+}
+.nav.scrolled.nav--over-light .nav__links a:hover {
+  color: var(--color-orange);
+}
+.nav.scrolled.nav--over-light .nav__links a::after {
+  background: var(--color-orange);
+}
+.nav.scrolled.nav--over-light .nav__auth {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--text-on-dark);
+}
+.nav.scrolled.nav--over-light .nav__auth:hover {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+  color: var(--color-teal);
+}
+.nav.scrolled.nav--over-light .nav__cart-count {
+  background: var(--color-orange);
+  color: var(--color-teal);
+}
+/* Default scrolled (dark sections) */
 .nav.scrolled .nav__links a {
   color: var(--text-on-dark);
 }
@@ -264,7 +327,7 @@ h1, h2, h3, h4 {
 }
 .hero__subtitle {
   color: var(--color-orange);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 500;
   letter-spacing: 0.25em;
 }
@@ -278,7 +341,7 @@ h1, h2, h3, h4 {
 }
 .hero__desc {
   max-width: 480px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 1rem;
   line-height: 1.75;
   color: var(--text-on-dark);
@@ -325,24 +388,70 @@ h1, h2, h3, h4 {
 .section--about {
   background: var(--color-teal);
 }
-/* Events: dark emerald (distinct from About) */
+/* Events: cream background, green headings */
 .section--events {
-  background: var(--color-emerald);
+  background: var(--color-cream);
+}
+.section--events .section__subtitle {
+  color: var(--color-teal);
+}
+.section--events .section__title.events__title,
+.section--events .events__title {
+  color: #000;
+}
+.section--events .events__text {
+  color: var(--text-primary);
+}
+.section--events .divider {
+  background: var(--color-teal);
+}
+/* Sanctuary (Rooms): distinct warm off-white so it doesn’t merge with Events */
+.section--sanctuary {
+  background: #EDE9DC;
+}
+.section--sanctuary .section__title,
+.section--sanctuary .section__desc {
+  color: var(--color-teal);
 }
 .section--sanctuary .section__title {
   margin-bottom: 0.5rem;
 }
 .section--sanctuary .section__desc {
-  color: var(--text-on-dark);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
+}
+.section--sanctuary .room-card__name,
+.section--sanctuary .room-card__desc {
+  color: var(--color-teal);
+}
+.section--sanctuary .room-card__desc {
+  color: rgba(8, 60, 58, 0.85);
+}
+.section--terms-cards {
+  background: #E8E4D8;
+}
+.section--terms-cards .section__title,
+.section--terms-cards .terms-card__title {
+  color: var(--color-teal);
+}
+.section--terms-cards .terms-card {
+  border-color: rgba(8, 60, 58, 0.12);
+}
+.section--terms-cards .terms-card ul li {
+  color: var(--text-primary);
 }
 /* Gallery: emerald */
 .section--gallery {
   background: var(--color-emerald);
 }
-/* Directions: teal */
+/* Directions: teal; left content text on dark */
 #directions.section {
   background: var(--color-teal);
+}
+#directions .directions__heading {
+  color: var(--text-heading-on-dark);
+}
+#directions .directions__text {
+  color: var(--text-on-dark);
 }
 /* Reviews: emerald (distinct from Terms) */
 .section--reviews {
@@ -367,12 +476,9 @@ h1, h2, h3, h4 {
   color: var(--color-orange);
 }
 /* Terms: cream (distinct from Reviews) */
-.section--terms-cards {
-  background: var(--color-cream);
-}
 .section__subtitle {
   color: var(--color-orange);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 500;
 }
 .section__title {
@@ -406,13 +512,13 @@ h1, h2, h3, h4 {
 .room-card {
   border-radius: 16px;
   border: 1px solid rgba(252, 199, 107, 0.5);
-  box-shadow: 0 4px 24px rgba(5, 56, 39, 0.08);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   background: var(--color-cream);
 }
 .room-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 48px rgba(5, 56, 39, 0.12);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   border-color: var(--color-orange);
 }
 .room-card__media {
@@ -441,7 +547,7 @@ h1, h2, h3, h4 {
   color: var(--color-deep-black);
 }
 .room-card__desc {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--text-primary);
 }
 .section:not(.section--alt) .room-card__desc {
@@ -485,18 +591,7 @@ h1, h2, h3, h4 {
   color: var(--text-on-dark);
 }
 
-/* ===== EVENTS SECTION ===== */
-.section--events .section__subtitle {
-  color: var(--color-orange);
-}
-
-.section--events .section__title {
-  color: var(--text-heading-on-dark);
-}
-
-.section--events .events__text {
-  color: var(--text-on-dark);
-}
+/* ===== EVENTS SECTION (cream bg, green headings — see SECTIONS) ===== */
 
 /* ===== REVIEWS (home) — glass panels, see .section--reviews in SECTIONS ===== */
 
@@ -504,11 +599,11 @@ h1, h2, h3, h4 {
 .location-card {
   border-radius: 16px;
   border: 1px solid rgba(200, 169, 106, 0.4);
-  box-shadow: 0 8px 32px rgba(8, 60, 58, 0.2);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .location-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(8, 60, 58, 0.25);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.22);
 }
 .location-card__overlay {
   background: rgba(15, 77, 71, 0.30);
@@ -537,7 +632,7 @@ h1, h2, h3, h4 {
   color: var(--text-on-dark);
 }
 .location-card__cta {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background: rgba(15, 77, 71, 0.6);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -548,12 +643,12 @@ h1, h2, h3, h4 {
 .terms-card {
   border-radius: 14px;
   border: 1px solid rgba(252, 199, 107, 0.4);
-  box-shadow: 0 4px 20px rgba(5, 56, 39, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .terms-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 36px rgba(5, 56, 39, 0.1);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 .terms-card__title {
   font-family: 'Playfair Display', serif;
@@ -584,7 +679,7 @@ h1, h2, h3, h4 {
 }
 .testimonial__author {
   color: var(--color-orange);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 .section:not(.section--alt) .testimonial__text {
   color: var(--text-on-dark);
@@ -600,7 +695,7 @@ h1, h2, h3, h4 {
   color: var(--color-orange);
 }
 .footer__contact-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--color-orange);
   letter-spacing: 0.15em;
 }
@@ -619,7 +714,7 @@ h1, h2, h3, h4 {
 }
 .footer__copyright {
   color: rgba(255, 255, 255, 0.7);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 .footer__tagline {
   color: rgba(255, 255, 255, 0.8);
@@ -630,7 +725,7 @@ h1, h2, h3, h4 {
   color: var(--text-on-dark);
 }
 .footer__logo-tagline {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 .footer__line {
   background: var(--color-orange);
@@ -656,7 +751,7 @@ h1, h2, h3, h4 {
 
 /* ===== FORMS ===== */
 .form__group label {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--color-deep-black);
 }
 .form__group input:focus {
@@ -687,7 +782,7 @@ body.page-cart .nav .nav__inner {
   color: var(--text-on-dark);
 }
 .cart-step__heading {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--text-on-dark);
 }
 .cart__total strong {
@@ -793,7 +888,7 @@ body.page-cart .nav .nav__inner {
   background: var(--color-urban-white);
 }
 .reviews-page .testimonial__text {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: var(--color-deep-black);
 }
 

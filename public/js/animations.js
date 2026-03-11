@@ -143,12 +143,12 @@
         onEnter: function () {
           if (section.dataset.revealed === "1") return;
           section.dataset.revealed = "1";
-          var fromVars = { opacity: 0, y: 40, force3D: true };
+          var fromVars = { opacity: 0, y: 28, force3D: true };
           var toVars = {
             opacity: 1,
             y: 0,
-            duration: prefersReducedMotion ? 0.3 : 0.7,
-            stagger: prefersReducedMotion ? 0 : 0.12,
+            duration: prefersReducedMotion ? 0.3 : 0.8,
+            stagger: prefersReducedMotion ? 0 : 0.1,
             ease: "power3.out",
             force3D: true,
             overwrite: "auto",
@@ -170,24 +170,17 @@
   };
 
   function runWithGSAP() {
-    gsap.set(heroEls, { opacity: 0, y: 60 });
-    gsap.set(".hero", { scale: 1.05 });
+    gsap.set(heroEls, { opacity: 0, y: 32 });
 
-    var tl = gsap.timeline({ defaults: { ease: "power3.inOut" } });
-
-    tl.to(".hero", {
-      scale: 1,
-      duration: 1.4,
-      ease: "power3.out",
-    });
+    var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     tl.to(heroEls, {
       opacity: 1,
       y: 0,
-      stagger: 0.2,
-      duration: 1,
+      stagger: 0.12,
+      duration: 0.85,
       ease: "power3.out",
-    }, "-=0.6");
+    });
 
     tl.add(function () {
       var hero = document.querySelector(".hero.hero--entry");

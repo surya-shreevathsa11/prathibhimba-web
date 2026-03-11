@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Montserrat:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/style.css" />
@@ -203,7 +203,7 @@
 
     <main>
       <!-- About — Sanctuary split layout: image left, text right -->
-      <section class="section section--split section--about" id="about">
+      <section class="section section--split section--about" id="about" data-nav-theme="dark">
         <div class="container container--wide">
           <div class="about__grid">
             <div class="about__media" data-reveal="fade-up">
@@ -288,20 +288,13 @@
         </div>
       </section>
 
-      <!-- Events — photos left, description right -->
-      <section class="section section--events" id="events">
+      <!-- Events — content left, single photo right -->
+      <section class="section section--events" id="events" data-nav-theme="light">
         <div class="container container--wide">
           <div class="events__grid">
-            <div class="events__media" data-reveal="fade-up">
-              <div class="events__img-main" style="background-image: url(https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&h=1000&q=80);" aria-hidden="true"></div>
-              <div class="events__img-stack">
-                <div class="events__img-small" style="background-image: url(https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=400&h=500&q=80);" aria-hidden="true"></div>
-                <div class="events__img-small" style="background-image: url(https://images.unsplash.com/photo-1556745753-b2904692b3cd?auto=format&fit=crop&w=400&h=500&q=80);" aria-hidden="true"></div>
-              </div>
-            </div>
-            <div class="events__content" data-reveal="fade-up" data-reveal-delay="120">
+            <div class="events__content" data-reveal="fade-up">
               <span class="section__subtitle">What We Offer</span>
-              <h2 class="section__title section__title--left">Events at Prathibhimba</h2>
+              <h2 class="section__title section__title--left events__title">Events at Prathibhimba</h2>
               <div class="divider divider--left"></div>
               <p class="events__text">
                 Host your special moments amid the serene hills of Coorg. From intimate gatherings to small celebrations, our retreat provides a peaceful backdrop and personalised support to make your event memorable.
@@ -309,13 +302,17 @@
               <p class="events__text">
                 Whether it's a family reunion, a quiet anniversary, or a small corporate offsite, we work with you to arrange space, meals, and the little touches that matter. Get in touch to discuss your plans.
               </p>
+              <a href="/brochure.pdf" download class="btn btn--primary events__brochure-btn">Download Brochure</a>
+            </div>
+            <div class="events__media" data-reveal="fade-up" data-reveal-delay="120">
+              <div class="events__img-single" style="background-image: url(https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&h=1000&q=80);" aria-hidden="true"></div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Rooms — Select Your Sanctuary -->
-      <section class="section section--alt section--sanctuary" id="rooms">
+      <section class="section section--alt section--sanctuary" id="rooms" data-nav-theme="light">
         <div class="container">
           <h2 class="section__title" data-reveal="clip">Select Your Sanctuary</h2>
           <p class="section__desc" data-reveal="fade-up" data-reveal-delay="60">
@@ -326,7 +323,7 @@
       </section>
 
       <!-- Gallery — horizontal reel with left/right navigation -->
-      <section class="section section--gallery" id="gallery">
+      <section class="section section--gallery" id="gallery" data-nav-theme="dark">
         <div class="container">
           <div class="gallery-intro">
             <span class="gallery-intro__eyebrow">Visual Journey</span>
@@ -402,40 +399,47 @@
         </div>
       </section>
 
-      <!-- Directions (clickable location card like anudinakuteera) -->
-      <section class="section" id="directions">
-        <div class="container">
+      <!-- Directions — left: how to get there; right: location photo card -->
+      <section class="section" id="directions" data-nav-theme="dark">
+        <div class="container container--wide">
           <p class="section__subtitle" data-reveal="fade-up">How To Find Us</p>
           <h2 class="section__title" data-reveal="clip">Directions</h2>
           <div class="divider" data-reveal="flow" data-reveal-delay="80"></div>
 
-          <a
-            class="location-card"
-            href="https://maps.app.goo.gl/LPeNLoTUop7FPFPGA"
-            target="_blank"
-            rel="noopener"
-            data-reveal="fade-up"
-            data-reveal-delay="120"
-          >
-            <div
-              class="location-card__img"
-              style="
-                background-image: url(&quot;/img/designarena_image_1eyd2uq8.png&quot;);
-              "
-            ></div>
-            <div class="location-card__overlay">
-              <h3 class="location-card__title">Our Location</h3>
-              <p class="location-card__desc"></p>
-              <span class="location-card__cta"
-                >Tap to view Prathibhimba on Google Maps</span
-              >
+          <div class="directions__grid">
+            <div class="directions__content" data-reveal="fade-up" data-reveal-delay="100">
+              <h3 class="directions__heading">How to get there</h3>
+              <p class="directions__text">Add your directions content here — by road, nearest airport, or rail. You can describe the route from Bangalore, Mangalore, or other cities to Madikeri and then to Prathibhimba.</p>
+              <p class="directions__text">Include landmarks, approximate drive time, and any tips for first-time visitors. This block stays on the left so the map photo remains on the right.</p>
             </div>
-          </a>
+            <a
+              class="location-card directions__card"
+              href="https://maps.app.goo.gl/LPeNLoTUop7FPFPGA"
+              target="_blank"
+              rel="noopener"
+              data-reveal="fade-up"
+              data-reveal-delay="120"
+            >
+              <div
+                class="location-card__img"
+                style="
+                  background-image: url(&quot;/img/designarena_image_1eyd2uq8.png&quot;);
+                "
+              ></div>
+              <div class="location-card__overlay">
+                <h3 class="location-card__title">Our Location</h3>
+                <p class="location-card__desc"></p>
+                <span class="location-card__cta"
+                  >Tap to view Prathibhimba on Google Maps</span
+                >
+              </div>
+            </a>
+          </div>
         </div>
       </section>
 
       <!-- Reviews — 3 manual reviews -->
-      <section class="section section--reviews" id="reviews">
+      <section class="section section--reviews" id="reviews" data-nav-theme="dark">
         <div class="container">
           <p class="section__subtitle" data-reveal="fade-up">Guest Stories</p>
           <h2 class="section__title" data-reveal="clip">Reviews</h2>
@@ -458,7 +462,7 @@
       </section>
 
       <!-- Terms and Conditions (4-card format) -->
-      <section class="section section--alt section--terms-cards" id="terms">
+      <section class="section section--alt section--terms-cards" id="terms" data-nav-theme="light">
         <div class="container container--wide">
           <p class="section__subtitle" data-reveal="fade-up">
             Legal &amp; Info
@@ -548,16 +552,28 @@
       </section>
     </main>
 
-    <!-- Footer — compact: brand + copyright only -->
+    <!-- Footer — compact: Instagram logo left, brand + copyright -->
     <footer class="footer footer--compact">
       <div class="footer__wrap footer__wrap--compact">
-        <div class="footer__brand">
-          <img src="/img/summary%20green.jpeg" alt="Prathibhimba Retreat" class="footer__logo-img" />
+        <a href="https://www.instagram.com/vara_.2026?igsh=OHJkNWVxZjUzdDRq&utm_source=qr" class="footer__instagram-logo" target="_blank" rel="noopener" aria-label="Follow Vara on Instagram">
+          <img src="/img/vara-logo.png" alt="Vara" class="footer__instagram-img" />
+        </a>
+        <div class="footer__brand-block">
+          <div class="footer__brand">
+            <img src="/img/summary%20green.jpeg" alt="Prathibhimba Retreat" class="footer__logo-img" />
+          </div>
+          <p class="footer__tagline">Where nature meets luxury.</p>
+          <p class="footer__copyright">&copy; 2026 Prathibhimba. All rights reserved.</p>
         </div>
-        <p class="footer__tagline">Where nature meets luxury.</p>
-        <p class="footer__copyright">&copy; 2026 Prathibhimba. All rights reserved.</p>
       </div>
     </footer>
+
+    <!-- Floating chatbot (above WhatsApp) -->
+    <button type="button" class="chatbot-float" id="chatbotFloat" aria-label="Open chatbot">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </button>
 
     <!-- Floating WhatsApp (fixed bottom-right) -->
     <a

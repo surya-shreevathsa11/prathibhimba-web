@@ -1641,20 +1641,20 @@ main {
   min-height: 0;
 }
 
-.footer__instagram-logo {
+.footer__vara-logo {
   display: block;
   flex-shrink: 0;
   line-height: 0;
 }
-.footer__instagram-img {
+.footer__vara-img {
   display: block;
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   object-fit: cover;
   border-radius: 50%;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-.footer__instagram-logo:hover .footer__instagram-img {
+.footer__vara-logo:hover .footer__vara-img {
   transform: scale(1.05);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }

@@ -69,9 +69,9 @@
     roomObserver.observe(roomsGrid, { childList: true, subtree: true });
   }
 
-  /* ----- 3. Image parallax (scroll-based translateY; wrappers so zoom can stay on inner) ----- */
+  /* ----- 3. Image parallax (hero handled by hero-cinematic.js; only non-hero here) ----- */
   var parallaxEls = document.querySelectorAll(
-    ".hero__slides, .hero__video, .about__img-wrap, .events__media"
+    ".about__img-wrap, .events__media"
   );
   parallaxEls.forEach(function (el) {
     el.classList.add("parallax-img");

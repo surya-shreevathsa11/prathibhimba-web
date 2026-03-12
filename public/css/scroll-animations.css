@@ -1,0 +1,122 @@
+/**
+ * Scroll-driven premium animations.
+ * Does not change layout, typography, colors, spacing, or structure.
+ */
+
+/* ----- 1. Scroll-driven section reveal ----- */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.section-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ----- 2. Horizontal card slide (cards slide from right as section enters) ----- */
+.card-slide-in {
+  opacity: 0;
+  transform: translateX(80px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.card-grid-reveal.is-visible .card-slide-in,
+.card-grid-reveal.is-visible .terms-card,
+.card-grid-reveal.is-visible .review-card,
+.card-grid-reveal.is-visible .activity-card,
+.card-grid-reveal.is-visible .room-card {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.card-grid-reveal .terms-card,
+.card-grid-reveal .review-card,
+.card-grid-reveal .activity-card,
+.card-grid-reveal .room-card {
+  opacity: 0;
+  transform: translateX(80px);
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.card-grid-reveal.is-visible .terms-card:nth-child(1),
+.card-grid-reveal.is-visible .review-card:nth-child(1),
+.card-grid-reveal.is-visible .activity-card:nth-child(1),
+.card-grid-reveal.is-visible .room-card:nth-child(1) { transition-delay: 0ms; }
+.card-grid-reveal.is-visible .terms-card:nth-child(2),
+.card-grid-reveal.is-visible .review-card:nth-child(2),
+.card-grid-reveal.is-visible .activity-card:nth-child(2),
+.card-grid-reveal.is-visible .room-card:nth-child(2) { transition-delay: 120ms; }
+.card-grid-reveal.is-visible .terms-card:nth-child(3),
+.card-grid-reveal.is-visible .review-card:nth-child(3),
+.card-grid-reveal.is-visible .activity-card:nth-child(3),
+.card-grid-reveal.is-visible .room-card:nth-child(3) { transition-delay: 240ms; }
+.card-grid-reveal.is-visible .terms-card:nth-child(4),
+.card-grid-reveal.is-visible .review-card:nth-child(4),
+.card-grid-reveal.is-visible .activity-card:nth-child(4),
+.card-grid-reveal.is-visible .room-card:nth-child(4) { transition-delay: 360ms; }
+.card-grid-reveal.is-visible .terms-card:nth-child(5) { transition-delay: 480ms; }
+.card-grid-reveal.is-visible .room-card:nth-child(5) { transition-delay: 480ms; }
+.card-grid-reveal.is-visible .terms-card:nth-child(6),
+.card-grid-reveal.is-visible .room-card:nth-child(6) { transition-delay: 600ms; }
+.card-grid-reveal.is-visible .room-card:nth-child(7) { transition-delay: 720ms; }
+.card-grid-reveal.is-visible .room-card:nth-child(8) { transition-delay: 840ms; }
+
+/* ----- 4. Cinematic image zoom (hero & feature images) ----- */
+.cinematic-zoom-scroll {
+  animation: cinematicZoomScroll 10s linear forwards;
+  will-change: transform;
+}
+
+@keyframes cinematicZoomScroll {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+
+/* ----- 6. Card stack (parallax applied via JS) ----- */
+.gallery-reel__slide[data-stack-depth] {
+  will-change: transform;
+}
+
+/* ----- 8. Performance ----- */
+.parallax-img,
+.stat__num--animate {
+  will-change: transform;
+}
+
+.stat__num--animate {
+  will-change: contents;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-reveal,
+  .section-reveal.is-visible,
+  .card-grid-reveal .terms-card,
+  .card-grid-reveal .review-card,
+  .card-grid-reveal .activity-card,
+  .card-grid-reveal .room-card,
+  .card-grid-reveal.is-visible .terms-card,
+  .card-grid-reveal.is-visible .review-card,
+  .card-grid-reveal.is-visible .activity-card,
+  .card-grid-reveal.is-visible .room-card,
+  .cinematic-zoom-scroll {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+}

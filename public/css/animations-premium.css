@@ -1,0 +1,137 @@
+/**
+ * Premium page animations — CSS only.
+ * Does not change layout, colors, fonts, spacing, or content.
+ */
+
+/* ----- 1. Page load reveal (main container) ----- */
+.page-load-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.page-load-reveal.page-load-reveal--done {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ----- 2. Staggered content (hero / sections) ----- */
+.stagger-reveal > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.stagger-reveal.stagger-reveal--done > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-reveal.stagger-reveal--done > *:nth-child(1) { transition-delay: 0ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(2) { transition-delay: 100ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(3) { transition-delay: 200ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(4) { transition-delay: 300ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(5) { transition-delay: 400ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(6) { transition-delay: 500ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(7) { transition-delay: 600ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(8) { transition-delay: 700ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(9) { transition-delay: 800ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(10) { transition-delay: 900ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(11) { transition-delay: 1000ms; }
+.stagger-reveal.stagger-reveal--done > *:nth-child(12) { transition-delay: 1100ms; }
+
+/* ----- 3. Cinematic zoom (hero / large image panels) ----- */
+.cinematic-zoom {
+  animation: cinematicZoom 10s ease-out forwards;
+  will-change: transform;
+}
+
+@keyframes cinematicZoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+/* ----- 4. Button micro-interactions ----- */
+.btn-premium-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.btn-premium-hover:hover {
+  transform: scale(1.04);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+.btn-premium-hover:active {
+  transform: scale(0.98);
+}
+
+/* ----- 5. Scroll reveal (IntersectionObserver) ----- */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children when parent becomes visible */
+.reveal.reveal--stagger > * {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.reveal.reveal--stagger.is-visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal.reveal--stagger.is-visible > *:nth-child(1) { transition-delay: 0ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(2) { transition-delay: 80ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(3) { transition-delay: 160ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(4) { transition-delay: 240ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(5) { transition-delay: 320ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(6) { transition-delay: 400ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(7) { transition-delay: 480ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(8) { transition-delay: 560ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(9) { transition-delay: 640ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(10) { transition-delay: 720ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(11) { transition-delay: 800ms; }
+.reveal.reveal--stagger.is-visible > *:nth-child(12) { transition-delay: 880ms; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .page-load-reveal,
+  .page-load-reveal.page-load-reveal--done,
+  .stagger-reveal > *,
+  .stagger-reveal.stagger-reveal--done > *,
+  .cinematic-zoom,
+  .reveal,
+  .reveal.is-visible,
+  .reveal.reveal--stagger > *,
+  .reveal.reveal--stagger.is-visible > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: none;
+  }
+}

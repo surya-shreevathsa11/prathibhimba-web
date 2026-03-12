@@ -863,7 +863,50 @@ body.page-cart .nav .nav__inner {
   box-shadow: 0 8px 28px rgba(37, 211, 102, 0.5);
 }
 
-/* ===== MICRO-INTERACTIONS ===== */
+/* ===== PREMIUM MOTION — performance-safe (transforms + opacity only) ===== */
+
+/* will-change hints for animated elements */
+[data-reveal],
+.room-card,
+.review-card,
+.activity-card,
+.terms-card,
+.gallery-reel__slide,
+.hero__slide,
+.hero__slides,
+.hero__video {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* Button hover: subtle scale lift */
+.btn {
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+.btn:hover {
+  transform: scale(1.04);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Card hover: smooth lift */
+.room-card,
+.review-card,
+.activity-card,
+.terms-card {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+}
+
+/* Hero cinematic slow zoom (CSS fallback when GSAP is unavailable) */
+@keyframes heroSlowZoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+.hero__slide.is-active {
+  animation: heroSlowZoom 10s ease-out forwards;
+}
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -872,6 +915,14 @@ body.page-cart .nav .nav__inner {
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+/* Gallery reel nav buttons — hover scale */
+.gallery-reel__nav {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+.gallery-reel__nav:hover {
+  transform: scale(1.08);
 }
 
 /* Smooth focus outlines */

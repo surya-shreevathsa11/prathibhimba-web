@@ -8,8 +8,6 @@
   var lenisInstance = null;
   window.getLenis = function () { return lenisInstance; };
 
-  /* Lenis: keep smooth scroll for desktop, mobile and iPad. Do not disable or override
-   * smoothTouch/touchMultiplier so mobile and tablet scroll stays consistent in future. */
   function initLenis() {
     if (typeof Lenis === "undefined") return null;
     try {
@@ -53,36 +51,6 @@
     }
   }
 
-  function getRevealFrom(type, scrollDown) {
-    if (scrollDown) {
-      switch (type) {
-        case "clip":
-          return { opacity: 0, y: -48, force3D: true };
-        case "flow":
-          return { opacity: 0, scaleX: 0.88, transformOrigin: "center center", force3D: true };
-        case "slide-down":
-          return { opacity: 0, y: 40, force3D: true };
-        default:
-          return { opacity: 0, y: -56, scale: 0.98, force3D: true };
-      }
-    }
-    switch (type) {
-      case "clip":
-        return { opacity: 0, y: 52, force3D: true };
-      case "flow":
-        return { opacity: 0, scaleX: 0.82, transformOrigin: "center center", force3D: true };
-      case "slide-down":
-        return { opacity: 0, y: -36, force3D: true };
-      default:
-        return { opacity: 0, y: 56, scale: 0.98, force3D: true };
-    }
-  }
-
-  function getRevealTo(type, scrollDown) {
-    if (type === "flow") return { opacity: 1, scaleX: 1 };
-    return { opacity: 1, y: 0, scale: 1 };
-  }
-
   function enableScrollAnimations() {
     var prefersReducedMotion =
       window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -107,24 +75,43 @@
     });
     revealTriggers.length = 0;
 
+    /* Hero parallax — slides move slower than foreground on scroll */
     if (!prefersReducedMotion) {
       var heroSlides = document.querySelector(".hero__slides");
       if (heroSlides) {
         var heroAnim = gsap.to(heroSlides, {
-          y: "12%",
+          y: "18%",
           ease: "none",
           force3D: true,
           scrollTrigger: {
             trigger: ".hero",
             start: "top top",
             end: "bottom top",
-            scrub: 1,
+            scrub: 1.5,
           },
         });
         if (heroAnim && heroAnim.scrollTrigger) scrubTriggers.push(heroAnim.scrollTrigger);
       }
+
+      /* Hero video parallax */
+      var heroVideo = document.querySelector(".hero__video");
+      if (heroVideo) {
+        var vidAnim = gsap.to(heroVideo, {
+          y: "14%",
+          ease: "none",
+          force3D: true,
+          scrollTrigger: {
+            trigger: ".hero",
+            start: "top top",
+            end: "bottom top",
+            scrub: 1.5,
+          },
+        });
+        if (vidAnim && vidAnim.scrollTrigger) scrubTriggers.push(vidAnim.scrollTrigger);
+      }
     }
 
+    /* Section reveals with stagger */
     var hero = document.querySelector(".hero");
     var sections = gsap.utils.toArray(".section").filter(function (section) {
       return !hero || !hero.contains(section);
@@ -136,26 +123,53 @@
         gsap.set(els, { opacity: 1, y: 0, scaleX: 1, clearProps: "transform" });
         return;
       }
+
+      /* Card-level stagger for grids */
+      var cards = gsap.utils.toArray(
+        ".room-card, .review-card, .activity-card, .terms-card, .gallery-reel__slide",
+        section
+      );
+
       var trigger = st.create({
         trigger: section,
-        start: "top 88%",
+        start: "top 85%",
         once: true,
         onEnter: function () {
           if (section.dataset.revealed === "1") return;
           section.dataset.revealed = "1";
-          var fromVars = { opacity: 0, y: 28, force3D: true };
-          var toVars = {
-            opacity: 1,
-            y: 0,
-            duration: prefersReducedMotion ? 0.3 : 0.8,
-            stagger: prefersReducedMotion ? 0 : 0.1,
-            ease: "power3.out",
-            force3D: true,
-            overwrite: "auto",
-            clearProps: "transform",
-          };
+
           requestAnimationFrame(function () {
-            gsap.fromTo(els, fromVars, toVars);
+            gsap.fromTo(els,
+              { opacity: 0, y: 16, force3D: true },
+              {
+                opacity: 1,
+                y: 0,
+                duration: prefersReducedMotion ? 0.3 : 0.6,
+                stagger: prefersReducedMotion ? 0 : 0.1,
+                ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+                force3D: true,
+                overwrite: "auto",
+                clearProps: "transform",
+              }
+            );
+
+            if (cards.length > 0) {
+              gsap.fromTo(cards,
+                { opacity: 0, y: 24, scale: 0.97, force3D: true },
+                {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  duration: prefersReducedMotion ? 0.3 : 0.55,
+                  stagger: prefersReducedMotion ? 0 : 0.08,
+                  delay: 0.15,
+                  ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+                  force3D: true,
+                  overwrite: "auto",
+                  clearProps: "transform",
+                }
+              );
+            }
           });
         },
       });
@@ -170,17 +184,49 @@
   };
 
   function runWithGSAP() {
-    gsap.set(heroEls, { opacity: 0, y: 32 });
+    /* Hide main until ready */
+    var main = document.querySelector("main");
+    if (main) gsap.set(main, { opacity: 0, y: 20 });
 
-    var tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    gsap.set(heroEls, { opacity: 0, y: 16 });
 
+    var tl = gsap.timeline({
+      defaults: { ease: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    });
+
+    /* Page fade-in */
+    if (main) {
+      tl.to(main, {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+        force3D: true,
+        clearProps: "transform",
+      });
+    }
+
+    /* Hero content stagger: subtitle → title → divider → desc → CTA */
     tl.to(heroEls, {
       opacity: 1,
       y: 0,
-      stagger: 0.12,
-      duration: 0.85,
-      ease: "power3.out",
-    });
+      stagger: 0.1,
+      duration: 0.6,
+      ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+      force3D: true,
+      clearProps: "transform",
+    }, main ? "-=0.35" : 0);
+
+    /* Cinematic zoom on hero slide images */
+    var activeSlide = document.querySelector(".hero__slide.is-active");
+    if (activeSlide) {
+      tl.to(activeSlide, {
+        scale: 1.06,
+        duration: 10,
+        ease: "power1.out",
+        force3D: true,
+      }, 0);
+    }
 
     tl.add(function () {
       var hero = document.querySelector(".hero.hero--entry");

@@ -1316,6 +1316,44 @@ main {
 }
 .terms-card a:hover { opacity: 0.85; }
 
+/* ========== ACTIVITIES — 3 cards ========== */
+.activities__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.activity-card {
+  padding: 1.75rem 1.5rem;
+  background: var(--color-cream);
+  border-radius: 1rem;
+  border: 1px solid rgba(8, 60, 58, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.activity-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+.activity-card__title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-teal);
+  margin-bottom: 0.5rem;
+}
+.activity-card__desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  margin: 0;
+}
+@media (max-width: 900px) {
+  .activities__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ========== DIRECTIONS — left content, right photo card ========== */
 .directions__grid {
   display: grid;

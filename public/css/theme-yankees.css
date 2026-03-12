@@ -416,7 +416,7 @@ h1, h2, h3, h4 {
 }
 /* Sanctuary (Rooms): light green */
 .section--sanctuary {
-  background: #6f9f8b;
+  background: var(--color-teal);
 }
 .section--sanctuary .section__title,
 .section--sanctuary .section__desc {
@@ -437,20 +437,29 @@ h1, h2, h3, h4 {
   color: rgba(8, 60, 58, 0.85);
 }
 .section--terms-cards {
-  background: #6f9f8b;
+  background: var(--color-cream);
 }
 .section--terms-cards .section__title,
-.section--terms-cards .terms-card__title {
-  color: var(--text-heading-on-dark);
+.section--terms-cards .section__subtitle {
+  color: var(--color-teal);
+}
+.section--terms-cards .divider {
+  background: var(--color-teal);
 }
 .section--terms-cards .terms-card {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: var(--panel-glass);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  border-color: rgba(8, 60, 58, 0.2);
+  background: #7a9e7a !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.section--terms-cards .terms-card__title {
+  color: var(--color-teal) !important;
 }
 .section--terms-cards .terms-card ul li {
-  color: var(--text-on-dark);
+  color: var(--text-primary) !important;
+}
+.section--terms-cards .terms-card a {
+  color: var(--color-teal) !important;
 }
 /* Gallery: cream */
 .section--gallery {
@@ -465,27 +474,45 @@ h1, h2, h3, h4 {
 .section--gallery .gallery-intro__eyebrow::after {
   background: var(--color-teal);
 }
+/* Activities: dark green, cream cards */
+.section--activities {
+  background: var(--color-teal);
+}
+.section--activities .section__title,
+.section--activities .section__subtitle {
+  color: var(--text-heading-on-dark);
+}
+.section--activities .divider {
+  background: var(--color-orange);
+}
 /* Directions: teal; left content text on dark */
 #directions.section {
+  background: var(--color-cream);
+}
+#directions .section__title,
+#directions .section__subtitle {
+  color: var(--color-teal);
+}
+#directions .divider {
   background: var(--color-teal);
 }
 #directions .directions__heading {
-  color: var(--text-heading-on-dark);
+  color: var(--color-teal);
 }
 #directions .directions__text {
-  color: var(--text-on-dark);
+  color: var(--text-primary);
 }
-/* Reviews: cream */
+/* Reviews: dark green */
 .section--reviews {
-  background: var(--color-cream);
+  background: var(--color-teal);
 }
 .section.section--reviews .section__title,
 .section.section--reviews .section__subtitle,
 .section.section--reviews .section__desc {
-  color: var(--color-teal) !important;
+  color: var(--text-heading-on-dark) !important;
 }
 .section.section--reviews .divider {
-  background: var(--color-teal);
+  background: var(--color-orange);
 }
 .section--reviews .review-card {
   background: #EDE9DC !important;

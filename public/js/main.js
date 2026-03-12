@@ -644,6 +644,42 @@
     btn.target = "_blank";
   }
 
+  // --- Directions map: in-page zoom + click to open Google Maps ---
+  (function initDirectionsMapZoom() {
+    const iframe = $("#directionsMapIframe");
+    const zoomInBtn = $("#directionsZoomIn");
+    const zoomOutBtn = $("#directionsZoomOut");
+    if (!iframe || !zoomInBtn || !zoomOutBtn) return;
+
+    const lat = "12.3529593";
+    const lng = "75.7930243";
+    const minZoom = 12;
+    const maxZoom = 19;
+    let currentZoom = 15;
+
+    function updateMapSrc() {
+      iframe.src =
+        "https://www.google.com/maps?q=" +
+        lat +
+        "," +
+        lng +
+        "&z=" +
+        currentZoom +
+        "&output=embed";
+    }
+
+    zoomInBtn.addEventListener("click", function () {
+      if (currentZoom >= maxZoom) return;
+      currentZoom += 1;
+      updateMapSrc();
+    });
+    zoomOutBtn.addEventListener("click", function () {
+      if (currentZoom <= minZoom) return;
+      currentZoom -= 1;
+      updateMapSrc();
+    });
+  })();
+
   // --- Hero slider (4 images, 5s) ---
   function setupHeroSlider() {
     const slides = Array.from(document.querySelectorAll(".hero__slide"));

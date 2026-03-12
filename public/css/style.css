@@ -1404,6 +1404,46 @@ main {
   display: block;
   filter: grayscale(1) invert(1) hue-rotate(180deg) brightness(0.72) contrast(1.15);
 }
+/* Full-cover overlay: clicking the map opens Google Maps */
+.directions__map-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+/* Zoom controls above overlay so they remain clickable */
+.directions__map-zoom {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 2;
+}
+.directions__map-zoom-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  background: rgba(5, 56, 39, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.directions__map-zoom-btn:hover {
+  background: rgba(5, 56, 39, 1);
+  transform: scale(1.05);
+}
+.directions__map-zoom-btn:active {
+  transform: scale(0.98);
+}
 .directions__map-link {
   position: absolute;
   bottom: 0.75rem;

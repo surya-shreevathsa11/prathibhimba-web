@@ -75,41 +75,7 @@
     });
     revealTriggers.length = 0;
 
-    /* Hero parallax — slides move slower than foreground on scroll */
-    if (!prefersReducedMotion) {
-      var heroSlides = document.querySelector(".hero__slides");
-      if (heroSlides) {
-        var heroAnim = gsap.to(heroSlides, {
-          y: "18%",
-          ease: "none",
-          force3D: true,
-          scrollTrigger: {
-            trigger: ".hero",
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.5,
-          },
-        });
-        if (heroAnim && heroAnim.scrollTrigger) scrubTriggers.push(heroAnim.scrollTrigger);
-      }
-
-      /* Hero video parallax */
-      var heroVideo = document.querySelector(".hero__video");
-      if (heroVideo) {
-        var vidAnim = gsap.to(heroVideo, {
-          y: "14%",
-          ease: "none",
-          force3D: true,
-          scrollTrigger: {
-            trigger: ".hero",
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.5,
-          },
-        });
-        if (vidAnim && vidAnim.scrollTrigger) scrubTriggers.push(vidAnim.scrollTrigger);
-      }
-    }
+    /* Hero: pin + cinematic timeline is in hero-cinematic.js (no duplicate parallax here) */
 
     /* Section reveals with stagger */
     var hero = document.querySelector(".hero");
@@ -184,48 +150,63 @@
   };
 
   function runWithGSAP() {
-    /* Hide main until ready */
     var main = document.querySelector("main");
+    var heroSlidesEl = document.querySelector(".hero__slides");
+
     if (main) gsap.set(main, { opacity: 0, y: 20 });
 
-    gsap.set(heroEls, { opacity: 0, y: 16 });
+    /* 5. Text stagger intro: opacity 0→1, translateY 40→0, blur 6→0, 0.8s, stagger 0.05s, power3.out */
+    gsap.set(heroEls, { opacity: 0, y: 40, filter: "blur(6px)" });
+
+    /* 4. Masked image reveal: clip-path inset(100% 0 0 0) → inset(0 0 0 0), 1.2s power4.out on load */
+    if (heroSlidesEl) {
+      gsap.set(heroSlidesEl, { clipPath: "inset(100% 0 0 0)" });
+    }
 
     var tl = gsap.timeline({
       defaults: { ease: "cubic-bezier(0.22, 1, 0.36, 1)" },
     });
 
-    /* Page fade-in */
-    if (main) {
-      tl.to(main, {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+    /* Masked reveal first */
+    if (heroSlidesEl) {
+      tl.to(heroSlidesEl, {
+        clipPath: "inset(0% 0 0 0)",
+        duration: 1.2,
+        ease: "power4.out",
         force3D: true,
-        clearProps: "transform",
       });
     }
 
-    /* Hero content stagger: subtitle → title → divider → desc → CTA */
-    tl.to(heroEls, {
-      opacity: 1,
-      y: 0,
-      stagger: 0.1,
-      duration: 0.6,
-      ease: "cubic-bezier(0.22, 1, 0.36, 1)",
-      force3D: true,
-      clearProps: "transform",
-    }, main ? "-=0.35" : 0);
-
-    /* Cinematic zoom on hero slide images */
-    var activeSlide = document.querySelector(".hero__slide.is-active");
-    if (activeSlide) {
-      tl.to(activeSlide, {
-        scale: 1.06,
-        duration: 10,
-        ease: "power1.out",
+    /* Text stagger intro: subtitle → title → divider → desc → CTA */
+    tl.to(
+      heroEls,
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 0.8,
+        stagger: 0.05,
+        ease: "power3.out",
         force3D: true,
-      }, 0);
+        clearProps: "transform",
+      },
+      heroSlidesEl ? "-=0.6" : 0
+    );
+
+    /* Page fade-in */
+    if (main) {
+      tl.to(
+        main,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+          force3D: true,
+          clearProps: "transform",
+        },
+        "-=0.35"
+      );
     }
 
     tl.add(function () {
@@ -233,6 +214,7 @@
       if (hero) hero.classList.add("hero--entry-done");
       lenisInstance = initLenis();
       enableScrollAnimations();
+      if (window.initHeroCinematic) window.initHeroCinematic();
     });
   }
 

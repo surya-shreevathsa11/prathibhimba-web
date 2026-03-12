@@ -1393,8 +1393,9 @@ main {
   min-height: 320px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-light);
-  background: #0b0b0b;
+  background: #0a3d3a;
 }
+/* Dark green map: keep detail visible, green tint without going black */
 .directions__map-iframe {
   position: absolute;
   inset: 0;
@@ -1402,7 +1403,17 @@ main {
   height: 100%;
   border: 0;
   display: block;
-  filter: grayscale(1) invert(1) hue-rotate(180deg) brightness(0.72) contrast(1.15);
+  filter: grayscale(1) invert(1) hue-rotate(180deg) brightness(0.68) contrast(1.08) saturate(1.2) hue-rotate(95deg);
+}
+/* Green tint overlay – dark green tone, not black */
+.directions__map-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 60, 58, 0.48);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 0;
 }
 /* Full-cover overlay: clicking the map opens Google Maps */
 .directions__map-overlay {
@@ -1410,39 +1421,6 @@ main {
   inset: 0;
   z-index: 1;
   cursor: pointer;
-}
-/* Zoom controls above overlay so they remain clickable */
-.directions__map-zoom {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  z-index: 2;
-}
-.directions__map-zoom-btn {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1;
-  color: #fff;
-  background: rgba(5, 56, 39, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.15s ease;
-}
-.directions__map-zoom-btn:hover {
-  background: rgba(5, 56, 39, 1);
-  transform: scale(1.05);
-}
-.directions__map-zoom-btn:active {
-  transform: scale(0.98);
 }
 .directions__map-link {
   position: absolute;

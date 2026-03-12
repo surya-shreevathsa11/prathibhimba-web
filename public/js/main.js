@@ -644,18 +644,19 @@
     btn.target = "_blank";
   }
 
-  // --- Directions map: in-page zoom + click to open Google Maps ---
+  // --- Directions map: scroll-to-zoom when pointer is over map (throttled for smoother feel) ---
   (function initDirectionsMapZoom() {
-    const iframe = $("#directionsMapIframe");
-    const zoomInBtn = $("#directionsZoomIn");
-    const zoomOutBtn = $("#directionsZoomOut");
-    if (!iframe || !zoomInBtn || !zoomOutBtn) return;
+    const iframe = document.getElementById("directionsMapIframe");
+    const mapWrap = document.querySelector(".directions__map-wrap");
+    if (!iframe || !mapWrap) return;
 
     const lat = "12.3529593";
     const lng = "75.7930243";
     const minZoom = 12;
     const maxZoom = 19;
     let currentZoom = 15;
+    let zoomPending = 0;
+    let throttleTimer = null;
 
     function updateMapSrc() {
       iframe.src =
@@ -668,16 +669,35 @@
         "&output=embed";
     }
 
-    zoomInBtn.addEventListener("click", function () {
-      if (currentZoom >= maxZoom) return;
-      currentZoom += 1;
+    function applyZoomThrottled() {
+      if (zoomPending === 0) return;
+      const delta = zoomPending > 0 ? 1 : -1;
+      zoomPending -= delta;
+      currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom + delta));
       updateMapSrc();
-    });
-    zoomOutBtn.addEventListener("click", function () {
-      if (currentZoom <= minZoom) return;
-      currentZoom -= 1;
-      updateMapSrc();
-    });
+      throttleTimer = setTimeout(function () {
+        throttleTimer = null;
+        if (zoomPending !== 0) applyZoomThrottled();
+      }, 180);
+    }
+
+    mapWrap.addEventListener(
+      "wheel",
+      function (e) {
+        if (!mapWrap.contains(e.target)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.deltaY < 0) {
+          if (currentZoom >= maxZoom) return;
+          zoomPending += 1;
+        } else {
+          if (currentZoom <= minZoom) return;
+          zoomPending -= 1;
+        }
+        if (!throttleTimer) applyZoomThrottled();
+      },
+      { capture: true, passive: false }
+    );
   })();
 
   // --- Hero slider (4 images, 5s) ---

@@ -72,6 +72,20 @@
 .card-grid-reveal.is-visible .room-card:nth-child(7) { transition-delay: 720ms; }
 .card-grid-reveal.is-visible .room-card:nth-child(8) { transition-delay: 840ms; }
 
+/* Review section: cards reveal from bottom to top together (no stagger) */
+.section--reviews .card-grid-reveal .review-card {
+  transform: translateY(60px);
+}
+.section--reviews .card-grid-reveal.is-visible .review-card {
+  transform: translateY(0);
+  transition-delay: 0ms;
+}
+.section--reviews .card-grid-reveal.is-visible .review-card:nth-child(1),
+.section--reviews .card-grid-reveal.is-visible .review-card:nth-child(2),
+.section--reviews .card-grid-reveal.is-visible .review-card:nth-child(3) {
+  transition-delay: 0ms;
+}
+
 /* ----- 4. Cinematic image zoom (hero & feature images) ----- */
 .cinematic-zoom-scroll {
   animation: cinematicZoomScroll 10s linear forwards;

@@ -145,28 +145,37 @@
 
     /* Activities section: activity cards reveal from bottom to top (GSAP + ScrollTrigger) */
     var activitiesSection = document.getElementById("activities");
-    if (activitiesSection && !prefersReducedMotion) {
+    if (activitiesSection) {
       var activityCards = gsap.utils.toArray(".activity-card", activitiesSection);
       if (activityCards.length > 0) {
-        var activityTween = gsap.from(activityCards, {
-          y: 80,
+        gsap.set(activityCards, {
+          y: 120,
           opacity: 0,
-          duration: 0.75,
-          stagger: 0.14,
-          delay: 0.15,
-          ease: "power3.out",
+          scale: 0.96,
           force3D: true,
-          overwrite: "auto",
-          scrollTrigger: {
-            trigger: activitiesSection,
-            start: "top 85%",
-            once: true,
-            toggleActions: "play none none none",
-          },
         });
-        if (activityTween && activityTween.scrollTrigger) {
-          revealTriggers.push(activityTween.scrollTrigger);
-        }
+
+        activityCards.forEach(function (card, index) {
+          var stInstance = ScrollTrigger.create({
+            trigger: activitiesSection,
+            start: "top 80%",
+            once: true,
+            onEnter: function () {
+              gsap.to(activityCards, {
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                duration: 0.8,
+                stagger: 0.12,
+                ease: "power3.out",
+                force3D: true,
+                overwrite: "auto",
+                delay: 0.05,
+              });
+            },
+          });
+          revealTriggers.push(stInstance);
+        });
       }
     }
 
@@ -244,6 +253,9 @@
       lenisInstance = initLenis();
       enableScrollAnimations();
       if (window.initHeroCinematic) window.initHeroCinematic();
+      if (typeof ScrollTrigger !== "undefined") {
+        ScrollTrigger.refresh();
+      }
     });
   }
 

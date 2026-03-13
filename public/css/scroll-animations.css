@@ -82,6 +82,15 @@
   transition-delay: 0ms;
 }
 
+/* Rooms section: cards reveal symmetrically from bottom (all together) */
+.section--sanctuary .card-grid-reveal .room-card {
+  transform: translateY(60px);
+}
+.section--sanctuary .card-grid-reveal.is-visible .room-card {
+  transform: translateY(0);
+  transition-delay: 0ms;
+}
+
 /* ----- 4. Cinematic image zoom (hero & feature images) ----- */
 .cinematic-zoom-scroll {
   animation: cinematicZoomScroll 10s linear forwards;

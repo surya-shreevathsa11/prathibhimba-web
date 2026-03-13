@@ -94,14 +94,14 @@ connectDB().then(() => {
 });
 
 ///////////////////////////////
-import { sendConfirmationMailToGuest } from "./utils/resend.util.js";
-import { Booking } from "./models/booking.model.js";
-async function test() {
-  const booking = await Booking.findOne({
-    razorpayOrderId: "order_SQiZf5yTxyIHXc",
-  });
-  console.log(booking);
-  await sendConfirmationMailToGuest(booking);
-}
-
-test();
+// import { sendConfirmationMailToGuest } from "./utils/resend.util.js";
+// import { Booking } from "./models/booking.model.js";
+// async function test() {
+//   const booking = await Booking.findOne({
+//     razorpayOrderId: "order_SQiZf5yTxyIHXc",
+//   });
+//   console.log(booking);
+//   await sendConfirmationMailToGuest(booking);
+// }
+//
+// test();

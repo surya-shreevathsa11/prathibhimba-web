@@ -700,6 +700,97 @@
     );
   })();
 
+  // --- Events media slider: left/right arrows + 7s autoplay ---
+  (function initEventsSlider() {
+    var imgEl = document.getElementById("eventsImage");
+    var prevBtn = document.getElementById("eventsPrev");
+    var nextBtn = document.getElementById("eventsNext");
+    var titleEl = document.querySelector(".events__title");
+    var subtitleEl = document.querySelector(".events__content .section__subtitle");
+    var textEls = document.querySelectorAll(".events__text");
+    if (!imgEl || !prevBtn || !nextBtn || !titleEl || !subtitleEl || textEls.length < 1) return;
+
+    var events = [
+      {
+        subtitle: "What We Offer",
+        title: "Events at Prathibhimba",
+        lines: [
+          "Host your special moments amid the serene hills of Coorg. From intimate gatherings to small celebrations, our retreat provides a peaceful backdrop and personalised support to make your event memorable.",
+          "Whether it's a family reunion, a quiet anniversary, or a small corporate offsite, we work with you to arrange space, meals, and the little touches that matter. Get in touch to discuss your plans."
+        ],
+        image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&h=800&q=80",
+      },
+      {
+        subtitle: "What We Offer",
+        title: "Intimate Celebrations",
+        lines: [
+          "Design intimate celebrations with curated decor, warm lighting, and tablescapes that reflect your story.",
+          "From milestone birthdays to private receptions, we coordinate vendors and details so you can simply arrive and enjoy."
+        ],
+        image: "https://images.unsplash.com/photo-1525186402429-b4ff38bedeca?auto=format&fit=crop&w=1200&h=800&q=80",
+      },
+      {
+        subtitle: "What We Offer",
+        title: "Retreats & Offsites",
+        lines: [
+          "Host thoughtful offsites surrounded by nature, where teams can unwind, reflect, and reconnect.",
+          "We can help structure simple agendas, breaks, and meals so the rhythm of the day feels calm and considered."
+        ],
+        image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&h=800&q=80",
+      },
+    ];
+
+    var idx = 0;
+    var autoTimer = null;
+
+    function showEvent(nextIdx) {
+      idx = (nextIdx + events.length) % events.length;
+      var ev = events[idx];
+      imgEl.style.opacity = "0";
+      imgEl.style.filter = "blur(4px) scale(1.02)";
+      setTimeout(function () {
+        imgEl.style.backgroundImage = "url(" + ev.image + ")";
+        imgEl.dataset.eventIdx = String(idx);
+        imgEl.style.opacity = "1";
+        imgEl.style.filter = "blur(0px) scale(1)";
+      }, 140);
+
+      // Update text content to match event
+      subtitleEl.textContent = ev.subtitle;
+      titleEl.textContent = ev.title;
+      textEls.forEach(function (p, i) {
+        if (ev.lines[i]) {
+          p.textContent = ev.lines[i];
+          p.style.display = "";
+        } else {
+          p.textContent = "";
+          p.style.display = "none";
+        }
+      });
+    }
+
+    function go(delta) {
+      showEvent(idx + delta);
+      restartAuto();
+    }
+
+    function restartAuto() {
+      if (autoTimer) clearInterval(autoTimer);
+      autoTimer = setInterval(function () {
+        showEvent(idx + 1);
+      }, 7000);
+    }
+
+    prevBtn.addEventListener("click", function () {
+      go(-1);
+    });
+    nextBtn.addEventListener("click", function () {
+      go(1);
+    });
+
+    restartAuto();
+  })();
+
   // --- Hero slider (4 images, 5s) ---
   function setupHeroSlider() {
     const slides = Array.from(document.querySelectorAll(".hero__slide"));

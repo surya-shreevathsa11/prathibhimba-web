@@ -70,9 +70,7 @@
   }
 
   /* ----- 3. Image parallax (hero handled by hero-cinematic.js; only non-hero here) ----- */
-  var parallaxEls = document.querySelectorAll(
-    ".about__img-wrap, .events__media"
-  );
+  var parallaxEls = document.querySelectorAll(".about__img-wrap");
   parallaxEls.forEach(function (el) {
     el.classList.add("parallax-img");
   });

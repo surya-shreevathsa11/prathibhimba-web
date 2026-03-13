@@ -857,7 +857,7 @@ main {
 /* ========== ROOMS ========== */
 .rooms__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
@@ -957,7 +957,7 @@ main {
 }
 
 .events__media {
-  position: relative;
+  position: static;
 }
 
 .events__img-single {
@@ -969,10 +969,56 @@ main {
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 36px rgba(0, 0, 0, 0.2);
-  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition:
+    transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.6s ease-out,
+    filter 0.6s ease-out;
 }
 .events__media:hover .events__img-single {
   transform: scale(1.04);
+}
+
+.section--events {
+  position: relative;
+}
+
+.events__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(8, 60, 58, 0.65);
+  color: #f5f2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  z-index: 3;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.events__nav--prev {
+  left: 1.25rem;
+}
+.events__nav--next {
+  right: 1.25rem;
+}
+.events__nav:hover {
+  background: rgba(200, 169, 106, 0.95);
+  color: #083c3a;
+  transform: translateY(-50%) scale(1.06);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+.events__nav:active {
+  transform: translateY(-50%) scale(0.96);
 }
 
 .events__content {
@@ -1000,6 +1046,10 @@ main {
 
 .events__brochure-btn {
   margin-top: 0.5rem;
+}
+
+.events__book-btn {
+  margin-top: 0.75rem;
 }
 
 @media (max-width: 900px) {

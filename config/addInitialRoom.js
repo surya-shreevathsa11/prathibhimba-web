@@ -10,10 +10,11 @@ export const addInitalPrices = async () => {
         Object.entries(rooms).map(([roomId, room]) => ({
           roomId,
           name: room.name,
+          type: room.type,
           description: room.description,
           pricePerNight: room.price,
           capacity: room.capacity,
-        })),
+        }))
       );
     } else {
       console.log("Base Prices added");

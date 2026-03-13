@@ -116,23 +116,37 @@ export const checkAvailability = async (booking) => {
 
 const validateGuests = async (guestInfo) => {
   try {
-    const { roomId, adults, children } = guestInfo;
+    let { roomId, adults, children } = guestInfo;
 
-    if (Number.isNaN(Number(adults)) || Number.isNaN(Number(children))) {
+    adults = Number(adults);
+    children = Number(children);
+
+    if (Number.isNaN(adults) || Number.isNaN(children)) {
       return { 0: "Invalid guest count" };
-    }
-
-    if (!adults) {
-      return { 0: "Atleast one adult required" };
     }
 
     const roomInfo = await Room.findOne({ roomId });
 
-    if (
-      adults > roomInfo.capacity.adults ||
-      children > roomInfo.capacity.adults + roomInfo.capacity.children - adults
-    ) {
-      return { 0: "Invalid guest Count selected" };
+    if (!roomInfo) {
+      return { 0: "Room not found" };
+    }
+
+    const { minAdults, maxAdults, maxChildren, maxTotal } = roomInfo.capacity;
+
+    if (adults < minAdults) {
+      return { 0: `At least ${minAdults} adult required` };
+    }
+
+    if (adults > maxAdults) {
+      return { 0: "Too many adults selected" };
+    }
+
+    if (children > maxChildren) {
+      return { 0: "Too many children selected" };
+    }
+
+    if (adults + children > maxTotal) {
+      return { 0: "Total guest limit exceeded" };
     }
 
     return { 1: "ok" };
@@ -214,6 +228,7 @@ export const addToCart = async (req, res) => {
     const bookingDetails = {
       roomId,
       roomName: room.name,
+      type: room.type,
       checkIn: parseDateOnly(checkIn),
       checkOut: parseDateOnly(checkOut),
       price: pricing.totalPrice,
@@ -287,6 +302,7 @@ export const listRooms = async (_req, res) => {
       roomId: r.roomId,
       name: r.name,
       description: r.description,
+      type: r.type,
       price: r.pricePerNight,
       images: r.images
         ? { banner: r.images.banner || null, gallery: r.images.gallery || [] }
@@ -418,6 +434,7 @@ export const bookRooms = async (req, res) => {
         roomId: roomId,
         roomName: roomName.name,
         price: totalPrice,
+        type: roomName.type,
         priceBreakdown: breakdown,
         adults: Number(adults),
         children: Number(children),

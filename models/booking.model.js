@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-const roomIds = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"];
+const roomIds = JSON.parse(process.env.ROOM_IDS);
 
 export const priceBreakdownSchema = new Schema(
   {
@@ -20,6 +20,10 @@ const bookingRoomSchema = new Schema({
   },
 
   roomName: {
+    type: String,
+  },
+
+  type: {
     type: String,
   },
 

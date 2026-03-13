@@ -92,17 +92,16 @@ connectDB().then(() => {
     console.log("Server running at port", port);
   });
 });
-app.listen(4000, () => {
-  console.log("Server running at port", 4000);
-});
+
 ///////////////////////////////
-// import { sendConfirmationMailToGuest } from "./utils/resend.util.js";
-// import { Booking } from "./models/booking.model.js";
-// async function test() {
-//   const booking = await Booking.findOne({
-//     razorpayOrderId: "order_SOcsxVr3Mskyla",
-//   });
-//   await sendConfirmationMailToGuest(booking);
-// }
-//
-// test();
+import { sendConfirmationMailToGuest } from "./utils/resend.util.js";
+import { Booking } from "./models/booking.model.js";
+async function test() {
+  const booking = await Booking.findOne({
+    razorpayOrderId: "order_SQiZf5yTxyIHXc",
+  });
+  console.log(booking);
+  await sendConfirmationMailToGuest(booking);
+}
+
+test();

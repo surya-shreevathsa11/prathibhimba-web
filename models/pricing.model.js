@@ -1,15 +1,23 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-const roomIds = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"];
+const roomIds = JSON.parse(process.env.ROOM_IDS);
 
 //this contains info about the room and the base price also
 const capacitySchema = new Schema(
   {
-    adults: {
+    minAdults: {
       type: Number,
       required: true,
     },
-    children: {
+    maxAdults: {
+      type: Number,
+      required: true,
+    },
+    maxChildren: {
+      type: Number,
+      required: true,
+    },
+    maxTotal: {
       type: Number,
       required: true,
     },
@@ -33,6 +41,12 @@ const roomSchema = new Schema({
   description: {
     type: String,
     required: true,
+  },
+
+  type: {
+    type: String,
+    required: true,
+    enum: ["Room", "Dormitory"],
   },
 
   pricePerNight: {

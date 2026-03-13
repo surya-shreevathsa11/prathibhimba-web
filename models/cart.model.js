@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 import { priceBreakdownSchema } from "./booking.model.js";
 
-const roomIds = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"];
+const roomIds = JSON.parse(process.env.ROOM_IDS);
 
 const roomInfoSchema = new Schema(
   {
@@ -12,6 +12,7 @@ const roomInfoSchema = new Schema(
       required: true,
     },
     roomName: String,
+    type: String,
     price: {
       type: Number,
       required: true,

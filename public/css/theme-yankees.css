@@ -566,11 +566,10 @@ h1, h2, h3, h4 {
   border-radius: 16px;
   border: 1px solid rgba(252, 199, 107, 0.5);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16), 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  transition: box-shadow 0.35s ease, border-color 0.35s ease;
   background: var(--color-cream);
 }
 .room-card:hover {
-  transform: translateY(-6px);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
   border-color: var(--color-orange);
 }
@@ -578,10 +577,6 @@ h1, h2, h3, h4 {
   border-radius: 12px;
 }
 .room-card__media img {
-  transition: transform 0.6s ease;
-}
-.room-card:hover .room-card__media img {
-  transform: scale(1.08);
   filter: saturate(1.05) contrast(1.03);
 }
 .room-card__number {

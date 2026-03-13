@@ -512,18 +512,116 @@
           <div class="room-card__actions">
             <button type="button" class="btn btn--outline btn--sm" data-add-cart="${room.id}" data-name="${escapeHtml(room.name)}" data-price="${room.price}">Add to cart</button>
           </div>
+          <div class="room-card__overlay">
+            <div class="room-card__overlay-inner">
+              <h3 class="room-card__overlay-title">${escapeHtml(room.name)}</h3>
+              <p class="room-card__overlay-desc">${escapeHtml(room.description)}</p>
+              <p class="room-card__overlay-meta">From ₹${room.price} / night</p>
+            </div>
+          </div>
         </div>
       `;
           },
         )
         .join("");
       if (window.refreshScrollReveals) window.refreshScrollReveals();
+      if (window.initRoomCardHover) window.initRoomCardHover();
       updateCartUI();
       updateRoomCartButtons();
     } catch {
       /* silent */
     }
   }
+
+  // --- Room card premium hover (GSAP) ---
+  function initRoomCardHover() {
+    if (typeof gsap === "undefined") return;
+    const cards = $$(".room-card");
+    if (!cards.length) return;
+
+    cards.forEach((card) => {
+      const img = card.querySelector(".room-card__media img");
+      const overlay = card.querySelector(".room-card__overlay");
+      const overlayInner = overlay && overlay.querySelector(".room-card__overlay-inner");
+      const contentEls = card.querySelectorAll(
+        ".room-card__number, .room-card__name, .room-card__desc, .room-card__price",
+      );
+      if (!img || !overlay || !overlayInner || !contentEls.length) return;
+
+      gsap.set(img, {
+        scale: 1.01,
+        transformOrigin: "center center",
+      });
+      gsap.set(overlay, {
+        scaleY: 0,
+        opacity: 0,
+        transformOrigin: "center center",
+      });
+      gsap.set(overlayInner, {
+        opacity: 0,
+        y: 10,
+      });
+
+      const hoverTl = gsap.timeline({
+        paused: true,
+        defaults: { overwrite: "auto" },
+      });
+
+      hoverTl.to(
+        contentEls,
+        {
+          opacity: 0,
+          y: 4,
+          duration: 0.4,
+          ease: "power2.out",
+          stagger: 0.02,
+        },
+        0,
+      );
+
+      hoverTl.to(
+        overlay,
+        {
+          scaleY: 1,
+          opacity: 1,
+          duration: 0.85,
+          ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+        },
+        0,
+      );
+
+      hoverTl.to(
+        overlayInner,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power3.out",
+        },
+        0.12,
+      );
+
+      hoverTl.to(
+        img,
+        {
+          scale: 1.06,
+          duration: 0.9,
+          ease: "power3.out",
+        },
+        0,
+      );
+
+      card.addEventListener("mouseenter", () => {
+        hoverTl.play();
+      });
+
+      card.addEventListener("mouseleave", () => {
+        hoverTl.reverse();
+      });
+    });
+  }
+
+  window.initRoomCardHover = initRoomCardHover;
 
   // --- Gallery filter ---
   $$(".gallery__filter").forEach((btn) => {

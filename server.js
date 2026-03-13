@@ -1,13 +1,13 @@
- import express from "express";
- import cors from "cors";
- import path from "path";
-// import "dotenv/config";
- import cookieParser from "cookie-parser";
-// import session from "express-session";
-// import passport from "passport";
-// import MongoStore from "connect-mongo";
+import express from "express";
+import cors from "cors";
+import path from "path";
+import "dotenv/config";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import passport from "passport";
+import MongoStore from "connect-mongo";
 
-// import "./config/passport.js";
+import "./config/passport.js";
 
 //specific to esm
 import { fileURLToPath } from "url";
@@ -21,12 +21,12 @@ import connectDB from "./db.js";
 const app = express();
 app.use(cookieParser());
 
-// app.use(
-//   cors({
-//     origin: process.env.CORS_ORIGIN,
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  })
+);
 
 app.use(express.json({ limit: "128kb" }));
 app.use(
@@ -44,54 +44,54 @@ app.get("/reviews", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "reviews.html"));
 });
 
-// app.use(
-//   session({
-//     secret: process.env.SESSION_SECRET,
-//     resave: false,
-//     saveUninitialized: false,
-//     store: MongoStore.create({
-//       mongoUrl: process.env.MONGODB_URI,
-//       ttl: 60 * 60 * 24,
-//     }),
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      ttl: 60 * 60 * 24,
+    }),
 
-//     cookie: {
-//       maxAge: 1000 * 60 * 60 * 24, // 24 hours
-//       httpOnly: true,
-//       secure: false, // true in production (HTTPS)
-//       sameSite: "lax",
-//     },
-//   })
-// );
-// app.use(passport.initialize());
-// app.use(passport.session());
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: "lax",
+    },
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
-// import authRouter from "./routes/auth.routes.js";
-// import bookingRouter from "./routes/booking.route.js";
-// import razorpayRouter from "./routes/razorpay.route.js";
-// import adminLoginRouter from "./routes/admin.auth.route.js";
-// import adminRouter from "./routes/admin.route.js";
+import authRouter from "./routes/auth.routes.js";
+import bookingRouter from "./routes/booking.route.js";
+import razorpayRouter from "./routes/razorpay.route.js";
+import adminLoginRouter from "./routes/admin.auth.route.js";
+import adminRouter from "./routes/admin.route.js";
 
-// app.use("/api/auth", authRouter);
-// app.use("/api/booking", bookingRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/booking", bookingRouter);
 
-// //rzp and payment
-// //need to set to raw for webhooks to work
+//rzp and payment
+//need to set to raw for webhooks to work
 
-// app.use("/api/payment", razorpayRouter);
+app.use("/api/payment", razorpayRouter);
 
-// /////////admin routes
-// app.use("/api/admin", adminLoginRouter);
-// app.use("/api/admin", adminRouter);
+/////////admin routes
+app.use("/api/admin", adminLoginRouter);
+app.use("/api/admin", adminRouter);
 
-// import { addInitalPrices } from "./config/addInitialRoom.js";
-// addInitalPrices();
+import { addInitalPrices } from "./config/addInitialRoom.js";
+addInitalPrices();
 
-// connectDB().then(() => {
-//   const port = process.env.PORT;
-//   app.listen(port, () => {
-//     console.log("Server running at port", port);
-//   });
-// });
+connectDB().then(() => {
+  const port = process.env.PORT;
+  app.listen(port, () => {
+    console.log("Server running at port", port);
+  });
+});
 app.listen(4000, () => {
   console.log("Server running at port", 4000);
 });

@@ -12,7 +12,7 @@
     if (typeof Lenis === "undefined") return null;
     try {
       var lenis = new Lenis({
-        duration: 1.2,
+        duration: 0.8,
         smoothWheel: true,
         smoothTouch: true,
         touchMultiplier: 2,

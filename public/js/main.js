@@ -1,5 +1,7 @@
 (function () {
   let currentUser = null;
+  /** Room limit: set from backend after validating /api/booking/rooms response. Only these room IDs are allowed for cart/booking. */
+  let validRoomIdsFromBackend = [];
 
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
@@ -189,6 +191,10 @@
       var errEl = $("#bookRoomError");
       var submitBtn = $("#bookRoomSubmitBtn");
       var roomId = "R" + pendingBookRoom.id;
+      if (validRoomIdsFromBackend.length > 0 && validRoomIdsFromBackend.indexOf(roomId) === -1) {
+        errEl.textContent = "This room is not available for booking.";
+        return;
+      }
       var checkIn = $("#bookRoomCheckIn").value;
       var checkOut = $("#bookRoomCheckOut").value;
       var adults = parseInt($("#bookRoomAdults").value, 10) || 1;
@@ -280,10 +286,8 @@
       navProfile.style.display = "block";
       navProfile.setAttribute("aria-hidden", "false");
       if (navProfileAvatar) {
-        navProfileAvatar.src =
-          currentUser.avatar && currentUser.avatar.trim()
-            ? currentUser.avatar
-            : DEFAULT_AVATAR_URL;
+        var imageUrl = (currentUser.avatar || currentUser.picture || "").trim();
+        navProfileAvatar.src = imageUrl ? imageUrl : DEFAULT_AVATAR_URL;
         navProfileAvatar.alt = currentUser.name
           ? String(currentUser.name)
           : "Profile";
@@ -487,7 +491,10 @@
     try {
       const res = await fetch("/api/booking/rooms");
       const data = await res.json();
-      if (!data.success) return;
+      if (!data.success || !Array.isArray(data.rooms)) return;
+      validRoomIdsFromBackend = data.rooms.map(function (r) {
+        return r.roomId || (r.id != null ? "R" + r.id : "");
+      }).filter(Boolean);
       const grid = $("#roomsGrid");
       grid.innerHTML = data.rooms
         .map(

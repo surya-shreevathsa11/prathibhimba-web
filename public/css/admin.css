@@ -27,10 +27,10 @@
 .admin__header-title {
   font-family: "Playfair Display", serif;
   font-size: 1.5rem;
-  font-style: italic;
+  font-style: normal;
   margin: 0;
   color: #f8f8f8;
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .admin__header-title span {
@@ -56,14 +56,18 @@
 }
 
 .admin__header .admin__logout {
-  color: rgba(248, 248, 248, 0.9);
-  border-color: rgba(248, 248, 248, 0.4);
-  padding: 0.4rem 0.85rem;
+  background: var(--color-burnt-copper, #FCC76B);
+  color: #053827;
+  border: 1px solid rgba(252, 199, 107, 0.9);
+  padding: 0.45rem 0.9rem;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
 }
 
 .admin__header .admin__logout:hover {
-  color: var(--color-burnt-copper, #FCC76B);
-  border-color: rgba(248, 248, 248, 0.6);
+  background: #e6b85c;
+  color: #053827;
+  border-color: #e6b85c;
 }
 
 .admin__header-brand {
@@ -557,6 +561,7 @@ body.admin--dashboard .admin__status-select:focus {
 .admin__section h2 {
   font-family: "Playfair Display", serif;
   font-size: 1.35rem;
+  font-style: normal;
   color: #2c2416;
   margin-bottom: 1.25rem;
   font-weight: 600;
@@ -620,18 +625,22 @@ body.admin--dashboard .admin__grid {
 }
 
 .admin__price-row label {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #2c2416;
   font-weight: 500;
   white-space: nowrap;
   text-transform: none;
   letter-spacing: 0;
   margin: 0;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
 }
 
 .admin__room-id {
-  color: #a89878;
+  color: #6b5d4f;
   font-size: 0.78rem;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
 }
 
 .admin__price-row input {
@@ -1565,9 +1574,23 @@ body.admin--dashboard .admin__season-form .form__group {
 
 .admin__pricing-base-title {
   margin: 0 0 1rem 0;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
   color: var(--color-obsidian, #1a1a1a);
+}
+
+.admin__loading-hint {
+  margin: 0;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+  color: #6b5d4f;
+  font-family: "Inter", sans-serif;
+}
+
+.admin__btn-save-base {
+  margin-top: 1.25rem;
 }
 
 /* Add Pricing Rule modal */

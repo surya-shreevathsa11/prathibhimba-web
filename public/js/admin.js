@@ -66,16 +66,7 @@
   var bookingsCache = [];
   var blockedDatesList = [];
 
-  var roomList = [
-    { id: "R1", name: "Sunflower" },
-    { id: "R2", name: "Lily" },
-    { id: "R3", name: "Marigold" },
-    { id: "R4", name: "Lavender" },
-    { id: "R5", name: "Dahlia" },
-    { id: "R6", name: "Gardenia" },
-    { id: "R7", name: "Petunia" },
-    { id: "R8", name: "Zinnia" },
-  ];
+  var roomList = [];
 
   // ─── Helpers ─────────────────────────────────────────────────────────────────
   function showView(id) {
@@ -288,7 +279,10 @@
       .then(function (r) {
         if (r.ok) {
           showView("adminDashboard");
-          renderBasePrices();
+          loadRooms(function () {
+            renderBasePrices();
+            loadPricingRules();
+          });
           loadBlockDates();
           loadBookings();
         } else {
@@ -308,25 +302,67 @@
     /* no-op: pricing rules UI replaced seasonal list; kept for init compatibility */
   }
 
+  // ─── Rooms from backend (/api/booking/rooms) ───────────────────────────────────
+  function loadRooms(callback) {
+    if (basePriceGrid) basePriceGrid.innerHTML = '<p class="admin__loading-hint">Loading rooms…</p>';
+    fetch("/api/booking/rooms", { credentials: "include" })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.success && Array.isArray(data.rooms)) {
+          roomList = data.rooms.map(function (r) {
+            return {
+              id: r.roomId || r.id,
+              name: r.name || r.roomId || "Room",
+              price: r.price != null ? r.price : 0,
+            };
+          });
+        } else {
+          roomList = [];
+        }
+        fillRoomSelects();
+        if (typeof callback === "function") callback();
+      })
+      .catch(function () {
+        roomList = [];
+        if (typeof callback === "function") callback();
+      });
+  }
+
+  function fillRoomSelects() {
+    var blockSel = document.getElementById("blockRoom");
+    var imageSel = document.getElementById("imageRoom");
+    var ruleAppliesSel = document.getElementById("ruleAppliesTo");
+    var opts = roomList.map(function (r) {
+      return '<option value="' + r.id + '">' + r.id + " — " + (r.name || r.id) + "</option>";
+    }).join("");
+    if (blockSel && opts) blockSel.innerHTML = opts;
+    if (imageSel && opts) imageSel.innerHTML = opts;
+    if (ruleAppliesSel && opts) ruleAppliesSel.innerHTML = opts;
+  }
+
   // ─── Base prices ─────────────────────────────────────────────────────────────
   function renderBasePrices() {
     if (!basePriceGrid) return;
     basePriceGrid.innerHTML = roomList
       .map(function (r) {
+        var val = r.price != null ? Number(r.price) : 0;
+        var safeId = String(r.id).replace(/[^a-zA-Z0-9-_]/g, "_");
         return (
           '<div class="admin__price-row">' +
           '<label for="bp-' +
-          r.id +
+          safeId +
           '">' +
-          r.name +
+          (r.name || r.id) +
           ' <span class="admin__room-id">(' +
           r.id +
           ")</span></label>" +
           '<input type="number" id="bp-' +
-          r.id +
+          safeId +
           '" data-room="' +
           r.id +
-          '" min="0" step="1" value="0" placeholder="0">' +
+          '" min="0" step="1" value="' +
+          val +
+          '" placeholder="0">' +
           "</div>"
         );
       })
@@ -336,7 +372,8 @@
   if (saveBasePriceBtn) {
     saveBasePriceBtn.addEventListener("click", function () {
       var payload = roomList.map(function (r) {
-        var input = document.getElementById("bp-" + r.id);
+        var safeId = String(r.id).replace(/[^a-zA-Z0-9-_]/g, "_");
+        var input = document.getElementById("bp-" + safeId);
         return {
           roomId: r.id,
           pricePerNight: input ? Number(input.value) || 0 : 0,
@@ -1357,8 +1394,11 @@
       .then(function (res) {
         if (res.ok) {
           showView("adminDashboard");
-          renderBasePrices();
-          renderSeasonal();
+          loadRooms(function () {
+            renderBasePrices();
+            renderSeasonal();
+            loadPricingRules();
+          });
           loadBlockDates();
           loadBookings();
         } else {

@@ -1,7 +1,7 @@
 export const rooms = {
   R1: {
     id: "01",
-    name: "Sunflower",
+    name: "Silver Oak Haven",
     type: "Room",
     description: "Warm tones with olive wood accents",
     price: 3500,
@@ -15,7 +15,7 @@ export const rooms = {
 
   R2: {
     id: "02",
-    name: "Lily",
+    name: "Rosewood retreat",
     type: "Room",
     description: "Sun-drenched citrus palette",
     price: 3500,
@@ -29,7 +29,7 @@ export const rooms = {
 
   R3: {
     id: "03",
-    name: "Marigold",
+    name: "Banyan House",
     type: "Dormitory",
     description: "Earthy sage and linen textures",
     price: 10000,
@@ -43,7 +43,7 @@ export const rooms = {
 
   R4: {
     id: "04",
-    name: "Lavender",
+    name: "Rain Tree Grove",
     type: "Dormitory",
     description: "Rich clay and rustic warmth",
     price: 10000,

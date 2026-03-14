@@ -603,7 +603,7 @@ body.admin--dashboard .admin__filter-bar {
 /* ── Base price grid ──────────────────────────────────────────────────────── */
 .admin__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 0.75rem;
 }
 
@@ -634,6 +634,10 @@ body.admin--dashboard .admin__grid {
   margin: 0;
   font-family: "Inter", sans-serif;
   font-style: normal;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin__room-id {
@@ -645,6 +649,8 @@ body.admin--dashboard .admin__grid {
 
 .admin__price-row input {
   width: 80px;
+  min-width: 80px;
+  flex-shrink: 0;
   padding: 0.35rem 0.5rem;
   border: 1px solid #e0d8cc;
   border-radius: 4px;

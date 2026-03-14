@@ -17,7 +17,20 @@ export const addInitalPrices = async () => {
         }))
       );
     } else {
-      console.log("Base Prices added");
+      // Sync room names and config from room.js to existing DB records
+      for (const [roomId, room] of Object.entries(rooms)) {
+        await Room.findOneAndUpdate(
+          { roomId },
+          {
+            name: room.name,
+            type: room.type,
+            description: room.description,
+            pricePerNight: room.price,
+            capacity: room.capacity,
+          }
+        );
+      }
+      console.log("Base Prices synced");
     }
   } catch (error) {
     console.log("error adding base price");

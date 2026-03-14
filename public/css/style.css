@@ -986,6 +986,12 @@ main {
   padding: 5rem 0;
 }
 
+/* Inset content so nav arrows don’t overlap text or image */
+.section--events .container {
+  padding-left: 4rem;
+  padding-right: 4rem;
+}
+
 .events__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1091,6 +1097,10 @@ main {
 }
 
 @media (max-width: 900px) {
+  .section--events .container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
   .events__grid {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -1098,6 +1108,13 @@ main {
 
   .events__img-single {
     aspect-ratio: 4 / 3;
+  }
+}
+
+@media (max-width: 600px) {
+  .section--events .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 

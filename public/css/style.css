@@ -1044,10 +1044,10 @@ main {
     box-shadow 0.25s ease;
 }
 .events__nav--prev {
-  left: 1.25rem;
+  left: 1rem;
 }
 .events__nav--next {
-  right: 1.25rem;
+  right: 1rem;
 }
 .events__nav:hover {
   background: rgba(200, 169, 106, 0.95);

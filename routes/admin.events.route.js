@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyJWT } from "../middlewares/admin.middleware.js";
+import { verifyJWT } from "../middleware/admin.middleware.js";
 import {
   createEvent,
   listEvents,
@@ -14,7 +14,7 @@ import {
   removeGalleryImage,
   cancelEnrollment,
   getEventCloudinarySignature,
-} from "../controllers/admin.event.controller.js";
+} from "../controllers/admin.events.controller.js";
 
 const router = express.Router();
 

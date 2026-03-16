@@ -1088,12 +1088,21 @@ main {
   margin-bottom: 1.25rem;
 }
 
-.events__brochure-btn {
-  margin-top: 0.5rem;
+.events__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1.25rem;
 }
 
+.events__actions .btn {
+  margin-top: 0;
+}
+
+.events__brochure-btn,
 .events__book-btn {
-  margin-top: 0.75rem;
+  margin-top: 0;
 }
 
 @media (max-width: 900px) {

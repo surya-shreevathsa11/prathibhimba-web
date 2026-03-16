@@ -749,60 +749,12 @@
     btn.target = "_blank";
   }
 
-  // --- Directions map: scroll-to-zoom when pointer is over map (throttled for smoother feel) ---
-  (function initDirectionsMapZoom() {
+  // --- Directions map: no wheel capture so page scroll works over map; zoom via "Open in Google Maps" ---
+  (function initDirectionsMap() {
     const iframe = document.getElementById("directionsMapIframe");
     const mapWrap = document.querySelector(".directions__map-wrap");
     if (!iframe || !mapWrap) return;
-
-    const lat = "12.3529593";
-    const lng = "75.7930243";
-    const minZoom = 12;
-    const maxZoom = 19;
-    let currentZoom = 15;
-    let zoomPending = 0;
-    let throttleTimer = null;
-
-    function updateMapSrc() {
-      iframe.src =
-        "https://www.google.com/maps?q=" +
-        lat +
-        "," +
-        lng +
-        "&z=" +
-        currentZoom +
-        "&output=embed";
-    }
-
-    function applyZoomThrottled() {
-      if (zoomPending === 0) return;
-      const delta = zoomPending > 0 ? 1 : -1;
-      zoomPending -= delta;
-      currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom + delta));
-      updateMapSrc();
-      throttleTimer = setTimeout(function () {
-        throttleTimer = null;
-        if (zoomPending !== 0) applyZoomThrottled();
-      }, 180);
-    }
-
-    mapWrap.addEventListener(
-      "wheel",
-      function (e) {
-        if (!mapWrap.contains(e.target)) return;
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.deltaY < 0) {
-          if (currentZoom >= maxZoom) return;
-          zoomPending += 1;
-        } else {
-          if (currentZoom <= minZoom) return;
-          zoomPending -= 1;
-        }
-        if (!throttleTimer) applyZoomThrottled();
-      },
-      { capture: true, passive: false }
-    );
+    // Map uses fixed zoom; user can open in Google Maps for full zoom/pan. Page scroll works over map.
   })();
 
   // --- Events media slider: left/right arrows + 7s autoplay ---

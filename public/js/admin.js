@@ -67,6 +67,7 @@
   var blockedDatesList = [];
 
   var roomList = [];
+  var eventsList = [];
 
   // ─── Helpers ─────────────────────────────────────────────────────────────────
   function showView(id) {
@@ -103,7 +104,13 @@
   }
 
   function switchTab(tabId) {
-    var tabs = { bookings: "tabContentBookings", pricing: "tabContentPricing", blockdates: "tabContentBlockDates", images: "tabContentImages" };
+    var tabs = {
+      bookings: "tabContentBookings",
+      pricing: "tabContentPricing",
+      events: "tabContentEvents",
+      blockdates: "tabContentBlockDates",
+      images: "tabContentImages"
+    };
     var contentId = tabs[tabId];
     if (!contentId) return;
     document.querySelectorAll(".admin__tab-btn").forEach(function (btn) {
@@ -116,6 +123,7 @@
     });
     var btn = document.getElementById("tabBookings");
     if (tabId === "pricing") btn = document.getElementById("tabPricing");
+    if (tabId === "events") btn = document.getElementById("tabEvents");
     if (tabId === "blockdates") btn = document.getElementById("tabBlockDates");
     if (tabId === "images") btn = document.getElementById("tabRoomImages");
     if (btn) { btn.classList.add("active"); btn.setAttribute("aria-selected", "true"); }
@@ -126,6 +134,9 @@
     }
     if (tabId === "pricing") {
       loadPricingRules();
+    }
+    if (tabId === "events") {
+      loadEvents();
     }
     if (tabId === "blockdates") {
       loadBlockDates();
@@ -325,6 +336,248 @@
       .catch(function () {
         roomList = [];
         if (typeof callback === "function") callback();
+      });
+  }
+
+  // ─── Events (admin) ────────────────────────────────────────────────────────────
+  var eventsMsg = document.getElementById("eventsMsg");
+  var eventsListEl = document.getElementById("eventsList");
+  var eventsEmptyEl = document.getElementById("eventsEmpty");
+  var eventsCountBadge = document.getElementById("eventsCountBadge");
+  var eventForm = document.getElementById("eventForm");
+  var eventNameInput = document.getElementById("eventName");
+  var eventDescInput = document.getElementById("eventDescription");
+  var eventMaxInput = document.getElementById("eventMaxPeople");
+  var eventStartInput = document.getElementById("eventStartDate");
+  var eventEndInput = document.getElementById("eventEndDate");
+
+  function renderEvents() {
+    if (!eventsListEl || !eventsEmptyEl) return;
+    if (!eventsList || eventsList.length === 0) {
+      eventsListEl.innerHTML = "";
+      eventsEmptyEl.style.display = "block";
+      if (eventsCountBadge) eventsCountBadge.textContent = "";
+      return;
+    }
+    eventsEmptyEl.style.display = "none";
+    if (eventsCountBadge) {
+      eventsCountBadge.textContent =
+        eventsList.length === 1
+          ? "1 event live"
+          : eventsList.length + " events live";
+    }
+    eventsListEl.innerHTML = eventsList
+      .map(function (ev) {
+        var id = ev._id || ev.id;
+        var desc =
+          (ev.description || "")
+            .replace(/\s+/g, " ")
+            .trim();
+        var startLabel = ev.startDate ? formatDate(ev.startDate) : "—";
+        var endLabel = ev.endDate ? formatDate(ev.endDate) : "—";
+        return (
+          '<article class="admin__events-item" data-event-id="' + (id || "") + '">' +
+          '<div class="admin__events-item-main">' +
+          '<h4 class="admin__events-item-title">' + escapeHtml(ev.name || "Untitled event") + "</h4>" +
+          '<p class="admin__events-item-meta">Max guests: ' +
+          (ev.maxPeopleAllowed != null ? ev.maxPeopleAllowed : "—") +
+          (ev.curPeopleEnrolled != null
+            ? " · Enrolled: " + ev.curPeopleEnrolled
+            : "") +
+          " · " +
+          startLabel +
+          " – " +
+          endLabel +
+          "</p>" +
+          '<p class="admin__events-item-desc">' + escapeHtml(desc) + "</p>" +
+          "</div>" +
+          '<div class="admin__events-item-actions">' +
+          '<button type="button" class="btn btn--ghost btn--sm admin__event-edit" data-event-id="' + (id || "") + '">Edit</button>' +
+          '<button type="button" class="btn btn--ghost btn--sm admin__event-banner" data-event-id="' + (id || "") + '">Banner</button>' +
+          '<button type="button" class="btn btn--ghost btn--sm admin__event-gallery" data-event-id="' + (id || "") + '">Gallery</button>' +
+          '<button type="button" class="btn btn--ghost btn--sm admin__event-brochure" data-event-id="' + (id || "") + '">Brochure</button>' +
+          '<button type="button" class="btn admin__btn-delete-permanent admin__event-delete" data-event-id="' + (id || "") + '">Cancel</button>' +
+          "</div>" +
+          "</article>"
+        );
+      })
+      .join("");
+
+    eventsListEl.querySelectorAll(".admin__event-edit").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-event-id");
+        var ev = eventsList.find(function (e) {
+          return (e._id || e.id || "").toString() === (id || "");
+        });
+        if (!ev || !eventNameInput || !eventDescInput || !eventMaxInput) return;
+        eventNameInput.value = ev.name || "";
+        eventDescInput.value = ev.description || "";
+        eventMaxInput.value =
+          ev.maxPeopleAllowed != null ? String(ev.maxPeopleAllowed) : "";
+        if (eventStartInput) {
+          eventStartInput.value = ev.startDate
+            ? new Date(ev.startDate).toISOString().slice(0, 10)
+            : "";
+        }
+        if (eventEndInput) {
+          eventEndInput.value = ev.endDate
+            ? new Date(ev.endDate).toISOString().slice(0, 10)
+            : "";
+        }
+        eventForm.setAttribute("data-edit-id", id || "");
+        setMsg(eventsMsg, "Editing “" + (ev.name || "Event") + "”. Save to update.", false);
+      });
+    });
+
+    function openEventUpload(eventId, type) {
+      if (typeof cloudinary === "undefined") {
+        setMsg(eventsMsg, "Cloudinary widget is loading. Try again in a moment.", true);
+        return;
+      }
+      apiGet("/api/admin/events/cloudinary-signature")
+        .then(function (r) {
+          if (!r.ok || !r.data) {
+            setMsg(eventsMsg, "Could not get upload signature.", true);
+            return;
+          }
+          var d = r.data;
+          var widget = cloudinary.createUploadWidget(
+            {
+              cloudName: d.cloudName,
+              apiKey: d.apiKey,
+              uploadSignature: d.signature,
+              uploadSignatureTimestamp: d.timestamp,
+              folder: d.folder,
+              sources: ["local", "camera"],
+              multiple: type === "gallery",
+            },
+            function (error, result) {
+              if (error) return;
+              if (result.event === "success") {
+                var url = result.info && result.info.secure_url;
+                if (!url) return;
+                var req;
+                if (type === "banner") {
+                  req = apiPatch("/api/admin/events/" + eventId + "/banner", {
+                    url: url,
+                  });
+                } else if (type === "brochure") {
+                  req = apiPatch("/api/admin/events/" + eventId + "/brochure", {
+                    url: url,
+                  });
+                } else {
+                  req = apiPost("/api/admin/events/" + eventId + "/gallery", {
+                    url: url,
+                  });
+                }
+                req
+                  .then(function (res) {
+                    if (res.ok) {
+                      setMsg(
+                        eventsMsg,
+                        type === "banner"
+                          ? "Banner updated."
+                          : type === "brochure"
+                          ? "Brochure updated."
+                          : "Image added to gallery.",
+                        false
+                      );
+                      loadEvents();
+                    } else {
+                      setMsg(
+                        eventsMsg,
+                        (res.data && res.data.message) || "Update failed.",
+                        true
+                      );
+                    }
+                  })
+                  .catch(function () {
+                    setMsg(eventsMsg, "Network error. Please try again.", true);
+                  });
+              }
+            }
+          );
+          widget.open();
+        })
+        .catch(function () {
+          setMsg(eventsMsg, "Could not get upload signature.", true);
+        });
+    }
+
+    eventsListEl
+      .querySelectorAll(".admin__event-banner")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          openEventUpload(id, "banner");
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-gallery")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          openEventUpload(id, "gallery");
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-brochure")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          openEventUpload(id, "brochure");
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-delete")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          if (
+            !window.confirm(
+              "Cancel this event? It will be removed from the website."
+            )
+          )
+            return;
+          apiDelete("/api/admin/events/" + id)
+            .then(function (r) {
+              if (r.ok) {
+                eventsList = eventsList.filter(function (e) {
+                  return (e._id || e.id || "").toString() !== id;
+                });
+                renderEvents();
+                setMsg(eventsMsg, "Event cancelled.", false);
+              } else {
+                setMsg(
+                  eventsMsg,
+                  (r.data && r.data.message) || "Could not cancel event.",
+                  true
+                );
+              }
+            })
+            .catch(function () {
+              setMsg(eventsMsg, "Network error. Could not cancel event.", true);
+            });
+        });
+      });
+  }
+
+  function loadEvents() {
+    apiGet("/api/admin/events")
+      .then(function (r) {
+        eventsList = (r.data && r.data.data) || [];
+        renderEvents();
+      })
+      .catch(function () {
+        eventsList = [];
+        renderEvents();
       });
   }
 
@@ -562,6 +815,66 @@
         .catch(function () {
           setMsg(formMsg, "Network error. Could not add rule.", true);
           if (formMsg) formMsg.style.display = "block";
+        });
+    });
+  }
+
+  // ─── Event form submit (create + edit) ─────────────────────────────────────────
+  if (eventForm) {
+    eventForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!eventNameInput || !eventDescInput || !eventMaxInput || !eventStartInput || !eventEndInput) return;
+
+      var nameVal = eventNameInput.value.trim();
+      var descVal = eventDescInput.value.trim();
+      var maxVal = parseInt(eventMaxInput.value, 10) || 0;
+      var startVal = eventStartInput.value;
+      var endVal = eventEndInput.value;
+
+      if (!nameVal || !descVal || !maxVal || !startVal || !endVal) {
+        setMsg(eventsMsg, "Please fill in all required fields.", true);
+        return;
+      }
+
+      if (startVal > endVal) {
+        setMsg(eventsMsg, "Start date must be before or equal to end date.", true);
+        return;
+      }
+
+      var payload = {
+        name: nameVal,
+        description: descVal,
+        maxPeopleAllowed: maxVal,
+        startDate: startVal,
+        endDate: endVal,
+      };
+
+      var editId = eventForm.getAttribute("data-edit-id");
+      var req = editId
+        ? apiPatch("/api/admin/events/" + editId, payload)
+        : apiPost("/api/admin/events", payload);
+
+      req
+        .then(function (r) {
+          if (r.ok) {
+            setMsg(
+              eventsMsg,
+              editId ? "Event updated successfully." : "Event created successfully.",
+              false
+            );
+            eventForm.removeAttribute("data-edit-id");
+            eventForm.reset();
+            loadEvents();
+          } else {
+            setMsg(
+              eventsMsg,
+              (r.data && r.data.message) || "Could not save event.",
+              true
+            );
+          }
+        })
+        .catch(function () {
+          setMsg(eventsMsg, "Network error. Please try again.", true);
         });
     });
   }
@@ -805,7 +1118,7 @@
     });
   }
 
-  [["tabBookings", "bookings"], ["tabPricing", "pricing"], ["tabBlockDates", "blockdates"], ["tabRoomImages", "images"]].forEach(function (pair) {
+  [["tabBookings", "bookings"], ["tabPricing", "pricing"], ["tabEvents", "events"], ["tabBlockDates", "blockdates"], ["tabRoomImages", "images"]].forEach(function (pair) {
     var btn = document.getElementById(pair[0]);
     if (btn) btn.addEventListener("click", function () { switchTab(pair[1]); });
   });

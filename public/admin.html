@@ -187,6 +187,7 @@
           <nav class="admin__tabs" role="tablist">
             <button type="button" class="admin__tab-btn active" role="tab" id="tabBookings" data-tab="bookings" aria-selected="true"><span class="admin__tab-icon" aria-hidden="true">📅</span> Bookings</button>
             <button type="button" class="admin__tab-btn" role="tab" id="tabPricing" data-tab="pricing" aria-selected="false"><span class="admin__tab-icon" aria-hidden="true">🏷</span> Pricing Rules</button>
+            <button type="button" class="admin__tab-btn" role="tab" id="tabEvents" data-tab="events" aria-selected="false"><span class="admin__tab-icon" aria-hidden="true">🎉</span> Events</button>
             <button type="button" class="admin__tab-btn" role="tab" id="tabBlockDates" data-tab="blockdates" aria-selected="false"><span class="admin__tab-icon" aria-hidden="true">⊘</span> Block Dates</button>
             <button type="button" class="admin__tab-btn" role="tab" id="tabRoomImages" data-tab="images" aria-selected="false">Room Images</button>
           </nav>
@@ -276,6 +277,59 @@
                 <p class="admin__msg" id="basePriceMsg" style="display: none"></p>
                 <div class="admin__grid" id="basePriceGrid"></div>
                 <button type="button" class="btn btn--primary btn--sm admin__btn-save-base" id="saveBasePriceBtn">Save Base Prices</button>
+              </div>
+            </section>
+          </div>
+
+          <div id="tabContentEvents" class="admin__tab-content" role="tabpanel" style="display: none">
+            <section class="admin__section admin__events-section">
+              <div class="admin__events-layout">
+                <div class="admin__events-form-card">
+                  <h2 class="admin__events-title">Events</h2>
+                  <p class="admin__events-subtitle">Create and manage events that appear on the website.</p>
+                  <p class="admin__msg" id="eventsMsg" style="display: none"></p>
+                  <form id="eventForm" class="admin__events-form" novalidate>
+                    <div class="form__group">
+                      <label for="eventName">Event title <span class="form__required">*</span></label>
+                      <input type="text" id="eventName" name="eventName" placeholder="e.g., Coffee Harvest Weekend" required />
+                    </div>
+                    <div class="form__group">
+                      <label for="eventDescription">Description <span class="form__required">*</span></label>
+                      <textarea id="eventDescription" name="eventDescription" rows="3" placeholder="Short description of the experience" required></textarea>
+                    </div>
+                    <div class="form__group">
+                      <label for="eventMaxPeople">Maximum guests <span class="form__required">*</span></label>
+                      <input type="number" id="eventMaxPeople" name="eventMaxPeople" min="1" step="1" placeholder="e.g., 30" required />
+                    </div>
+                    <div class="admin__form-row admin__form-row--two">
+                      <div class="form__group">
+                        <label for="eventStartDate">Start date <span class="form__required">*</span></label>
+                        <div class="admin__input-with-icon">
+                          <input type="date" id="eventStartDate" name="eventStartDate" required />
+                          <span class="admin__input-icon admin__input-icon--calendar" aria-hidden="true">📅</span>
+                        </div>
+                      </div>
+                      <div class="form__group">
+                        <label for="eventEndDate">End date <span class="form__required">*</span></label>
+                        <div class="admin__input-with-icon">
+                          <input type="date" id="eventEndDate" name="eventEndDate" required />
+                          <span class="admin__input-icon admin__input-icon--calendar" aria-hidden="true">📅</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="admin__events-actions">
+                      <button type="submit" class="btn btn--primary btn--sm" id="eventSaveBtn">Save Event</button>
+                    </div>
+                  </form>
+                </div>
+                <div class="admin__events-list-card">
+                  <div class="admin__events-list-header">
+                    <h3 class="admin__events-list-title">Upcoming &amp; Published Events</h3>
+                    <span class="admin__events-count" id="eventsCountBadge" aria-live="polite"></span>
+                  </div>
+                  <div class="admin__events-list" id="eventsList" aria-live="polite"></div>
+                  <p class="admin__empty admin__events-empty" id="eventsEmpty">No events added yet. Create an event to display it on the website.</p>
+                </div>
               </div>
             </section>
           </div>

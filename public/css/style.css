@@ -2475,6 +2475,9 @@ body.page-cart .nav {
     padding: 0.9rem 0;
     padding-top: max(0.9rem, env(safe-area-inset-top));
   }
+  .nav__inner {
+    align-items: center;
+  }
   .nav__links {
     display: none;
     position: absolute;
@@ -2493,6 +2496,10 @@ body.page-cart .nav {
   }
   .nav__toggle {
     display: flex;
+  }
+  .nav__right {
+    margin-left: 0;
+    padding-left: 0.75rem;
   }
   .cart-page {
     padding: 3rem 0 2.5rem;

@@ -31,19 +31,36 @@ export const getEventCloudinarySignature = (req, res) => {
 // POST /api/admin/events
 export const createEvent = async (req, res) => {
   try {
-    const { name, description, maxPeopleAllowed, banner, brochure, gallery } =
-      req.body;
+    const {
+      name,
+      description,
+      maxPeopleAllowed,
+      startDate,
+      endDate,
+      banner,
+      brochure,
+      gallery,
+    } = req.body;
 
-    if (!name || !description || !maxPeopleAllowed) {
+    if (!name || !description || !maxPeopleAllowed || !startDate || !endDate) {
       return res.status(400).json({
-        message: "name, description and maxPeopleAllowed are required",
+        message:
+          "name, description, maxPeopleAllowed, startDate and endDate are required",
       });
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      return res
+        .status(400)
+        .json({ message: "startDate must be before or equal to endDate" });
     }
 
     const event = await Event.create({
       name,
       description,
       maxPeopleAllowed,
+      startDate,
+      endDate,
       banner: banner || null,
       brochure: brochure || null,
       gallery: gallery || [],
@@ -96,10 +113,26 @@ export const editEvent = async (req, res) => {
       return res.status(400).json({ message: "Invalid event ID" });
     }
 
-    const allowedFields = ["name", "description", "maxPeopleAllowed"];
+    const allowedFields = [
+      "name",
+      "description",
+      "maxPeopleAllowed",
+      "startDate",
+      "endDate",
+    ];
     const updates = {};
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
+    if (
+      updates.startDate &&
+      updates.endDate &&
+      new Date(updates.startDate) > new Date(updates.endDate)
+    ) {
+      return res
+        .status(400)
+        .json({ message: "startDate must be before or equal to endDate" });
     }
 
     if (Object.keys(updates).length === 0) {

@@ -27,6 +27,14 @@ const eventSchema = new mongoose.Schema(
       min: 0,
     },
 
+    startDate: {
+      type: Date,
+    },
+
+    endDate: {
+      type: Date,
+    },
+
     banner: String,
 
     gallery: [String],

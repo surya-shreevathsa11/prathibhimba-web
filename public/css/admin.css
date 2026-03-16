@@ -659,6 +659,172 @@ body.admin--dashboard .admin__grid {
   background: #fff;
 }
 
+/* ── Events admin tab ─────────────────────────────────────────────────────── */
+.admin__events-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin__events-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+  gap: 1.5rem;
+}
+
+.admin__events-form-card,
+.admin__events-list-card {
+  background: #faf8f4;
+  border-radius: 10px;
+  border: 1px solid #e8e0d0;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 8px 24px rgba(39, 41, 50, 0.08);
+}
+
+.admin__events-title {
+  font-family: "Inter", sans-serif;
+  font-size: 1.1rem;
+  color: #2c2416;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.admin__events-subtitle {
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  color: #8a7a60;
+  margin: 0 0 1rem;
+}
+
+.admin__events-form .form__group + .form__group {
+  margin-top: 0.8rem;
+}
+
+.admin__events-form .admin__form-row--two {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.admin__events-form .admin__form-row--two .form__group {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.admin__events-form input[type="date"] {
+  background: #fff;
+}
+
+.admin__events-form textarea {
+  background: #fff;
+  color: #2c2416;
+  border: 1px solid #e0d8cc;
+}
+
+.admin__events-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.admin__events-actions .btn {
+  min-width: 140px;
+}
+
+.admin__events-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin__events-list-title {
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  color: #2c2416;
+  margin: 0;
+  font-weight: 600;
+}
+
+.admin__events-count {
+  font-size: 0.8rem;
+  font-family: "Inter", sans-serif;
+  color: #8a7a60;
+}
+
+.admin__events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin__events-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #eadfcb;
+}
+
+.admin__events-item-main {
+  min-width: 0;
+}
+
+.admin__events-item-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c2416;
+  margin: 0 0 0.15rem;
+}
+
+.admin__events-item-meta {
+  font-size: 0.78rem;
+  color: #8a7a60;
+  margin: 0 0 0.3rem;
+}
+
+.admin__events-item-desc {
+  font-size: 0.8rem;
+  color: #4f4332;
+  margin: 0;
+  max-height: 3.2em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin__events-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.admin__events-item-actions .btn {
+  font-size: 0.75rem;
+  padding-inline: 0.65rem;
+}
+
+.admin__events-empty {
+  font-size: 0.85rem;
+  color: #8a7a60;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .admin__events-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .admin__events-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 /* ── Seasonal pricing form ────────────────────────────────────────────────── */
 .admin__season-form {
   display: grid;

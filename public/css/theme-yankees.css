@@ -334,6 +334,12 @@ h1, h2, h3, h4 {
 .hero::before {
   background: linear-gradient(rgba(8, 60, 58, 0.75), rgba(8, 60, 58, 0.75));
 }
+
+/* Make hero media fully visible even with the main overlap */
+.hero.hero--entry {
+  min-height: calc(100vh + 3rem);
+  min-height: calc(100dvh + 3rem);
+}
 .hero__subtitle {
   color: var(--color-orange);
   font-family: 'Montserrat', sans-serif;
@@ -413,6 +419,100 @@ h1, h2, h3, h4 {
 }
 .section--events .divider {
   background: var(--color-teal);
+}
+
+/* ===== SECTION TRANSITIONS — liquid color sublimation (green → cream) ===== */
+/* Keep layout/spacing unchanged: transition layer overflows without margins. */
+.section--about,
+.section--sanctuary,
+.section--activities,
+.section--reviews {
+  position: relative;
+  z-index: 1;
+}
+
+.section--events,
+.section--gallery,
+.section--terms-cards,
+#directions.section {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+
+/* Shadow separation at green ↔ cream connections (subtle, premium) */
+.section--about,
+.section--sanctuary,
+.section--activities,
+.section--reviews {
+  box-shadow:
+    inset 0 -28px 44px -44px rgba(0, 0, 0, 0.55);
+}
+.section--events,
+.section--gallery,
+.section--terms-cards,
+#directions.section {
+  box-shadow:
+    inset 0 28px 44px -44px rgba(0, 0, 0, 0.5);
+}
+
+.section--events::before,
+.section--gallery::before,
+.section--terms-cards::before,
+#directions.section::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: clamp(160px, 18vw, 200px);
+  pointer-events: none;
+  transform: translateY(calc(-1 * clamp(100px, 12vw, 120px))) scaleY(1.3);
+  transform-origin: top;
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 60, 58, 1) 0%,
+    rgba(8, 60, 58, 0.85) 20%,
+    rgba(8, 60, 58, 0.55) 42%,
+    rgba(8, 60, 58, 0.25) 62%,
+    rgba(230, 226, 211, 0.7) 82%,
+    rgba(230, 226, 211, 1) 100%
+  );
+  filter: blur(28px);
+  z-index: 3;
+}
+
+.section--events::after,
+.section--gallery::after,
+.section--terms-cards::after,
+#directions.section::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: clamp(160px, 18vw, 200px);
+  pointer-events: none;
+  transform: translateY(calc(-1 * clamp(100px, 12vw, 120px))) scaleY(1.25);
+  transform-origin: top;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.05) 35%,
+    transparent 70%
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.42;
+  filter: blur(12px);
+  z-index: 4;
+}
+
+.section--events > *,
+.section--gallery > *,
+.section--terms-cards > *,
+#directions.section > * {
+  position: relative;
+  z-index: 5;
 }
 /* Sanctuary (Rooms): light green */
 .section--sanctuary {
@@ -777,6 +877,22 @@ h1, h2, h3, h4 {
 }
 .footer__line {
   background: var(--color-orange);
+}
+
+/* Compact footer: keep VARA at left, center brand block to full viewport */
+@media (min-width: 768px) {
+  .footer__wrap--compact {
+    justify-content: flex-start;
+  }
+  .footer__wrap--compact .footer__brand-block {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    flex: 0 0 auto;
+  }
+  .footer__wrap--compact .footer__copyright {
+    width: auto;
+  }
 }
 
 /* ===== MODALS ===== */

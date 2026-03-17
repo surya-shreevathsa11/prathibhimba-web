@@ -15,7 +15,7 @@ export const rooms = {
 
   R2: {
     id: "02",
-    name: "Rosewood retreat",
+    name: "Rosewood Retreat",
     type: "Room",
     description: "Sun-drenched citrus palette",
     price: 3500,

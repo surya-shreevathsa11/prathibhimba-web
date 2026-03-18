@@ -332,7 +332,8 @@ h1, h2, h3, h4 {
   background: var(--color-teal);
 }
 .hero::before {
-  background: linear-gradient(rgba(8, 60, 58, 0.75), rgba(8, 60, 58, 0.75));
+  /* Remove green tint from hero media */
+  background: rgba(0, 0, 0, 0.18) !important;
 }
 
 /* Make hero media fully visible even with the main overlap */
@@ -372,14 +373,20 @@ h1, h2, h3, h4 {
 .hero__video {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   overflow: hidden;
 }
 .hero__video video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: saturate(0.85) brightness(0.9);
+  /* Show video original colors (no teal tint) */
+  filter: none !important;
+}
+
+/* Once the drone video is playing, keep original video colors */
+.hero--video-ready .hero__video video {
+  filter: none;
 }
 
 /* ===== SECTIONS — alternate teal #083C3A / emerald #0F4D47 / cream ===== */

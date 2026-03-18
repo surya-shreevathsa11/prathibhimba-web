@@ -329,9 +329,9 @@ h4 {
 }
 .nav__logo-img {
   display: block;
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
   border-radius: 50%;
 }
 .nav__links {
@@ -581,6 +581,8 @@ body[data-auth-disabled] [data-auth-ui] {
   position: absolute;
   inset: 0;
   z-index: 0;
+  opacity: 0;
+  transition: opacity 0.35s ease;
 }
 .hero__slide {
   position: absolute;
@@ -598,6 +600,20 @@ body[data-auth-disabled] [data-auth-ui] {
   opacity: 1;
   transform: scale(1.02);
 }
+
+/* When the drone video is ready, hide the fallback random slide images */
+.hero--video-ready .hero__slides {
+  opacity: 0;
+}
+
+/* If video fails, show fallback slides (prevents a blank hero) */
+.hero--video-failed .hero__slides {
+  opacity: 1;
+}
+.hero--video-ready .hero__slide {
+  opacity: 0 !important;
+  transform: scale(1.06) !important;
+}
 .hero::before {
   content: "";
   position: absolute;
@@ -605,6 +621,11 @@ body[data-auth-disabled] [data-auth-ui] {
   background: var(--overlay-dark);
   pointer-events: none;
   z-index: 1;
+}
+
+/* When the drone video is ready, remove the green-tinted overlay so the video shows original colors */
+.hero--video-ready::before {
+  background: rgba(0, 0, 0, 0.18);
 }
 .hero__content {
   position: relative;
@@ -1396,6 +1417,7 @@ main {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  align-self: stretch;
   background: var(--color-urban-white);
   border-radius: 0.75rem;
   padding: 1.5rem 1.25rem;
@@ -1416,7 +1438,10 @@ main {
   list-style: disc;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
+  transition: none;
+  will-change: auto;
 }
 .terms-card li {
   font-size: 0.85rem;
@@ -1424,6 +1449,10 @@ main {
   line-height: 1.5;
   margin-bottom: 0.4rem;
 }
+
+/* (no display:none) Reveal is purely max-height for smooth pulldown */
+
+/* Reveal is per-card hover (not whole section) for smoother, user-friendly behavior */
 .terms-card a {
   color: var(--color-burnt-copper);
   text-decoration: underline;
@@ -1847,14 +1876,15 @@ main {
 }
 .footer__logo-img {
   display: block;
-  width: 52px;
-  height: 52px;
-  object-fit: contain;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
   border-radius: 50%;
 }
 .footer--compact .footer__logo-img {
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
 }
 .footer__tagline {
   font-size: 0.85rem;

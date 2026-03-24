@@ -1280,15 +1280,18 @@ main {
   box-shadow: 0 16px 40px var(--shadow-soft);
 }
 .testimonial__text {
-  font-family: "Playfair Display", serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 1.05rem;
-  font-style: italic;
+  font-style: normal;
+  font-weight: 400;
   color: var(--text-primary);
   margin-bottom: 1rem;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 .testimonial__author {
+  font-family: "Montserrat", sans-serif;
   font-size: 0.78rem;
+  font-weight: 500;
   color: var(--color-burnt-copper);
   letter-spacing: 0.08em;
 }
@@ -1323,16 +1326,19 @@ main {
 }
 
 .review-card__text {
-  font-family: "Playfair Display", serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 1rem;
-  font-style: italic;
+  font-style: normal;
+  font-weight: 400;
   color: var(--text-primary);
   line-height: 1.65;
   margin-bottom: 1rem;
 }
 
 .review-card__author {
+  font-family: "Montserrat", sans-serif;
   font-size: 0.8rem;
+  font-weight: 500;
   color: var(--color-burnt-copper);
   letter-spacing: 0.06em;
   margin: 0;

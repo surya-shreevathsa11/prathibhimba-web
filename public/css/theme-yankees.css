@@ -353,14 +353,36 @@ h1, h2, h3, h4 {
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 1.05;
-  color: var(--text-heading-on-dark);
+  color: #dcc9a4;
+  text-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.88),
+    0 2px 18px rgba(8, 36, 34, 0.75);
 }
 .hero__desc {
   max-width: 480px;
   font-family: 'Montserrat', sans-serif;
   font-size: 1rem;
   line-height: 1.75;
-  color: var(--text-on-dark);
+  color: #c4b08a;
+  /* Thick outline on the glyphs (not a box border) for video contrast */
+  text-shadow:
+    -3px 0 0 rgba(8, 44, 42, 0.92),
+    3px 0 0 rgba(8, 44, 42, 0.92),
+    0 -3px 0 rgba(8, 44, 42, 0.92),
+    0 3px 0 rgba(8, 44, 42, 0.92),
+    -2px -2px 0 rgba(8, 44, 42, 0.88),
+    2px -2px 0 rgba(8, 44, 42, 0.88),
+    -2px 2px 0 rgba(8, 44, 42, 0.88),
+    2px 2px 0 rgba(8, 44, 42, 0.88),
+    -1px -1px 0 rgba(0, 0, 0, 0.75),
+    1px -1px 0 rgba(0, 0, 0, 0.75),
+    -1px 1px 0 rgba(0, 0, 0, 0.75),
+    1px 1px 0 rgba(0, 0, 0, 0.75),
+    -1px 0 0 rgba(0, 0, 0, 0.65),
+    1px 0 0 rgba(0, 0, 0, 0.65),
+    0 -1px 0 rgba(0, 0, 0, 0.65),
+    0 1px 0 rgba(0, 0, 0, 0.65),
+    0 2px 14px rgba(8, 32, 30, 0.55);
 }
 .hero__cta {
   justify-content: center;
@@ -428,14 +450,15 @@ h1, h2, h3, h4 {
   background: var(--color-teal);
 }
 
-/* ===== SECTION TRANSITIONS — liquid color sublimation (green → cream) ===== */
-/* Keep layout/spacing unchanged: transition layer overflows without margins. */
+/* ===== SECTION TRANSITIONS — soft sublimation (teal ↔ cream + gold hint) ===== */
+/* Cream sits above teal (z-index) so top + bottom blends live on cream sections. */
 .section--about,
 .section--sanctuary,
 .section--activities,
 .section--reviews {
   position: relative;
   z-index: 1;
+  overflow: visible;
 }
 
 .section--events,
@@ -447,22 +470,21 @@ h1, h2, h3, h4 {
   overflow: visible;
 }
 
-/* Shadow separation at green ↔ cream connections (subtle, premium) */
+/* Inset shadows: very soft so they don’t read as a hard line */
 .section--about,
 .section--sanctuary,
 .section--activities,
 .section--reviews {
-  box-shadow:
-    inset 0 -28px 44px -44px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 -36px 48px -48px rgba(0, 0, 0, 0.22);
 }
 .section--events,
 .section--gallery,
 .section--terms-cards,
 #directions.section {
-  box-shadow:
-    inset 0 28px 44px -44px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 36px 48px -48px rgba(0, 0, 0, 0.18);
 }
 
+/* Top of cream block: blur from teal above → cream (sublimation into this section) */
 .section--events::before,
 .section--gallery::before,
 .section--terms-cards::before,
@@ -472,23 +494,24 @@ h1, h2, h3, h4 {
   left: 0;
   top: 0;
   width: 100%;
-  height: clamp(160px, 18vw, 200px);
+  height: clamp(180px, 22vw, 240px);
   pointer-events: none;
-  transform: translateY(calc(-1 * clamp(100px, 12vw, 120px))) scaleY(1.3);
+  transform: translateY(calc(-1 * clamp(110px, 14vw, 140px))) scaleY(1.35);
   transform-origin: top;
   background: linear-gradient(
     to bottom,
     rgba(8, 60, 58, 1) 0%,
-    rgba(8, 60, 58, 0.85) 20%,
-    rgba(8, 60, 58, 0.55) 42%,
-    rgba(8, 60, 58, 0.25) 62%,
-    rgba(230, 226, 211, 0.7) 82%,
+    rgba(8, 60, 58, 0.78) 14%,
+    rgba(15, 77, 71, 0.42) 32%,
+    rgba(200, 169, 106, 0.14) 52%,
+    rgba(230, 226, 211, 0.55) 78%,
     rgba(230, 226, 211, 1) 100%
   );
-  filter: blur(28px);
+  filter: blur(32px);
   z-index: 3;
 }
 
+/* Bottom of cream block: blur from cream → teal below (was incorrectly duplicated at top) */
 .section--events::after,
 .section--gallery::after,
 .section--terms-cards::after,
@@ -496,22 +519,24 @@ h1, h2, h3, h4 {
   content: "";
   position: absolute;
   left: 0;
-  top: 0;
+  bottom: 0;
+  top: auto;
   width: 100%;
-  height: clamp(160px, 18vw, 200px);
+  height: clamp(180px, 22vw, 240px);
   pointer-events: none;
-  transform: translateY(calc(-1 * clamp(100px, 12vw, 120px))) scaleY(1.25);
-  transform-origin: top;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 0, 0, 0.12) 0%,
-    rgba(0, 0, 0, 0.05) 35%,
-    transparent 70%
+  transform: translateY(clamp(90px, 12vw, 130px)) scaleY(1.3);
+  transform-origin: bottom;
+  background: linear-gradient(
+    to bottom,
+    rgba(230, 226, 211, 1) 0%,
+    rgba(230, 226, 211, 0.72) 18%,
+    rgba(200, 169, 106, 0.12) 38%,
+    rgba(8, 60, 58, 0.38) 72%,
+    rgba(8, 60, 58, 0.92) 92%,
+    rgba(8, 60, 58, 1) 100%
   );
-  mix-blend-mode: multiply;
-  opacity: 0.42;
-  filter: blur(12px);
-  z-index: 4;
+  filter: blur(32px);
+  z-index: 3;
 }
 
 .section--events > *,
@@ -829,12 +854,15 @@ h1, h2, h3, h4 {
   box-shadow: 0 12px 36px rgba(5, 56, 39, 0.1);
 }
 .testimonial__text {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Montserrat', sans-serif;
+  font-style: normal;
+  font-weight: 400;
   color: var(--text-primary);
 }
 .testimonial__author {
   color: var(--color-orange);
   font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
 }
 .section:not(.section--alt) .testimonial__text {
   color: var(--text-on-dark);

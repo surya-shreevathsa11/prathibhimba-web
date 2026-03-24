@@ -769,11 +769,22 @@
     var brochureBtn = document.querySelector(".events__brochure-btn");
     if (!sectionEl || !imgEl || !prevBtn || !nextBtn || !titleEl || !subtitleEl || textEls.length < 1) return;
 
-    function hideEventsSection() {
-      sectionEl.style.display = "none";
-      var navLink = document.querySelector('.nav__links a[href="#events"]');
-      if (navLink && navLink.parentElement) {
-        navLink.parentElement.style.display = "none";
+    function showEventsEmptyState() {
+      if (subtitleEl) {
+        subtitleEl.textContent = "What We Offer";
+        subtitleEl.style.display = "";
+      }
+      titleEl.textContent = "Events at Prathibhimba";
+      if (textEls[0]) {
+        textEls[0].textContent = "Currently no events available";
+        textEls[0].style.display = "";
+      }
+      if (textEls[1]) textEls[1].style.display = "none";
+      prevBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      if (brochureBtn) {
+        brochureBtn.style.display = "";
+        brochureBtn.href = "/brochure.pdf";
       }
     }
 
@@ -784,7 +795,7 @@
       .then(function (data) {
         var raw = (data && (data.data || data.events)) || [];
         if (!Array.isArray(raw) || raw.length === 0) {
-          hideEventsSection();
+          showEventsEmptyState();
           return;
         }
 

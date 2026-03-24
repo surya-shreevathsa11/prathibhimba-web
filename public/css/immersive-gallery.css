@@ -5,11 +5,16 @@
 .section--gallery {
   position: relative;
   padding: 6rem 0 7rem;
-  overflow: hidden;
+  /* visible so theme-yankees section blur transitions aren’t clipped */
+  overflow: visible;
   background: var(--color-cream, #E6E2D3);
 }
 
-.section--gallery::before {
+/* Decorative gold hairline (was ::before on section — freed for teal↔cream blend in theme-yankees.css) */
+.section--gallery > .container:first-of-type {
+  position: relative;
+}
+.section--gallery > .container:first-of-type::before {
   content: '';
   position: absolute;
   top: 0;
@@ -23,6 +28,7 @@
     rgba(200, 169, 106, 0.35) 50%,
     transparent 100%
   );
+  z-index: 6;
 }
 
 /* ----- Intro ----- */

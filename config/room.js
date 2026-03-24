@@ -3,7 +3,8 @@ export const rooms = {
     id: "01",
     name: "Silver Oak Haven",
     type: "Room",
-    description: "Warm tones with olive wood accents",
+    description:
+      "A comfortable private room for 2 adults and 1 child, designed for a relaxed and restful stay.",
     price: 3500,
     capacity: {
       minAdults: 1,
@@ -17,7 +18,8 @@ export const rooms = {
     id: "02",
     name: "Rosewood Retreat",
     type: "Room",
-    description: "Sun-drenched citrus palette",
+    description:
+      "A cozy private room ideal for 2 adults and 1 child, offering a calm and easy stay experience.",
     price: 3500,
     capacity: {
       minAdults: 1,
@@ -31,12 +33,13 @@ export const rooms = {
     id: "03",
     name: "Banyan House",
     type: "Dormitory",
-    description: "Earthy sage and linen textures",
+    description:
+      "A spacious dorm for up to 12 guests, perfect for sharing stories, laughter, and unforgettable memories together.",
     price: 10000,
     capacity: {
       minAdults: 1,
       maxAdults: 7,
-      maxChildren: 5,
+      maxChildren: 5,//no limit for kids and adults (total 12)
       maxTotal: 12,
     },
   },
@@ -45,7 +48,8 @@ export const rooms = {
     id: "04",
     name: "Rain Tree Grove",
     type: "Dormitory",
-    description: "Rich clay and rustic warmth",
+    description:
+      "A comfortable dorm for up to 12 guests, made for group stays filled with conversations, bonding, and lasting memories.",
     price: 10000,
     capacity: {
       minAdults: 1,

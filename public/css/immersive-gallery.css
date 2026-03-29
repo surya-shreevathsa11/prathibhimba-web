@@ -10,6 +10,12 @@
   background: var(--color-cream, #E6E2D3);
 }
 
+/* theme-yankees paints a blurred cream→teal band at the section bottom (::after).
+   That reads as a mist/fog across the lower part of gallery cards — turn it off here only. */
+.section--gallery::after {
+  display: none;
+}
+
 /* Decorative gold hairline (was ::before on section — freed for teal↔cream blend in theme-yankees.css) */
 .section--gallery > .container:first-of-type {
   position: relative;
@@ -123,8 +129,9 @@
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* Match section so no dark band shows at image edges; plain photo only */
+  background: var(--color-cream, #E6E2D3);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
   transition: box-shadow 0.35s ease;
 }
 
@@ -148,52 +155,6 @@
 
 .gallery-reel__slide:hover .gallery-reel__img-wrap img {
   transform: scale(1.05);
-}
-
-/* Overlay — translucent glass at bottom */
-.gallery-reel__overlay {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 1.5rem 1.25rem;
-  background: rgba(15, 77, 71, 0.30);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: none;
-  border-radius: 0 0 16px 16px;
-  pointer-events: none;
-}
-
-.gallery-reel__overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(8, 60, 58, 0.5) 0%, transparent 60%);
-  pointer-events: none;
-  border-radius: 0 0 16px 16px;
-}
-
-.gallery-reel__title {
-  position: relative;
-  z-index: 1;
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-heading-on-dark, #E6E2D3);
-  display: block;
-  margin-bottom: 0.2rem;
-}
-
-.gallery-reel__meta {
-  position: relative;
-  z-index: 1;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-on-dark, #D8D6C8);
 }
 
 /* ----- Nav buttons ----- */
@@ -274,14 +235,6 @@
   .gallery-reel__slide {
     flex: 0 0 92vw;
     width: 92vw;
-  }
-
-  .gallery-reel__overlay {
-    padding: 1.25rem 1rem;
-  }
-
-  .gallery-reel__title {
-    font-size: 1.05rem;
   }
 
   .gallery-intro {

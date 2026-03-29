@@ -364,25 +364,25 @@ h1, h2, h3, h4 {
   font-size: 1rem;
   line-height: 1.75;
   color: #c4b08a;
-  /* Thick outline on the glyphs (not a box border) for video contrast */
+  /* Thick outline on the glyphs (not a box border) for video contrast — slightly lighter halos, still readable on video */
   text-shadow:
-    -3px 0 0 rgba(8, 44, 42, 0.92),
-    3px 0 0 rgba(8, 44, 42, 0.92),
-    0 -3px 0 rgba(8, 44, 42, 0.92),
-    0 3px 0 rgba(8, 44, 42, 0.92),
-    -2px -2px 0 rgba(8, 44, 42, 0.88),
-    2px -2px 0 rgba(8, 44, 42, 0.88),
-    -2px 2px 0 rgba(8, 44, 42, 0.88),
-    2px 2px 0 rgba(8, 44, 42, 0.88),
-    -1px -1px 0 rgba(0, 0, 0, 0.75),
-    1px -1px 0 rgba(0, 0, 0, 0.75),
-    -1px 1px 0 rgba(0, 0, 0, 0.75),
-    1px 1px 0 rgba(0, 0, 0, 0.75),
-    -1px 0 0 rgba(0, 0, 0, 0.65),
-    1px 0 0 rgba(0, 0, 0, 0.65),
-    0 -1px 0 rgba(0, 0, 0, 0.65),
-    0 1px 0 rgba(0, 0, 0, 0.65),
-    0 2px 14px rgba(8, 32, 30, 0.55);
+    -3px 0 0 rgba(8, 44, 42, 0.64),
+    3px 0 0 rgba(8, 44, 42, 0.64),
+    0 -3px 0 rgba(8, 44, 42, 0.64),
+    0 3px 0 rgba(8, 44, 42, 0.64),
+    -2px -2px 0 rgba(8, 44, 42, 0.56),
+    2px -2px 0 rgba(8, 44, 42, 0.56),
+    -2px 2px 0 rgba(8, 44, 42, 0.56),
+    2px 2px 0 rgba(8, 44, 42, 0.56),
+    -1px -1px 0 rgba(0, 0, 0, 0.42),
+    1px -1px 0 rgba(0, 0, 0, 0.42),
+    -1px 1px 0 rgba(0, 0, 0, 0.42),
+    1px 1px 0 rgba(0, 0, 0, 0.42),
+    -1px 0 0 rgba(0, 0, 0, 0.36),
+    1px 0 0 rgba(0, 0, 0, 0.36),
+    0 -1px 0 rgba(0, 0, 0, 0.36),
+    0 1px 0 rgba(0, 0, 0, 0.36),
+    0 2px 14px rgba(8, 32, 30, 0.28);
 }
 .hero__cta {
   justify-content: center;
@@ -511,10 +511,9 @@ h1, h2, h3, h4 {
   z-index: 3;
 }
 
-/* Bottom of cream block: blur from cream → teal below (was incorrectly duplicated at top) */
+/* Bottom of cream block: blur from cream → teal below (omit terms: last block before footer — avoids dark blur over footer) */
 .section--events::after,
 .section--gallery::after,
-.section--terms-cards::after,
 #directions.section::after {
   content: "";
   position: absolute;
@@ -869,7 +868,10 @@ h1, h2, h3, h4 {
 }
 
 /* ===== FOOTER — Green ===== */
+/* Stack above main (z-index: 2) so section transition layers never paint over the footer */
 .footer {
+  position: relative;
+  z-index: 3;
   background: var(--color-green);
   border-top: 1px solid rgba(252, 199, 107, 0.25);
   padding: var(--sp-4) 0 var(--sp-2);

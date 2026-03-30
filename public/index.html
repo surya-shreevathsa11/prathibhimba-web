@@ -542,11 +542,58 @@
     </footer>
 
     <!-- Floating chatbot (above WhatsApp) -->
-    <button type="button" class="chatbot-float" id="chatbotFloat" aria-label="Open chatbot">
+    <button
+      type="button"
+      class="chatbot-float"
+      id="chatbotFloat"
+      aria-label="Open chatbot"
+      aria-controls="chatbotWindow"
+      aria-expanded="false"
+    >
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
       </svg>
     </button>
+
+    <!-- Chatbot window (bottom-right, not full-screen) -->
+    <div
+      class="chatbot-window"
+      id="chatbotWindow"
+      role="dialog"
+      aria-modal="false"
+      aria-label="Shruthi chatbot"
+      aria-hidden="true"
+    >
+      <div class="chatbot-window__header">
+        <div class="chatbot-window__title">Shruthi</div>
+        <button
+          type="button"
+          class="chatbot-window__close"
+          id="chatbotCloseBtn"
+          aria-label="Close chatbot"
+        >
+          &times;
+        </button>
+      </div>
+
+      <div class="chatbot__messages" id="chatbotMessages" aria-live="polite"></div>
+
+      <div class="chatbot__composer">
+        <textarea
+          id="chatbotInput"
+          class="chatbot__input"
+          rows="1"
+          placeholder="Ask about rooms, prices, availability..."
+        ></textarea>
+        <button type="button" class="chatbot__send-btn" id="chatbotSendBtn" aria-label="Send message">
+          Send
+        </button>
+      </div>
+
+      <p class="chatbot__hint">
+        Tip: Try "Is Banyan House available on 2026-04-10 to 2026-04-12?"
+      </p>
+    </div>
 
     <!-- Floating WhatsApp (fixed bottom-right) -->
     <a

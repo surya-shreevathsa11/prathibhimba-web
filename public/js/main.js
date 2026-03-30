@@ -1057,10 +1057,159 @@
     requestAnimationFrame(tick);
   }
 
+  function setupChatbotWidget() {
+    var floatBtn = $("#chatbotFloat");
+    var messagesEl = $("#chatbotMessages");
+    var inputEl = $("#chatbotInput");
+    var sendBtn = $("#chatbotSendBtn");
+    var windowEl = $("#chatbotWindow");
+    var closeBtn = $("#chatbotCloseBtn");
+
+    if (!floatBtn || !messagesEl || !inputEl || !sendBtn || !windowEl) return;
+
+    var chatbotHistory = [];
+    var isSending = false;
+    var typingEl = null;
+
+    function setTyping(isTyping) {
+      if (!messagesEl) return;
+      if (isTyping) {
+        if (typingEl) return;
+        typingEl = document.createElement("div");
+        typingEl.className =
+          "chatbot__bubble chatbot__bubble--model chatbot__bubble--typing";
+        typingEl.textContent = "Typing...";
+        messagesEl.appendChild(typingEl);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return;
+      }
+      if (typingEl && typingEl.parentNode) typingEl.parentNode.removeChild(typingEl);
+      typingEl = null;
+    }
+
+    function addBubble(text, role) {
+      var bubble = document.createElement("div");
+      bubble.className =
+        "chatbot__bubble " +
+        (role === "user" ? "chatbot__bubble--user" : "chatbot__bubble--model");
+      // escapeHtml ensures no HTML injection; keep newlines readable
+      var escaped = escapeHtml(String(text || ""));
+      // Minimal markdown rendering:
+      // - **bold**
+      // - bullet lines starting with "* "
+      escaped = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+      escaped = escaped.replace(/^\s*\*\s+/gm, "&#8226; ");
+      bubble.innerHTML = escaped.replace(/\n/g, "<br>");
+      messagesEl.appendChild(bubble);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function ensureGreetingIfEmpty() {
+      if (messagesEl.childElementCount > 0) return;
+      addBubble(
+        "Welcome to Prathibhimba Stays! I’m Shruthi, your assistant. How can I assist you with your stay today?",
+        "model"
+      );
+    }
+
+    async function sendMessage() {
+      if (isSending) return;
+      if (!inputEl) return;
+      var text = String(inputEl.value || "").trim();
+      if (!text) return;
+
+      isSending = true;
+      try {
+        inputEl.value = "";
+        addBubble(text, "user");
+        setTyping(true);
+
+        var res = await fetch("/api/chat/chatbot", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: text,
+            history: chatbotHistory,
+          }),
+        });
+
+        var data = await res.json().catch(function () {
+          return {};
+        });
+
+        if (!res.ok) {
+          var msg =
+            data && data.text ? data.text : "Sorry, I couldn't reach the concierge right now.";
+          throw new Error(msg);
+        }
+
+        var reply = data && data.text ? data.text : "";
+        if (!reply) reply = "Sorry, I couldn't generate a response. Please try again.";
+
+        // Preserve server-managed conversation history (best effort)
+        if (Array.isArray(data.history)) chatbotHistory = data.history;
+
+        setTyping(false);
+        addBubble(reply, "model");
+      } catch (err) {
+        console.error("Chatbot frontend error:", err);
+        setTyping(false);
+        addBubble(
+          "Sorry, something went wrong while getting that info. Please try again in a moment.",
+          "model"
+        );
+      } finally {
+        isSending = false;
+      }
+    }
+
+    floatBtn.addEventListener("click", function () {
+      var isOpen = windowEl.classList.toggle("is-open");
+      if (isOpen) floatBtn.style.display = "none";
+      else floatBtn.style.display = "";
+      floatBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      ensureGreetingIfEmpty();
+      setTimeout(function () {
+        try {
+          inputEl.focus();
+        } catch (_) {}
+      }, 50);
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function () {
+        windowEl.classList.remove("is-open");
+        floatBtn.setAttribute("aria-expanded", "false");
+        floatBtn.style.display = "";
+      });
+    }
+
+    sendBtn.addEventListener("click", function () {
+      sendMessage();
+    });
+
+    inputEl.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      if (!windowEl.classList.contains("is-open")) return;
+      windowEl.classList.remove("is-open");
+      floatBtn.setAttribute("aria-expanded", "false");
+      floatBtn.style.display = "";
+    });
+  }
+
   // --- Init ---
   setupDirections();
   setupHeroSlider();
   setupBlobCursor();
+  setupChatbotWidget();
   checkAuth(function (user) {
     if (user) {
       try {

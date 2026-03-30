@@ -1067,6 +1067,13 @@
 
     if (!floatBtn || !messagesEl || !inputEl || !sendBtn || !windowEl) return;
 
+    // Prevent Lenis / page smooth-scroll from hijacking scroll inside chatbot
+    try {
+      windowEl.setAttribute("data-lenis-prevent", "true");
+      messagesEl.setAttribute("data-lenis-prevent", "true");
+      inputEl.setAttribute("data-lenis-prevent", "true");
+    } catch (_) {}
+
     var chatbotHistory = [];
     var isSending = false;
     var typingEl = null;
@@ -1184,6 +1191,47 @@
         floatBtn.style.display = "";
       });
     }
+
+    // Native scroll inside chat messages only (no Lenis for chatbot).
+    // Stop scroll from bubbling to the page, but do NOT preventDefault (keeps native scroll working).
+    (function enableChatbotNativeScroll() {
+      if (!messagesEl || !messagesEl.addEventListener) return;
+
+      function isScrollable() {
+        return messagesEl.scrollHeight > messagesEl.clientHeight + 1;
+      }
+
+      function shouldHandle(target) {
+        try {
+          if (!target) return false;
+          if (target === inputEl || (target.closest && target.closest(".chatbot__composer"))) {
+            return false;
+          }
+          return true;
+        } catch (_) {
+          return true;
+        }
+      }
+
+      messagesEl.addEventListener(
+        "wheel",
+        function (e) {
+          if (!shouldHandle(e.target)) return;
+          if (!isScrollable()) return;
+          e.stopPropagation();
+        },
+        { passive: true, capture: true }
+      );
+      messagesEl.addEventListener(
+        "touchmove",
+        function (e) {
+          if (!shouldHandle(e.target)) return;
+          if (!isScrollable()) return;
+          e.stopPropagation();
+        },
+        { passive: true, capture: true }
+      );
+    })();
 
     sendBtn.addEventListener("click", function () {
       sendMessage();

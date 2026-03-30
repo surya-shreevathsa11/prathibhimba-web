@@ -11,12 +11,25 @@
   function initLenis() {
     if (typeof Lenis === "undefined") return null;
     try {
+      // Mobile/iPad should feel less "twitchy" than desktop
+      var narrow =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(max-width: 1024px)").matches;
       var lenis = new Lenis({
-        duration: 0.8,
         smoothWheel: true,
         smoothTouch: true,
-        touchMultiplier: 2,
+        duration: narrow ? 1.08 : 0.8,
+        wheelMultiplier: 1,
+        touchMultiplier: narrow ? 0.85 : 2,
         infinite: false,
+        // Disable Lenis only for the chatbot so it uses native scrolling
+        prevent: function (node) {
+          try {
+            return Boolean(node && node.closest && node.closest("#chatbotWindow"));
+          } catch (_) {
+            return false;
+          }
+        },
       });
       document.documentElement.classList.add("lenis", "lenis-smooth");
 

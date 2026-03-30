@@ -1874,8 +1874,6 @@ main {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
 }
-.footer__col { }
-.footer__col--brand { }
 .footer__brand {
   margin-bottom: 0.5rem;
   display: flex;
@@ -2538,16 +2536,25 @@ body.page-cart .nav {
     position: absolute;
     top: 100%;
     left: 0;
+    right: 0;
     width: 100%;
+    box-sizing: border-box;
     background: var(--color-obsidian);
     flex-direction: column;
     padding: 1.5rem;
     padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
     gap: 0.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: center;
   }
   .nav__links.open {
     display: flex;
+  }
+  .nav__links.open a {
+    text-align: center;
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
   .nav__toggle {
     display: flex;
@@ -2555,6 +2562,12 @@ body.page-cart .nav {
   .nav__right {
     margin-left: 0;
     padding-left: 0.75rem;
+  }
+
+  /* Hero: full-bleed so video background fills width on mobile */
+  .hero {
+    width: 100%;
+    min-height: 100svh;
   }
   .cart-page {
     padding: 3rem 0 2.5rem;

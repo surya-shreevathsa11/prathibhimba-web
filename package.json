@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@studio-freight/lenis": "^1.0.42",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.9.0",

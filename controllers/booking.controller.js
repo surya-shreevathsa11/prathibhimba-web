@@ -58,6 +58,10 @@ async function calculateBookingPrice(roomId, checkIn, checkOut) {
   };
 }
 
+// Expose the existing pricing logic for the chatbot route.
+// This keeps the dynamic per-date pricing consistent across the app.
+export const calculateBookingPriceForChatbot = calculateBookingPrice;
+
 export const checkAvailability = async (booking) => {
   try {
     const { roomId } = booking;

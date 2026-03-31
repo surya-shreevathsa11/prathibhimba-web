@@ -2216,6 +2216,9 @@ main {
   color: var(--text-primary);
   text-align: left;
 }
+.chatbot__bubble--auth-prompt {
+  max-width: 92%;
+}
 .chatbot__bubble--typing {
   /* darker typing indicator */
   background: rgba(15, 113, 115, 0.16) !important;

@@ -1,5 +1,7 @@
 (function () {
   let currentUser = null;
+  /** Set by setupChatbotWidget; called from updateAuthUI when auth changes */
+  var refreshChatbotAuthUI = null;
   /** Room limit: set from backend after validating /api/booking/rooms response. Only these room IDs are allowed for cart/booking. */
   let validRoomIdsFromBackend = [];
 
@@ -300,6 +302,7 @@
       if (navProfileAvatar) navProfileAvatar.src = DEFAULT_AVATAR_URL;
       if (navProfileDropdown) navProfileDropdown.classList.remove("is-open");
     }
+    if (typeof refreshChatbotAuthUI === "function") refreshChatbotAuthUI();
   }
 
   $("#authBtn").addEventListener("click", () => {
@@ -1106,6 +1109,13 @@
     var sendBtn = $("#chatbotSendBtn");
     var windowEl = $("#chatbotWindow");
     var closeBtn = $("#chatbotCloseBtn");
+    var composerEl = $("#chatbotComposer");
+    var hintEl = $("#chatbotHint");
+
+    var MSG_SIGNIN =
+      "Welcome to Prathibhimba Stays! I'm Shruthi, your assistant. Please sign in to chat with me.";
+    var MSG_WELCOME =
+      "Welcome to Prathibhimba Stays! I'm Shruthi, your assistant. How can I assist you with your stay today?";
 
     if (!floatBtn || !messagesEl || !inputEl || !sendBtn || !windowEl) return;
 
@@ -1136,11 +1146,12 @@
       typingEl = null;
     }
 
-    function addBubble(text, role) {
+    function addBubble(text, role, extraClass) {
       var bubble = document.createElement("div");
       bubble.className =
         "chatbot__bubble " +
         (role === "user" ? "chatbot__bubble--user" : "chatbot__bubble--model");
+      if (extraClass) bubble.classList.add(extraClass);
       // escapeHtml ensures no HTML injection; keep newlines readable
       var escaped = escapeHtml(String(text || ""));
       // Minimal markdown rendering:
@@ -1153,16 +1164,42 @@
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    function ensureGreetingIfEmpty() {
-      if (messagesEl.childElementCount > 0) return;
-      addBubble(
-        "Welcome to Prathibhimba Stays! I’m Shruthi, your assistant. How can I assist you with your stay today?",
-        "model"
-      );
+    function applyChatbotAuthUI() {
+      if (!messagesEl || !windowEl) return;
+
+      if (!currentUser) {
+        chatbotHistory = [];
+        messagesEl.innerHTML = "";
+        addBubble(MSG_SIGNIN, "model", "chatbot__bubble--auth-prompt");
+        if (composerEl) composerEl.style.display = "none";
+        if (hintEl) hintEl.style.display = "none";
+        if (inputEl) {
+          inputEl.disabled = true;
+          inputEl.value = "";
+        }
+        if (sendBtn) sendBtn.disabled = true;
+        return;
+      }
+
+      if (composerEl) composerEl.style.display = "";
+      if (hintEl) hintEl.style.display = "";
+      if (inputEl) inputEl.disabled = false;
+      if (sendBtn) sendBtn.disabled = false;
+
+      var authPrompt = messagesEl.querySelector(".chatbot__bubble--auth-prompt");
+      if (authPrompt) {
+        messagesEl.innerHTML = "";
+        addBubble(MSG_WELCOME, "model");
+      } else if (messagesEl.childElementCount === 0) {
+        addBubble(MSG_WELCOME, "model");
+      }
     }
+
+    refreshChatbotAuthUI = applyChatbotAuthUI;
 
     async function sendMessage() {
       if (isSending) return;
+      if (!currentUser) return;
       if (!inputEl) return;
       var text = String(inputEl.value || "").trim();
       if (!text) return;
@@ -1186,6 +1223,13 @@
         var data = await res.json().catch(function () {
           return {};
         });
+
+        if (res.status === 401) {
+          currentUser = null;
+          updateAuthUI();
+          applyChatbotAuthUI();
+          return;
+        }
 
         if (!res.ok) {
           var msg =
@@ -1218,10 +1262,10 @@
       if (isOpen) floatBtn.style.display = "none";
       else floatBtn.style.display = "";
       floatBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      ensureGreetingIfEmpty();
+      applyChatbotAuthUI();
       setTimeout(function () {
         try {
-          inputEl.focus();
+          if (currentUser && inputEl && !inputEl.disabled) inputEl.focus();
         } catch (_) {}
       }, 50);
     });

@@ -894,12 +894,15 @@ main {
 .room-card {
   display: flex;
   flex-direction: column;
-  background: var(--color-urban-white);
+  background: var(--color-cream, #E6E2D3) !important;
+  background-image: none !important;
   padding: 1.1rem 1.1rem 1.5rem;
   text-align: left;
   border-radius: 1rem;
   border: 1px solid var(--border-light);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: none !important;
+  /* +~1cm visual height (device-dependent); keeps layout stable */
+  min-height: 520px;
   transition:
     box-shadow 0.3s,
     border-color 0.3s;
@@ -919,14 +922,18 @@ main {
   display: inline-block;
 }
 .room-card:hover {
-  box-shadow: 0 20px 50px var(--shadow-soft);
+  box-shadow: none !important;
   border-color: var(--color-burnt-copper);
 }
 .room-card__media {
   position: static;
   border-radius: 0.85rem;
   border: 1px solid var(--border-light);
-  aspect-ratio: 4 / 3;
+  /* Banner occupies the top half of the card */
+  flex: 0 0 50%;
+  height: 50%;
+  min-height: 220px;
+  aspect-ratio: auto;
   margin-bottom: 1rem;
   background: var(--color-cool-mist);
   will-change: transform;
@@ -1011,6 +1018,30 @@ main {
   font-weight: 600;
 }
 
+/* Mobile/iPad: fixed banner height + auto card height so text/button never clip (overflow stays visible) */
+@media (max-width: 1024px) {
+  .room-card {
+    padding-bottom: 1.75rem;
+    min-height: 480px;
+    height: auto;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+  .room-card__media {
+    flex: 0 0 220px;
+    height: 220px;
+    min-height: 0 !important;
+    max-height: none;
+    margin-bottom: 1rem;
+  }
+  .room-card__actions {
+    margin-top: 1rem !important;
+    margin-bottom: 0;
+    padding-top: 0.75rem;
+    flex-shrink: 0;
+  }
+}
+
 /* ========== EVENTS — photos left, description right ========== */
 .section--events {
   padding: 5rem 0;
@@ -1028,10 +1059,18 @@ main {
   gap: 3rem;
   align-items: center;
   margin-top: 2rem;
+  grid-template-areas:
+    "content media"
+    "actions media";
 }
 
 .events__media {
   position: static;
+  grid-area: media;
+}
+
+.events__content {
+  grid-area: content;
 }
 
 .events__img-single {
@@ -1124,6 +1163,7 @@ main {
   gap: 0.75rem;
   align-items: center;
   margin-top: 1.25rem;
+  grid-area: actions;
 }
 
 .events__actions .btn {
@@ -1143,6 +1183,10 @@ main {
   .events__grid {
     grid-template-columns: 1fr;
     gap: 2rem;
+    grid-template-areas:
+      "content"
+      "media"
+      "actions";
   }
 
   .events__img-single {
@@ -2030,8 +2074,10 @@ main {
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center;
   display: block;
   flex-shrink: 0;
+  transform: scale(1.22);
 }
 
 .whatsapp-float {
@@ -2510,11 +2556,17 @@ main {
 /* Cart page — full-screen background image, no blue footer, card centered */
 body.page-cart {
   min-height: 100vh;
-  background-image: url("/img/designarena_image_ix01sftz.png");
+  background-image: url("/img/Prathibimba%28img%29.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+@media (max-width: 1024px) {
+  body.page-cart {
+    background-attachment: scroll;
+    background-position: center center;
+  }
 }
 body.page-cart .footer {
   display: none;
@@ -3040,6 +3092,8 @@ body.page-cart .nav {
   }
   .room-card {
     padding: 1rem 1rem 1.25rem;
+    min-height: 480px;
+    height: auto;
   }
   .room-card__name {
     font-size: 1.1rem;

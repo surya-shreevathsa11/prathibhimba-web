@@ -546,6 +546,8 @@
     const cards = $$(".room-card");
     if (!cards.length) return;
 
+    const hoverTargets = [];
+
     cards.forEach((card) => {
       const img = card.querySelector(".room-card__media img");
       const overlay = card.querySelector(".room-card__overlay");
@@ -619,13 +621,53 @@
       );
 
       card.addEventListener("mouseenter", () => {
+        if (window.__roomCardIsScrollLocked) return;
         hoverTl.play();
       });
 
       card.addEventListener("mouseleave", () => {
+        if (window.__roomCardIsScrollLocked) return;
         hoverTl.reverse();
       });
+
+      hoverTargets.push({ overlay, overlayInner, contentEls, hoverTl });
     });
+
+    // Install the scroll-lock once; it prevents the hover overlay from tinting
+    // cards while the user scrolls (tint often triggers on hover during scrolling).
+    window.__roomCardHoverTargets = hoverTargets;
+    if (!window.__roomCardScrollLockInstalled) {
+      window.__roomCardScrollLockInstalled = true;
+      window.__roomCardIsScrollLocked = false;
+
+      let scrollTimeout = null;
+      window.addEventListener(
+        "scroll",
+        () => {
+          window.__roomCardIsScrollLocked = true;
+
+          if (window.__roomCardHoverTargets && window.__roomCardHoverTargets.length) {
+            window.__roomCardHoverTargets.forEach(({ overlay, overlayInner, contentEls, hoverTl }) => {
+              if (!overlay || !overlayInner || !contentEls) return;
+              try {
+                if (hoverTl && hoverTl.pause) hoverTl.pause(0);
+                gsap.set(overlay, { scaleY: 0, opacity: 0, transformOrigin: "center center" });
+                gsap.set(overlayInner, { opacity: 0, y: 10 });
+                gsap.set(Array.from(contentEls), { opacity: 1, y: 0 });
+              } catch {
+                /* silent */
+              }
+            });
+          }
+
+          if (scrollTimeout) clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            window.__roomCardIsScrollLocked = false;
+          }, 200);
+        },
+        { passive: true },
+      );
+    }
   }
 
   window.initRoomCardHover = initRoomCardHover;

@@ -241,3 +241,14 @@
     margin-bottom: 2rem;
   }
 }
+
+/* Mobile / iPad: no arrow buttons — swipe / drag the track horizontally (scroll already enabled) */
+@media (max-width: 1024px) {
+  .gallery-reel__nav {
+    display: none !important;
+  }
+
+  .gallery-reel__track {
+    overscroll-behavior-x: contain;
+  }
+}

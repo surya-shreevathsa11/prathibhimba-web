@@ -3,11 +3,17 @@
   min-height: 100vh;
   padding: 0;
   margin: 0;
-  background-image: url("/img/designarena_image_ix01sftz.png");
+  background-image: url("/img/Prathibimba%28img%29.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+@media (max-width: 1024px) {
+  .admin-body {
+    background-attachment: scroll;
+    background-position: center center;
+  }
 }
 
 .admin__header {

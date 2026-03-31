@@ -137,3 +137,99 @@
     animation: none;
   }
 }
+
+/* Hard guarantee: room cards never render any shadow (this file loads last) */
+.room-card,
+.room-card:hover {
+  box-shadow: none !important;
+}
+
+/* Mobile/iPad: disable hover overlay (prevents accidental tint on touch/scroll) */
+@media (max-width: 1024px) {
+  .room-card__overlay {
+    display: none !important;
+    opacity: 0 !important;
+    transform: scaleY(0) !important;
+    visibility: hidden !important;
+  }
+  .room-card__overlay-inner {
+    opacity: 0 !important;
+    transform: translateY(10px) !important;
+  }
+}
+
+/* Desktop: restore original hover-reveal look (light olive overlay) */
+@media (min-width: 1025px) {
+  .room-card__overlay {
+    /* match original hover overlay colour */
+    background: #7a9e7a !important;
+    color: #0a0a0a !important;
+    z-index: 4 !important;
+  }
+
+  /* match original behaviour: description is hidden until hover overlay reveals it */
+  .room-card__desc {
+    display: none !important;
+  }
+
+  /* keep Add-to-cart visible at the bottom during hover reveal */
+  .room-card__actions {
+    position: relative !important;
+    z-index: 6 !important;
+  }
+}
+
+/* Hard guarantee: card stays solid cream (no tint/gradient bleed) */
+.room-card,
+.room-card * {
+  background-image: none !important;
+}
+.room-card {
+  background: #E6E2D3 !important;
+  background-color: #E6E2D3 !important;
+}
+
+/* Ensure overlay can never visually cover the visible card content */
+.room-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #E6E2D3 !important;
+  z-index: 1 !important;
+  pointer-events: none;
+}
+.room-card {
+  /* keep stacking context predictable for ::before */
+  position: relative !important;
+}
+.room-card__number,
+.room-card__name,
+.room-card__desc,
+.room-card__price,
+.room-card__actions {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Mobile/iPad: keep room cards static (no entrance animation) */
+@media (max-width: 1024px) {
+  .room-card {
+    overflow: visible !important;
+  }
+  .card-grid-reveal .room-card,
+  .card-grid-reveal.is-visible .room-card {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Desktop: guarantee Add-to-cart stays visible above hover overlay */
+@media (min-width: 1025px) {
+  .room-card__actions {
+    position: relative !important;
+    z-index: 6 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}

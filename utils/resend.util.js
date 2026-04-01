@@ -2,6 +2,10 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const mailFromGuest = "Prathibhimba <mail@support.prathibhimbastays.com>";
+const mailFromBookings = "Prathibhimba Bookings <mail@support.prathibhimbastays.com>";
+const adminEmail = process.env.ADMIN_EMAIL;
+
 // ─── Colours (Prathibhimba palette) ──────────────────────────────────────────
 // Dark forest green  : #0d2b22   (header bg deep)
 // Mid forest green   : #1a4035   (header bg)
@@ -463,7 +467,7 @@ function buildAdminOTPHtml(otp) {
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:0 0 12px 12px;padding:24px 40px;">
               <p style="margin:0 0 4px;font-family:'Georgia',serif;font-size:15px;color:#f5f0e8;">Prathibhimba Boutique Retreat</p>
               <p style="margin:0 0 8px;font-size:12px;color:#7aaa98;font-family:Helvetica,Arial,sans-serif;">Madikeri, Coorg, Karnataka</p>
-              <p style="margin:0;font-size:11px;color:#3a5a50;font-family:Helvetica,Arial,sans-serif;">support@prathibhimbastays.in</p>
+              <p style="margin:0;font-size:11px;color:#3a5a50;font-family:Helvetica,Arial,sans-serif;">support@prathibhimbastays.com</p>
             </td>
           </tr>
 
@@ -665,7 +669,7 @@ function buildCancellationHtml(booking) {
 
 export async function sendConfirmationMailToGuest(booking) {
   await resend.emails.send({
-    from: "Prathibhimba <mail@support.prathibhimbastays.in>",
+    from: mailFromGuest,
     to: booking.guest.email,
     subject: `Booking Confirmed – Prathibhimba (#${booking._id})`,
     html: buildEmailHtml(booking),
@@ -674,8 +678,8 @@ export async function sendConfirmationMailToGuest(booking) {
 
 export async function sendConfirmationMailToAdmin(booking) {
   await resend.emails.send({
-    from: "Prathibhimba Bookings <mail@support.prathibhimbastays.in>",
-    to: "prathibhimbastays@gmail.com", // 🔁 replace with your admin email
+    from: mailFromBookings,
+    to: adminEmail,
     subject: `New Booking: ${booking.guest.name} – ₹${booking.totalAmount}`,
     html: buildAdminEmailHtml(booking),
   });
@@ -683,7 +687,7 @@ export async function sendConfirmationMailToAdmin(booking) {
 
 export async function sendPaymentFailedMailToGuest(booking) {
   await resend.emails.send({
-    from: "Prathibhimba <mail@support.prathibhimbastays.in>",
+    from: mailFromGuest,
     to: booking.guest.email,
     subject: `Payment Failed – Prathibhimba Booking`,
     html: buildPaymentFailedHtml(booking),
@@ -692,9 +696,9 @@ export async function sendPaymentFailedMailToGuest(booking) {
 
 export const sendAdminOTPEmail = async (email, otp) => {
   const { data, error } = await resend.emails.send({
-    from: "Prathibhimba <mail@support.prathibhimbastays.in>",
+    from: mailFromGuest,
     to: [email],
-    reply_to: "prathibhimbastays@gmail.com",
+    reply_to: adminEmail,
     subject: "Your Admin Login OTP – Prathibhimba",
     html: buildAdminOTPHtml(otp),
   });
@@ -706,7 +710,7 @@ export const sendAdminOTPEmail = async (email, otp) => {
 
 export async function sendCancellationMailToGuest(booking) {
   await resend.emails.send({
-    from: "Prathibhimba <mail@support.prathibhimbastays.in>",
+    from: mailFromGuest,
     to: booking.guest.email,
     subject: `Booking Cancelled – Prathibhimba (#${booking._id})`,
     html: buildCancellationHtml(booking),

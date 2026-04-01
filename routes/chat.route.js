@@ -13,6 +13,8 @@ import {
   systemInstruction,
   roomTools,
   safetySettings,
+  isUserMessageOnScope,
+  CHAT_OFF_TOPIC_REPLY,
 } from "../utils/geminiTools.js";
 import isAuthenticated from "../middleware/auth.middleware.js";
 
@@ -26,6 +28,22 @@ const model = genAI.getGenerativeModel({
 
 router.post("/chatbot", isAuthenticated, async (req, res) => {
   const { message, history } = req.body;
+
+  if (message == null || typeof message !== "string") {
+    return res.status(400).json({
+      text: "Please send a text message.",
+      history: history || [],
+    });
+  }
+
+  // Hard guardrail: skip Gemini for clearly off-topic / abusive prompts
+  if (!isUserMessageOnScope(message)) {
+    return res.json({
+      text: CHAT_OFF_TOPIC_REPLY,
+      history: history || [],
+    });
+  }
+
   const chat = model.startChat({ history: history || [] });
 
   try {

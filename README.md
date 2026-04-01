@@ -1,4 +1,4 @@
-# Summer Green — Homestay Website
+# Prathibhimba — Homestay Website
 
 Full-stack homestay website built with Node.js, Express, and vanilla HTML/CSS/JS.
 

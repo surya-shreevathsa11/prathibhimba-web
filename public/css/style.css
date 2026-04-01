@@ -1503,6 +1503,12 @@ main {
   padding: 1.5rem 1.25rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-light);
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+.terms-card:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+  border-color: var(--color-burnt-copper);
 }
 .terms-card__title {
   font-size: 1rem;
@@ -1512,16 +1518,23 @@ main {
   font-family: "Playfair Display", serif;
   flex-shrink: 0;
 }
+.terms-card__content {
+  flex: 0 0 auto;
+  max-height: 14em;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+.terms-card:not(:hover) .terms-card__content li:nth-child(n + 5) {
+  display: none;
+}
+.terms-card:hover .terms-card__content {
+  max-height: 2000px;
+}
 .terms-card ul {
   margin: 0;
   padding: 0 0 0 1.1rem;
   list-style: disc;
-  flex: 1;
   min-height: 0;
-  max-height: none;
-  overflow: visible;
-  transition: none;
-  will-change: auto;
 }
 .terms-card li {
   font-size: 0.85rem;
@@ -1529,10 +1542,6 @@ main {
   line-height: 1.5;
   margin-bottom: 0.4rem;
 }
-
-/* (no display:none) Reveal is purely max-height for smooth pulldown */
-
-/* Reveal is per-card hover (not whole section) for smoother, user-friendly behavior */
 .terms-card a {
   color: var(--color-burnt-copper);
   text-decoration: underline;

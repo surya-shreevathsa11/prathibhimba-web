@@ -394,8 +394,13 @@
           '<div class="admin__events-item-actions">' +
           '<button type="button" class="btn btn--ghost btn--sm admin__event-edit" data-event-id="' + (id || "") + '">Edit</button>' +
           '<button type="button" class="btn btn--ghost btn--sm admin__event-banner" data-event-id="' + (id || "") + '">Banner</button>' +
-          '<button type="button" class="btn btn--ghost btn--sm admin__event-gallery" data-event-id="' + (id || "") + '">Gallery</button>' +
           '<button type="button" class="btn btn--ghost btn--sm admin__event-brochure" data-event-id="' + (id || "") + '">Brochure</button>' +
+          (ev.brochure
+            ? '<button type="button" class="btn btn--ghost btn--sm admin__event-remove-brochure" data-event-id="' + (id || "") + '">Remove brochure</button>'
+            : "") +
+          (ev.curPeopleEnrolled != null && ev.curPeopleEnrolled > 0
+            ? '<button type="button" class="btn btn--ghost btn--sm admin__event-cancel-enrollment" data-event-id="' + (id || "") + '">Cancel enrollment</button>'
+            : "") +
           '<button type="button" class="btn admin__btn-delete-permanent admin__event-delete" data-event-id="' + (id || "") + '">Cancel</button>' +
           "</div>" +
           "</article>"
@@ -449,7 +454,7 @@
               uploadSignatureTimestamp: d.timestamp,
               folder: d.folder,
               sources: ["local", "camera"],
-              multiple: type === "gallery",
+              multiple: false,
             },
             function (error, result) {
               if (error) return;
@@ -466,9 +471,7 @@
                     url: url,
                   });
                 } else {
-                  req = apiPost("/api/admin/events/" + eventId + "/gallery", {
-                    url: url,
-                  });
+                  return;
                 }
                 req
                   .then(function (res) {
@@ -477,9 +480,7 @@
                         eventsMsg,
                         type === "banner"
                           ? "Banner updated."
-                          : type === "brochure"
-                          ? "Brochure updated."
-                          : "Image added to gallery.",
+                          : "Brochure updated.",
                         false
                       );
                       loadEvents();
@@ -515,22 +516,69 @@
       });
 
     eventsListEl
-      .querySelectorAll(".admin__event-gallery")
-      .forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var id = btn.getAttribute("data-event-id");
-          if (!id) return;
-          openEventUpload(id, "gallery");
-        });
-      });
-
-    eventsListEl
       .querySelectorAll(".admin__event-brochure")
       .forEach(function (btn) {
         btn.addEventListener("click", function () {
           var id = btn.getAttribute("data-event-id");
           if (!id) return;
           openEventUpload(id, "brochure");
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-remove-brochure")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          if (!window.confirm("Remove the uploaded brochure for this event?")) return;
+          apiDelete("/api/admin/events/" + id + "/brochure")
+            .then(function (r) {
+              if (r.ok) {
+                setMsg(eventsMsg, "Brochure removed.", false);
+                loadEvents();
+              } else {
+                setMsg(
+                  eventsMsg,
+                  (r.data && r.data.message) || "Could not remove brochure.",
+                  true
+                );
+              }
+            })
+            .catch(function () {
+              setMsg(eventsMsg, "Network error. Please try again.", true);
+            });
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-cancel-enrollment")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          if (
+            !window.confirm(
+              "Cancel one enrollment for this event? The enrolled guest count will go down by one."
+            )
+          )
+            return;
+          apiDelete("/api/admin/events/" + id + "/enrollments/admin")
+            .then(function (r) {
+              if (r.ok) {
+                setMsg(eventsMsg, "Enrollment cancelled.", false);
+                loadEvents();
+              } else {
+                setMsg(
+                  eventsMsg,
+                  (r.data && r.data.message) || "Could not cancel enrollment.",
+                  true
+                );
+              }
+            })
+            .catch(function () {
+              setMsg(eventsMsg, "Network error. Please try again.", true);
+            });
         });
       });
 

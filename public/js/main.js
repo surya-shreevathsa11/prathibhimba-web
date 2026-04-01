@@ -544,134 +544,31 @@
     }
   }
 
-  // --- Room card premium hover (GSAP) ---
+  // --- Room card hover: JS-driven description expand (desktop only) ---
   function initRoomCardHover() {
-    if (typeof gsap === "undefined") return;
-    const cards = $$(".room-card");
-    if (!cards.length) return;
+    if (window.innerWidth <= 1024) return;
+    document.querySelectorAll(".room-card").forEach(function (card) {
+      var desc = card.querySelector(".room-card__desc");
+      if (!desc) return;
 
-    const hoverTargets = [];
-
-    cards.forEach((card) => {
-      const img = card.querySelector(".room-card__media img");
-      const overlay = card.querySelector(".room-card__overlay");
-      const overlayInner = overlay && overlay.querySelector(".room-card__overlay-inner");
-      const contentEls = card.querySelectorAll(
-        ".room-card__number, .room-card__name, .room-card__desc, .room-card__price",
-      );
-      if (!img || !overlay || !overlayInner || !contentEls.length) return;
-
-      gsap.set(img, {
-        scale: 1.01,
-        transformOrigin: "center center",
+      card.addEventListener("mouseenter", function () {
+        card.classList.add("is-hovered");
+        // Measure the full natural height and force it with highest CSS priority
+        desc.style.setProperty("max-height", desc.scrollHeight + "px", "important");
+        desc.style.setProperty("opacity", "1", "important");
+        desc.style.setProperty("transform", "translateY(0)", "important");
+        desc.style.setProperty("margin-bottom", "1rem", "important");
+        desc.style.setProperty("overflow", "visible", "important");
       });
-      gsap.set(overlay, {
-        scaleY: 0,
-        opacity: 0,
-        transformOrigin: "center center",
+      card.addEventListener("mouseleave", function () {
+        card.classList.remove("is-hovered");
+        desc.style.setProperty("max-height", "0", "important");
+        desc.style.setProperty("opacity", "0", "important");
+        desc.style.setProperty("transform", "translateY(16px)", "important");
+        desc.style.setProperty("margin-bottom", "0", "important");
+        desc.style.setProperty("overflow", "hidden", "important");
       });
-      gsap.set(overlayInner, {
-        opacity: 0,
-        y: 10,
-      });
-
-      const hoverTl = gsap.timeline({
-        paused: true,
-        defaults: { overwrite: "auto" },
-      });
-
-      hoverTl.to(
-        contentEls,
-        {
-          opacity: 0,
-          y: 4,
-          duration: 0.4,
-          ease: "power2.out",
-          stagger: 0.02,
-        },
-        0,
-      );
-
-      hoverTl.to(
-        overlay,
-        {
-          scaleY: 1,
-          opacity: 1,
-          duration: 0.85,
-          ease: "cubic-bezier(0.22, 1, 0.36, 1)",
-        },
-        0,
-      );
-
-      hoverTl.to(
-        overlayInner,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "power3.out",
-        },
-        0.12,
-      );
-
-      hoverTl.to(
-        img,
-        {
-          scale: 1.06,
-          duration: 0.9,
-          ease: "power3.out",
-        },
-        0,
-      );
-
-      card.addEventListener("mouseenter", () => {
-        if (window.__roomCardIsScrollLocked) return;
-        hoverTl.play();
-      });
-
-      card.addEventListener("mouseleave", () => {
-        if (window.__roomCardIsScrollLocked) return;
-        hoverTl.reverse();
-      });
-
-      hoverTargets.push({ overlay, overlayInner, contentEls, hoverTl });
     });
-
-    // Install the scroll-lock once; it prevents the hover overlay from tinting
-    // cards while the user scrolls (tint often triggers on hover during scrolling).
-    window.__roomCardHoverTargets = hoverTargets;
-    if (!window.__roomCardScrollLockInstalled) {
-      window.__roomCardScrollLockInstalled = true;
-      window.__roomCardIsScrollLocked = false;
-
-      let scrollTimeout = null;
-      window.addEventListener(
-        "scroll",
-        () => {
-          window.__roomCardIsScrollLocked = true;
-
-          if (window.__roomCardHoverTargets && window.__roomCardHoverTargets.length) {
-            window.__roomCardHoverTargets.forEach(({ overlay, overlayInner, contentEls, hoverTl }) => {
-              if (!overlay || !overlayInner || !contentEls) return;
-              try {
-                if (hoverTl && hoverTl.pause) hoverTl.pause(0);
-                gsap.set(overlay, { scaleY: 0, opacity: 0, transformOrigin: "center center" });
-                gsap.set(overlayInner, { opacity: 0, y: 10 });
-                gsap.set(Array.from(contentEls), { opacity: 1, y: 0 });
-              } catch {
-                /* silent */
-              }
-            });
-          }
-
-          if (scrollTimeout) clearTimeout(scrollTimeout);
-          scrollTimeout = setTimeout(() => {
-            window.__roomCardIsScrollLocked = false;
-          }, 200);
-        },
-        { passive: true },
-      );
-    }
   }
 
   window.initRoomCardHover = initRoomCardHover;

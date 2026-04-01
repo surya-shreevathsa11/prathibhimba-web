@@ -901,21 +901,19 @@ main {
   border-radius: 1rem;
   border: 1px solid var(--border-light);
   box-shadow: none !important;
-  /* Laptop/Desktop: keep card around 10–12cm tall (≈380–455px @ 96dpi) */
   min-height: 520px;
   transition:
-    box-shadow 0.3s,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
     border-color 0.3s;
   position: relative;
-  overflow: hidden;
-  transform-style: preserve-3d;
+  overflow: visible;
   will-change: transform;
 }
 
 /* Laptop only: set a consistent card length + clean content alignment */
 @media (min-width: 1025px) {
   .room-card {
-    height: 440px;
     min-height: 440px;
   }
   .room-card__media {
@@ -947,9 +945,10 @@ main {
   border-color: var(--color-burnt-copper);
 }
 .room-card__media {
-  position: static;
+  position: relative;
   border-radius: 0.85rem;
   border: 1px solid var(--border-light);
+  overflow: hidden;
   /* Banner occupies the top half of the card */
   flex: 0 0 50%;
   height: 50%;
@@ -966,6 +965,7 @@ main {
   transform-origin: center center;
   will-change: transform;
   filter: saturate(0.95) contrast(1.05);
+  transition: transform 0.5s ease, filter 0.5s ease;
 }
 .room-card__overlay {
   position: absolute;

@@ -144,38 +144,38 @@
   box-shadow: none !important;
 }
 
-/* Mobile/iPad: disable hover overlay (prevents accidental tint on touch/scroll) */
-@media (max-width: 1024px) {
-  .room-card__overlay {
-    display: none !important;
-    opacity: 0 !important;
-    transform: scaleY(0) !important;
-    visibility: hidden !important;
-  }
-  .room-card__overlay-inner {
-    opacity: 0 !important;
-    transform: translateY(10px) !important;
-  }
+/* Overlay is no longer used — animation is pure CSS description-expand */
+.room-card__overlay {
+  display: none !important;
 }
 
-/* Desktop: restore original hover-reveal look (light olive overlay) */
+/* Desktop only: description-expand hover (banner stays visible; desc reveals smoothly) */
 @media (min-width: 1025px) {
-  .room-card__overlay {
-    /* match original hover overlay colour */
-    background: #7a9e7a !important;
-    color: #0a0a0a !important;
-    z-index: 4 !important;
+  /* Card lifts on hover — CSS pseudo-class + JS class */
+  .room-card:hover,
+  .room-card.is-hovered {
+    transform: translateY(-4px) scale(1.04) !important;
+    z-index: 2;
   }
 
-  /* match original behaviour: description is hidden until hover overlay reveals it */
+  /* Description hidden at rest — no !important so JS setProperty overrides it */
   .room-card__desc {
-    display: none !important;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(16px);
+    margin-bottom: 0;
+    transition: max-height 0.5s ease, opacity 0.4s ease, transform 0.4s ease, margin-bottom 0.4s ease;
   }
 
-  /* keep Add-to-cart visible at the bottom during hover reveal */
-  .room-card__actions {
-    position: relative !important;
-    z-index: 6 !important;
+  /* Image subtle zoom on hover */
+  .room-card__media img {
+    transition: transform 0.5s ease, filter 0.5s ease !important;
+  }
+  .room-card.is-hovered .room-card__media img,
+  .room-card:hover .room-card__media img {
+    transform: scale(1.06) !important;
+    filter: saturate(1.02) contrast(1.08) !important;
   }
 }
 
@@ -189,29 +189,7 @@
   background-color: #E6E2D3 !important;
 }
 
-/* Ensure overlay can never visually cover the visible card content */
-.room-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: #E6E2D3 !important;
-  z-index: 1 !important;
-  pointer-events: none;
-}
-.room-card {
-  /* keep stacking context predictable for ::before */
-  position: relative !important;
-}
-.room-card__number,
-.room-card__name,
-.room-card__desc,
-.room-card__price,
-.room-card__actions {
-  position: relative !important;
-  z-index: 2 !important;
-}
-
-/* Keep banner image visible above the cream safety layer */
+/* Keep banner image visible */
 .room-card__media,
 .room-card__media img {
   position: relative !important;
@@ -228,15 +206,5 @@
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
-  }
-}
-
-/* Desktop: guarantee Add-to-cart stays visible above hover overlay */
-@media (min-width: 1025px) {
-  .room-card__actions {
-    position: relative !important;
-    z-index: 6 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
   }
 }

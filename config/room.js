@@ -34,7 +34,7 @@ export const rooms = {
     name: "Banyan House",
     type: "Dormitory",
     description:
-      "A spacious dorm for up to 12 guests, perfect for sharing stories, laughter, and unforgettable memories together.",
+      "A spacious dorm for up to 12 guests, perfect for sharing stories, laughter, and unforgettable.",
     price: 10000,
     capacity: {
       minAdults: 1,
@@ -49,7 +49,7 @@ export const rooms = {
     name: "Rain Tree Grove",
     type: "Dormitory",
     description:
-      "A comfortable dorm for up to 12 guests, made for group stays filled with conversations, bonding, and lasting memories.",
+      "A comfortable dorm for up to 12 guests, made for group stays filled with conversations and bonding.",
     price: 10000,
     capacity: {
       minAdults: 1,

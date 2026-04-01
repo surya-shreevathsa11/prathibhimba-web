@@ -901,7 +901,7 @@ main {
   border-radius: 1rem;
   border: 1px solid var(--border-light);
   box-shadow: none !important;
-  /* +~1cm visual height (device-dependent); keeps layout stable */
+  /* Laptop/Desktop: keep card around 10–12cm tall (≈380–455px @ 96dpi) */
   min-height: 520px;
   transition:
     box-shadow 0.3s,
@@ -910,6 +910,27 @@ main {
   overflow: hidden;
   transform-style: preserve-3d;
   will-change: transform;
+}
+
+/* Laptop only: set a consistent card length + clean content alignment */
+@media (min-width: 1025px) {
+  .room-card {
+    height: 440px;
+    min-height: 440px;
+  }
+  .room-card__media {
+    flex: 0 0 50%;
+    height: 50%;
+    min-height: 0;
+    margin-bottom: 0.9rem;
+  }
+  .room-card__name {
+    margin: 8px 0 6px;
+    padding-bottom: 8px;
+  }
+  .room-card__actions {
+    padding-top: 0.85rem;
+  }
 }
 .room-card__actions {
   margin-top: auto;

@@ -14,6 +14,7 @@ import {
   removeGalleryImage,
   cancelEnrollment,
   getEventCloudinarySignature,
+  getEventCloudinaryRawSignature,
 } from "../controllers/admin.events.controller.js";
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.use(verifyJWT);
 
 // Cloudinary
 router.get("/cloudinary-signature", getEventCloudinarySignature);
+router.get("/cloudinary-signature/raw", getEventCloudinaryRawSignature); // PDFs
 
 // CRUD
 router.post("/", createEvent);

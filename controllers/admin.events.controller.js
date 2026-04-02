@@ -8,19 +8,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ─── Cloudinary Signature (Images) ───────────────────────────────────────────
-// GET /api/admin/events/cloudinary-signature
-export const getEventCloudinarySignature = (req, res) => {
+// ─── Cloudinary signatures (banner vs images use different signed folders) ──
+function respondEventImageUploadSignature(res, folder) {
   const timestamp = Math.round(Date.now() / 1000);
-  const folder = "summer-green/events";
   const source = "uw";
   const resource_type = "image";
-
   const signature = cloudinary.utils.api_sign_request(
     { timestamp, folder, source },
     process.env.CLOUDINARY_API_SECRET
   );
-
   return res.status(200).json({
     signature,
     timestamp,
@@ -29,6 +25,21 @@ export const getEventCloudinarySignature = (req, res) => {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_API_KEY,
   });
+}
+
+// GET /api/admin/events/cloudinary-signature/banner
+export const getEventBannerCloudinarySignature = (req, res) => {
+  respondEventImageUploadSignature(res, "summer-green/events/banner");
+};
+
+// GET /api/admin/events/cloudinary-signature/images
+export const getEventImagesCloudinarySignature = (req, res) => {
+  respondEventImageUploadSignature(res, "summer-green/events/images");
+};
+
+// GET /api/admin/events/cloudinary-signature (legacy: same folder as before)
+export const getEventCloudinarySignature = (req, res) => {
+  respondEventImageUploadSignature(res, "summer-green/events");
 };
 
 // ─── Cloudinary Signature (PDFs / Raw files) ─────────────────────────────────

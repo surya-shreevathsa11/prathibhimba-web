@@ -34,7 +34,7 @@ export const rooms = {
     name: "Banyan House",
     type: "Dormitory",
     description:
-      "A spacious dorm for up to 12 guests, perfect for sharing stories, laughter, and unforgettable.",
+      "A spacious dorm for up to 12 guests, perfect for sharing stories and laughter.",
     price: 10000,
     capacity: {
       minAdults: 1,

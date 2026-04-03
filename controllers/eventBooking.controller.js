@@ -3,6 +3,27 @@ import { Event } from "../models/events.model.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
+/**
+ * GET /api/events/bookings
+ * Lists the signed-in user's event bookings (newest first), with event details populated.
+ */
+export const listUserEventBookings = async (req, res) => {
+  try {
+    const bookings = await EventBooking.find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .populate(
+        "eventId",
+        "name description startDate endDate banner brochure maxPeopleAllowed pricePerPerson curPeopleEnrolled"
+      )
+      .lean();
+
+    return res.status(200).json({ data: bookings });
+  } catch (error) {
+    console.error("Error listing user event bookings:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 export const bookEvents = async (req, res) => {
   try {
     const guest = req?.body?.guest;
@@ -36,9 +57,7 @@ export const bookEvents = async (req, res) => {
       const availableSpots = event.maxPeopleAllowed - event.curPeopleEnrolled;
       return res
         .status(400)
-        .json({
-          message: `Only ${availableSpots} slot(s) available`,
-        });
+        .json({ message: `Only ${availableSpots} slot(s) available` });
     }
 
     const totalPrice =

@@ -68,6 +68,8 @@ app.use(passport.session());
 import authRouter from "./routes/auth.routes.js";
 import bookingRouter from "./routes/booking.route.js";
 import razorpayRouter from "./routes/razorpay.route.js";
+import eventRazorpayRouter from "./routes/razorpayEvent.route.js";
+import eventRouter from "./routes/eventBooking.route.js";
 import adminLoginRouter from "./routes/admin.auth.route.js";
 import adminRouter from "./routes/admin.route.js";
 import adminEventRouter from "./routes/admin.events.route.js";
@@ -81,8 +83,10 @@ app.use("/api/chat", chatRouter);
 
 //rzp and payment
 //need to set to raw for webhooks to work
-
 app.use("/api/payment", razorpayRouter);
+
+app.use("/api/events/payment", eventRazorpayRouter);
+app.use("/api/events", eventRouter);
 
 /////////admin routes
 app.use("/api/admin", adminLoginRouter);

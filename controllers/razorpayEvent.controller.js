@@ -100,6 +100,19 @@ async function handlePaymentCaptured(payload) {
     const totalPrice = eventBooking.totalAmount || 0;
 
     // Update booking with payment details
+    const guestCount = eventBooking?.guest?.guestCount || 0;
+    const wasConfirmed = eventBooking.status === "confirmed";
+
+    // Increment the event's current enrolled count when transitioning
+    // from not-confirmed to confirmed.
+    if (!wasConfirmed && guestCount > 0) {
+      await Event.findByIdAndUpdate(
+        eventBooking.eventId,
+        { $inc: { curPeopleEnrolled: guestCount } },
+        { new: true }
+      );
+    }
+
     eventBooking.status = "confirmed";
     eventBooking.razorpayPaymentId = paymentId;
 

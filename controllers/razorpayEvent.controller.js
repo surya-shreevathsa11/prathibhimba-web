@@ -97,20 +97,13 @@ async function handlePaymentCaptured(payload) {
     }
 
     const wasConfirmed = eventBooking.status === "confirmed";
-    const totalPrice = eventBooking.totalAmount || 0;
+    const guestCount = Number(eventBooking?.guest?.guestCount) || 0;
 
-    // Update booking with payment details
-    const guestCount = eventBooking?.guest?.guestCount || 0;
-    const wasConfirmed = eventBooking.status === "confirmed";
-
-    // Increment the event's current enrolled count when transitioning
-    // from not-confirmed to confirmed.
+    // Increment Event.curPeopleEnrolled once when first confirming (not on webhook retries).
     if (!wasConfirmed && guestCount > 0) {
-      await Event.findByIdAndUpdate(
-        eventBooking.eventId,
-        { $inc: { curPeopleEnrolled: guestCount } },
-        { new: true }
-      );
+      await Event.findByIdAndUpdate(eventBooking.eventId, {
+        $inc: { curPeopleEnrolled: guestCount },
+      });
     }
 
     eventBooking.status = "confirmed";
@@ -119,14 +112,6 @@ async function handlePaymentCaptured(payload) {
     eventBooking.amountPaid = amountPaid;
 
     await eventBooking.save();
-
-    // Keep event availability in sync (used by maxPeopleAllowed checks)
-    if (!wasConfirmed) {
-      const increment = Number(eventBooking?.guest?.guestCount) || 1;
-      await Event.findByIdAndUpdate(eventBooking.eventId, {
-        $inc: { curPeopleEnrolled: increment },
-      });
-    }
 
     // Send confirmation emails
     await sendConfirmationMailToGuest(eventBooking);

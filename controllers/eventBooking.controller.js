@@ -115,22 +115,3 @@ export const bookEvents = async (req, res) => {
       .json({ message: "Something went wrong while booking events" });
   }
 };
-
-// GET /api/booking/events/bookings
-// Lists the authenticated user's event bookings for "My Bookings"
-export const listEventsBooked = async (req, res) => {
-  try {
-    const userId = req?.user?._id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
-
-    const bookings = await EventBooking.find({ userId })
-      .populate("eventId")
-      .lean()
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json({ data: bookings });
-  } catch (error) {
-    console.error("Error listing event bookings:", error);
-    return res.status(500).json({ message: "Something went wrong" });
-  }
-};

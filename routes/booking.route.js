@@ -12,7 +12,7 @@ import {
 } from "../controllers/booking.controller.js";
 import {
   bookEvents,
-  listEventsBooked,
+  listUserEventBookings,
 } from "../controllers/eventBooking.controller.js";
 import isAuthenticated from "../middleware/auth.middleware.js";
 
@@ -28,6 +28,6 @@ router.post("/checkout", isAuthenticated, bookRooms);
 
 // events booking
 router.post("/events/checkout", isAuthenticated, bookEvents);
-router.get("/events/bookings", isAuthenticated, listEventsBooked);
+router.get("/events/bookings", isAuthenticated, listUserEventBookings);
 
 export default router;

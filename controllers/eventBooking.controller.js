@@ -57,7 +57,7 @@ export const bookEvents = async (req, res) => {
       const availableSpots = event.maxPeopleAllowed - event.curPeopleEnrolled;
       return res
         .status(400)
-        .json({ message: "Only ${ availableSpots} slot(s) available" });
+        .json({ message: `Only ${availableSpots} slot(s) available` });
     }
 
     const totalPrice = event.pricePerPerson * Number(guest.guestCount);

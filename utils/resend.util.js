@@ -90,7 +90,7 @@ function buildEmailHtml(booking) {
           <!-- Header -->
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 60%,#2a5c4e 100%);border-radius:12px 12px 0 0;padding:48px 40px 36px;">
-              <p style="margin:0 0 8px 0;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Boutique Retreat</p>
+              <p style="margin:0 0 8px 0;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Lakeside Retreat</p>
               <h1 style="margin:0;font-family:'Georgia',serif;font-size:42px;color:#f5f0e8;font-weight:normal;letter-spacing:1px;">Prathibhimba</h1>
               <div style="width:48px;height:2px;background:#c9a84c;margin:16px auto 20px;"></div>
               <p style="margin:0;font-size:13px;color:#a0b8b0;font-family:Helvetica,Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;">Madikeri, Coorg</p>
@@ -110,7 +110,7 @@ function buildEmailHtml(booking) {
 
               <p style="margin:0 0 8px 0;font-family:'Georgia',serif;font-size:22px;color:#1a4035;">Dear ${booking.guest.name},</p>
               <p style="margin:0 0 28px 0;font-size:14px;color:#5a5548;line-height:1.8;">
-                Thank you for choosing Prathibhimba. We're delighted to confirm your reservation and look forward to welcoming you to our boutique retreat nestled in the serene hills of Madikeri, Coorg.
+                Thank you for choosing Prathibhimba. We're delighted to confirm your reservation and look forward to welcoming you to our lakeside retreat nestled in the serene hills of Madikeri, Coorg.
               </p>
 
               <!-- Booking Reference -->
@@ -263,7 +263,7 @@ function buildEmailHtml(booking) {
           <!-- Footer -->
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:0 0 12px 12px;padding:28px 40px;">
-              <p style="margin:0 0 8px;font-family:'Georgia',serif;font-size:16px;color:#f5f0e8;">Prathibhimba Boutique Retreat</p>
+              <p style="margin:0 0 8px;font-family:'Georgia',serif;font-size:16px;color:#f5f0e8;">Prathibhimba Lakeside Retreat</p>
               <p style="margin:0 0 4px;font-size:12px;color:#7aaa98;font-family:Helvetica,Arial,sans-serif;">Madikeri, Coorg, Karnataka</p>
               <p style="margin:12px 0 0;font-size:11px;color:#3a5a50;font-family:Helvetica,Arial,sans-serif;">This is an automated confirmation. Please do not reply to this email.</p>
             </td>
@@ -347,7 +347,7 @@ function buildPaymentFailedHtml(booking) {
         <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:12px 12px 0 0;padding:48px 40px 36px;">
-              <p style="margin:0 0 8px;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Boutique Retreat</p>
+              <p style="margin:0 0 8px;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Lakeside Retreat</p>
               <h1 style="margin:0;font-family:'Georgia',serif;font-size:38px;color:#f5f0e8;font-weight:normal;">Prathibhimba</h1>
               <div style="width:48px;height:2px;background:#b05a2a;margin:16px auto 0;"></div>
             </td>
@@ -383,7 +383,7 @@ function buildPaymentFailedHtml(booking) {
           </tr>
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:0 0 12px 12px;padding:24px 40px;">
-              <p style="margin:0;font-family:'Georgia',serif;font-size:15px;color:#f5f0e8;">Prathibhimba Boutique Retreat</p>
+              <p style="margin:0;font-family:'Georgia',serif;font-size:15px;color:#f5f0e8;">Prathibhimba Lakeside Retreat</p>
               <p style="margin:6px 0 0;font-size:12px;color:#3a5a50;font-family:Helvetica,Arial,sans-serif;">Madikeri, Coorg, Karnataka</p>
             </td>
           </tr>
@@ -417,7 +417,7 @@ function buildAdminOTPHtml(otp) {
           <!-- Header -->
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 60%,#2a5c4e 100%);border-radius:12px 12px 0 0;padding:40px 40px 32px;">
-              <p style="margin:0 0 6px 0;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Boutique Retreat</p>
+              <p style="margin:0 0 6px 0;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Lakeside Retreat</p>
               <h1 style="margin:0;font-family:'Georgia',serif;font-size:36px;color:#f5f0e8;font-weight:normal;letter-spacing:1px;">Prathibhimba</h1>
               <div style="width:40px;height:2px;background:#c9a84c;margin:14px auto 0;"></div>
             </td>
@@ -465,7 +465,7 @@ function buildAdminOTPHtml(otp) {
           <!-- Footer -->
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:0 0 12px 12px;padding:24px 40px;">
-              <p style="margin:0 0 4px;font-family:'Georgia',serif;font-size:15px;color:#f5f0e8;">Prathibhimba Boutique Retreat</p>
+              <p style="margin:0 0 4px;font-family:'Georgia',serif;font-size:15px;color:#f5f0e8;">Prathibhimba Lakeside Retreat</p>
               <p style="margin:0 0 8px;font-size:12px;color:#7aaa98;font-family:Helvetica,Arial,sans-serif;">Madikeri, Coorg, Karnataka</p>
               <p style="margin:0;font-size:11px;color:#3a5a50;font-family:Helvetica,Arial,sans-serif;">support@prathibhimbastays.com</p>
             </td>
@@ -546,7 +546,7 @@ function buildCancellationHtml(booking) {
           <!-- Header -->
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 60%,#2a5c4e 100%);border-radius:12px 12px 0 0;padding:48px 40px 36px;">
-              <p style="margin:0 0 8px 0;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Boutique Retreat</p>
+              <p style="margin:0 0 8px 0;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Lakeside Retreat</p>
               <h1 style="margin:0;font-family:'Georgia',serif;font-size:42px;color:#f5f0e8;font-weight:normal;letter-spacing:1px;">Prathibhimba</h1>
               <div style="width:48px;height:2px;background:#c9a84c;margin:16px auto 24px;"></div>
               <p style="margin:0;font-size:13px;color:#a0b8b0;font-family:Helvetica,Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;">Madikeri, Coorg</p>
@@ -649,7 +649,7 @@ function buildCancellationHtml(booking) {
           <!-- Footer -->
           <tr>
             <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:0 0 12px 12px;padding:28px 40px;">
-              <p style="margin:0 0 8px;font-family:'Georgia',serif;font-size:16px;color:#f5f0e8;">Prathibhimba Boutique Retreat</p>
+              <p style="margin:0 0 8px;font-family:'Georgia',serif;font-size:16px;color:#f5f0e8;">Prathibhimba Lakeside Retreat</p>
               <p style="margin:0 0 4px;font-size:12px;color:#7aaa98;font-family:Helvetica,Arial,sans-serif;">Madikeri, Coorg, Karnataka</p>
               <p style="margin:12px 0 0;font-size:11px;color:#3a5a50;font-family:Helvetica,Arial,sans-serif;">This is an automated notification. Please do not reply to this email.</p>
             </td>

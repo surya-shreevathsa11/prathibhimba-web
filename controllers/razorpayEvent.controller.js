@@ -5,7 +5,7 @@ import {
   sendConfirmationMailToAdmin,
   sendConfirmationMailToGuest,
   sendPaymentFailedMailToGuest,
-} from "../utils/resend.util.js";
+} from "../utils/eventResend.util.js";
 /*
  * Razorpay sends webhooks for:
  * - payment.captured → Payment successful
@@ -106,10 +106,10 @@ async function handlePaymentCaptured(payload) {
     await eventBooking.save();
 
     // Send confirmation emails
-    await sendConfirmationMailToGuest(booking);
-    await sendConfirmationMailToAdmin(booking);
+    await sendConfirmationMailToGuest(eventBooking);
+    await sendConfirmationMailToAdmin(eventBooking);
 
-    console.log("Confirmation emails sent for booking:", booking._id);
+    console.log("Confirmation emails sent for booking:", eventBooking._id);
   } catch (error) {
     console.error("Error handling payment captured:", error);
   }

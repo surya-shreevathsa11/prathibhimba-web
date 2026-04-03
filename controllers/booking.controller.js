@@ -118,6 +118,9 @@ export const checkAvailability = async (booking) => {
   }
 };
 
+const DORM_MAX_GUESTS_TOTAL = 12;
+const DORM_MIN_ADULTS = 1;
+
 const validateGuests = async (guestInfo) => {
   try {
     let { roomId, adults, children } = guestInfo;
@@ -133,6 +136,26 @@ const validateGuests = async (guestInfo) => {
 
     if (!roomInfo) {
       return { 0: "Room not found" };
+    }
+
+    // Dormitories: up to 12 guests total; at least 1 adult (no separate adult/child caps).
+    if (roomInfo.type === "Dormitory") {
+      if (!Number.isInteger(adults) || !Number.isInteger(children)) {
+        return { 0: "Guest counts must be whole numbers" };
+      }
+      if (adults < DORM_MIN_ADULTS) {
+        return { 0: "At least 1 adult is required for dorm bookings" };
+      }
+      if (children < 0 || adults < 0) {
+        return { 0: "Invalid guest count" };
+      }
+      const total = adults + children;
+      if (total > DORM_MAX_GUESTS_TOTAL) {
+        return {
+          0: `Dorm bookings allow up to ${DORM_MAX_GUESTS_TOTAL} guests total (adults + children)`,
+        };
+      }
+      return { 1: "ok" };
     }
 
     const { minAdults, maxAdults, maxChildren, maxTotal } = roomInfo.capacity;

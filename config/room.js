@@ -38,8 +38,8 @@ export const rooms = {
     price: 10000,
     capacity: {
       minAdults: 1,
-      maxAdults: 7,
-      maxChildren: 5,//no limit for kids and adults (total 12)
+      maxAdults: 12,
+      maxChildren: 11,
       maxTotal: 12,
     },
   },
@@ -53,8 +53,8 @@ export const rooms = {
     price: 10000,
     capacity: {
       minAdults: 1,
-      maxAdults: 7,
-      maxChildren: 5,
+      maxAdults: 12,
+      maxChildren: 11,
       maxTotal: 12,
     },
   },

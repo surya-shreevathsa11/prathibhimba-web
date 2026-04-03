@@ -50,6 +50,13 @@
 
   var bookingsBody = document.getElementById("bookingsBody");
   var bookingsEmpty = document.getElementById("bookingsEmpty");
+  var bookingsRoomSection = document.getElementById("bookingsRoomSection");
+  var bookingsEventSection = document.getElementById("bookingsEventSection");
+  var bookingsTabEventBookingsBody = document.getElementById("bookingsTabEventBookingsBody");
+  var bookingsTabEventBookingsEmpty = document.getElementById("bookingsTabEventBookingsEmpty");
+  var filterUpcomingWrap = document.getElementById("filterUpcomingWrap");
+  var bookingsToggleRoom = document.getElementById("bookingsToggleRoom");
+  var bookingsToggleEvent = document.getElementById("bookingsToggleEvent");
 
   var blockDatesMsg = document.getElementById("blockDatesMsg");
   var blockRoom = document.getElementById("blockRoom");
@@ -64,6 +71,8 @@
   var loggedInUsername = "";
   var seasonalPrices = [];
   var bookingsCache = [];
+  var bookingsViewMode = "room";
+  var bookingsTabEventBookingsCache = [];
   var blockedDatesList = [];
 
   var roomList = [];
@@ -137,6 +146,7 @@
     }
     if (tabId === "events") {
       loadEvents();
+      loadEventBookings();
     }
     if (tabId === "blockdates") {
       loadBlockDates();
@@ -350,6 +360,10 @@
   var eventMaxInput = document.getElementById("eventMaxPeople");
   var eventStartInput = document.getElementById("eventStartDate");
   var eventEndInput = document.getElementById("eventEndDate");
+  var eventBookingsBody = document.getElementById("eventBookingsBody");
+  var eventBookingsEmpty = document.getElementById("eventBookingsEmpty");
+  var eventBookingFilterStatus = document.getElementById("eventBookingFilterStatus");
+  var eventBookingsCache = [];
 
   function renderEvents() {
     if (!eventsListEl || !eventsEmptyEl) return;
@@ -668,6 +682,393 @@
       .catch(function () {
         eventsList = [];
         renderEvents();
+      });
+  }
+
+  function loadEventBookings() {
+    loadEventBookingsForPanel("eventsTab");
+  }
+
+  function loadEventBookingsForPanel(panel) {
+    var body =
+      panel === "bookingsTab"
+        ? bookingsTabEventBookingsBody
+        : eventBookingsBody;
+    var empty =
+      panel === "bookingsTab"
+        ? bookingsTabEventBookingsEmpty
+        : eventBookingsEmpty;
+    var statusSelect =
+      panel === "bookingsTab"
+        ? filterStatus
+        : eventBookingFilterStatus;
+    if (!body) return;
+    var status = statusSelect ? statusSelect.value : "";
+    var url =
+      "/api/admin/event-bookings" +
+      (status ? "?status=" + encodeURIComponent(status) : "");
+    body.innerHTML =
+      "<tr><td colspan='8' style='text-align:center;padding:1.5rem;color:#a89878;'>Loading…</td></tr>";
+    if (empty) empty.style.display = "none";
+
+    apiGet(url)
+      .then(function (r) {
+        if (!r.ok) {
+          if (panel === "bookingsTab") bookingsTabEventBookingsCache = [];
+          else eventBookingsCache = [];
+          body.innerHTML = "";
+          if (empty) {
+            empty.querySelector("p").textContent =
+              "Could not load event bookings.";
+            var eh = empty.querySelector(".admin__empty-hint");
+            if (eh) eh.textContent = "";
+            empty.style.display = "block";
+          }
+          return;
+        }
+        var list = (r.data && r.data.data) || [];
+        if (panel === "bookingsTab") bookingsTabEventBookingsCache = list;
+        else eventBookingsCache = list;
+        if (empty) {
+          empty.querySelector("p").textContent =
+            "No event bookings found.";
+          var hint = empty.querySelector(".admin__empty-hint");
+          if (hint) hint.textContent = "Try changing the status filter.";
+        }
+        renderEventBookingsTable(list, panel);
+      })
+      .catch(function () {
+        if (panel === "bookingsTab") bookingsTabEventBookingsCache = [];
+        else eventBookingsCache = [];
+        body.innerHTML = "";
+        if (empty) {
+          empty.querySelector("p").textContent =
+            "Could not load event bookings.";
+          empty.style.display = "block";
+        }
+      });
+  }
+
+  function renderEventBookingsTable(list, panel) {
+    var body =
+      panel === "bookingsTab"
+        ? bookingsTabEventBookingsBody
+        : eventBookingsBody;
+    var empty =
+      panel === "bookingsTab"
+        ? bookingsTabEventBookingsEmpty
+        : eventBookingsEmpty;
+    var panelPrefix =
+      panel === "bookingsTab" ? "eeb-btab-" : "eeb-ep-";
+
+    if (!body) return;
+
+    if (list.length === 0) {
+      if (empty) empty.style.display = "block";
+      body.innerHTML = "";
+      return;
+    }
+
+    if (empty) empty.style.display = "none";
+
+    var statusBadgeClass = {
+      confirmed: "admin__badge--confirmed",
+      pending: "admin__badge--pending",
+      cancelled: "admin__badge--cancelled",
+      blocked: "admin__badge--blocked",
+    };
+
+    body.innerHTML = list
+      .map(function (b) {
+        var ev = b.eventId;
+        var eventTitle =
+          ev && typeof ev === "object" && ev.name ? ev.name : "—";
+        var startD =
+          ev && typeof ev === "object" && ev.startDate
+            ? formatDate(ev.startDate)
+            : "—";
+        var endD =
+          ev && typeof ev === "object" && ev.endDate
+            ? formatDate(ev.endDate)
+            : "—";
+        var g = b.guest || {};
+        var gc = g.guestCount != null ? String(g.guestCount) : "—";
+        var rawId = (b._id || b.id || "").toString();
+        var idAttr = escapeHtml(rawId);
+        var currentStatus = (b.status || "pending").toLowerCase();
+        var badgeClass = statusBadgeClass[currentStatus] || "";
+
+        var statusOptions = ["pending", "confirmed", "cancelled", "blocked"]
+          .map(function (s) {
+            return (
+              '<option value="' +
+              s +
+              '"' +
+              (s === currentStatus ? " selected" : "") +
+              ">" +
+              s.charAt(0).toUpperCase() +
+              s.slice(1) +
+              "</option>"
+            );
+          })
+          .join("");
+
+        return (
+          "<tr data-event-booking-id='" +
+          idAttr +
+          "'>" +
+          "<td><span class='admin__guest-name'>" +
+          escapeHtml(g.name || "—") +
+          "</span><br><small>" +
+          escapeHtml(g.email || "") +
+          "</small></td>" +
+          "<td>" +
+          escapeHtml(g.phone || "—") +
+          "</td>" +
+          "<td>" +
+          escapeHtml(eventTitle) +
+          "</td>" +
+          "<td>" +
+          escapeHtml(gc) +
+          "</td>" +
+          "<td>" +
+          escapeHtml(startD) +
+          "<br><small>" +
+          escapeHtml(endD) +
+          "</small></td>" +
+          "<td>₹" +
+          Number(b.totalAmount || 0).toLocaleString("en-IN") +
+          "<br><small class='admin__paid'>Paid: ₹" +
+          Number(b.amountPaid || 0).toLocaleString("en-IN") +
+          "</small></td>" +
+          "<td class='admin__status-cell'>" +
+          "<span class='admin__badge " +
+          badgeClass +
+          "' data-eb-status-badge='" +
+          idAttr +
+          "'>" +
+          currentStatus +
+          "</span></td>" +
+          "<td class='admin__edit-cell'>" +
+          "<button type='button' class='btn btn--ghost btn--sm admin__event-booking-edit-btn' data-event-booking-id='" +
+          idAttr +
+          "'>Edit</button>" +
+          (currentStatus === "cancelled"
+            ? " <button type='button' class='btn admin__btn-delete-permanent admin__event-booking-delete-btn' data-event-booking-id='" +
+              idAttr +
+              "' aria-label='Delete permanently' title='Delete permanently'><span class='admin__icon-trash' aria-hidden='true'></span></button>"
+            : "") +
+          "<div class='admin__edit-panel admin__edit-panel--event-booking' id='" +
+          panelPrefix +
+          rawId +
+          "' style='display:none;'>" +
+          "<select class='admin__status-select admin__event-booking-status-select' data-event-booking-id='" +
+          idAttr +
+          "'>" +
+          statusOptions +
+          "</select>" +
+          "<button type='button' class='admin__event-booking-save btn btn--primary btn--sm' data-event-booking-id='" +
+          idAttr +
+          "'>Save</button>" +
+          "<button type='button' class='admin__event-booking-cancel btn btn--ghost btn--sm' data-event-booking-id='" +
+          idAttr +
+          "'>✕</button>" +
+          "<span class='admin__inline-msg admin__event-booking-inline-msg' data-eb-msg-id='" +
+          idAttr +
+          "'></span>" +
+          "</div></td></tr>"
+        );
+      })
+      .join("");
+
+    body
+      .querySelectorAll(".admin__event-booking-edit-btn")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var bid = btn.getAttribute("data-event-booking-id");
+          var editPanel = document.getElementById(panelPrefix + bid);
+          if (editPanel) editPanel.style.display = "flex";
+          btn.style.display = "none";
+        });
+      });
+
+    body
+      .querySelectorAll(".admin__event-booking-cancel")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var bid = btn.getAttribute("data-event-booking-id");
+          var editPanel = document.getElementById(panelPrefix + bid);
+          var editBtn = body.querySelector(
+            ".admin__event-booking-edit-btn[data-event-booking-id='" + bid + "']"
+          );
+          if (editPanel) editPanel.style.display = "none";
+          if (editBtn) editBtn.style.display = "";
+        });
+      });
+
+    body
+      .querySelectorAll(".admin__event-booking-save")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var bid = btn.getAttribute("data-event-booking-id");
+          var select = body.querySelector(
+            ".admin__event-booking-status-select[data-event-booking-id='" + bid + "']"
+          );
+          var msgEl = body.querySelector(
+            ".admin__event-booking-inline-msg[data-eb-msg-id='" + bid + "']"
+          );
+          var badge = body.querySelector(
+            "[data-eb-status-badge='" + bid + "']"
+          );
+          var status = select ? select.value : "";
+          if (!bid || !status) return;
+          btn.disabled = true;
+          if (msgEl) {
+            msgEl.textContent = "Saving…";
+            msgEl.className = "admin__inline-msg admin__event-booking-inline-msg";
+          }
+          apiPatch("/api/admin/event-bookings/" + bid, { status: status })
+            .then(function (r) {
+              if (r.ok) {
+                if (badge) {
+                  badge.textContent = status;
+                  badge.className =
+                    "admin__badge " + (statusBadgeClass[status] || "");
+                }
+                if (msgEl) {
+                  msgEl.textContent = "✓ Saved";
+                  msgEl.className =
+                    "admin__inline-msg admin__event-booking-inline-msg admin__inline-msg--ok";
+                }
+                var row = badge && badge.closest("tr");
+                var editCell = row && row.querySelector(".admin__edit-cell");
+                if (status !== "cancelled" && editCell) {
+                  var del = editCell.querySelector(".admin__event-booking-delete-btn");
+                  if (del) del.remove();
+                }
+                if (
+                  status === "cancelled" &&
+                  editCell &&
+                  !editCell.querySelector(".admin__event-booking-delete-btn")
+                ) {
+                  var deleteBtn = document.createElement("button");
+                  deleteBtn.type = "button";
+                  deleteBtn.className =
+                    "btn admin__btn-delete-permanent admin__event-booking-delete-btn";
+                  deleteBtn.setAttribute("data-event-booking-id", bid);
+                  deleteBtn.setAttribute("aria-label", "Delete permanently");
+                  deleteBtn.setAttribute("title", "Delete permanently");
+                  var trashSpan = document.createElement("span");
+                  trashSpan.className = "admin__icon-trash";
+                  trashSpan.setAttribute("aria-hidden", "true");
+                  deleteBtn.appendChild(trashSpan);
+                  deleteBtn.style.marginLeft = "0.5rem";
+                  editCell.insertBefore(
+                    deleteBtn,
+                    editCell.querySelector(".admin__edit-panel--event-booking")
+                  );
+                  deleteBtn.addEventListener("click", function () {
+                    if (
+                      !window.confirm(
+                        "Are you sure you want to delete this cancelled event booking permanently? This cannot be undone."
+                      )
+                    )
+                      return;
+                    apiDelete("/api/admin/event-bookings/" + bid).then(function (res) {
+                      if (res.ok) {
+                        var rrow = body.querySelector(
+                          "tr[data-event-booking-id='" + bid + "']"
+                        );
+                        if (rrow) rrow.remove();
+                        if (panel === "bookingsTab")
+                          bookingsTabEventBookingsCache =
+                            bookingsTabEventBookingsCache.filter(function (x) {
+                              return (x._id || x.id || "").toString() !== bid;
+                            });
+                        else
+                          eventBookingsCache = eventBookingsCache.filter(function (x) {
+                            return (x._id || x.id || "").toString() !== bid;
+                          });
+                        loadEvents();
+                        if (
+                          body.querySelectorAll("tr").length === 0 &&
+                          empty
+                        ) {
+                          empty.style.display = "block";
+                        }
+                      }
+                    });
+                  });
+                }
+                setTimeout(function () {
+                  var ep = document.getElementById(panelPrefix + bid);
+                  var eb = body.querySelector(
+                    ".admin__event-booking-edit-btn[data-event-booking-id='" + bid + "']"
+                  );
+                  if (ep) ep.style.display = "none";
+                  if (eb) eb.style.display = "";
+                  if (msgEl) msgEl.textContent = "";
+                }, 1500);
+                loadEvents();
+              } else {
+                if (msgEl) {
+                  msgEl.textContent =
+                    (r.data && r.data.message) || "Failed";
+                  msgEl.className =
+                    "admin__inline-msg admin__event-booking-inline-msg admin__inline-msg--err";
+                }
+              }
+            })
+            .catch(function () {
+              if (msgEl) {
+                msgEl.textContent = "Network error";
+                msgEl.className =
+                  "admin__inline-msg admin__event-booking-inline-msg admin__inline-msg--err";
+              }
+            })
+            .finally(function () {
+              btn.disabled = false;
+            });
+        });
+      });
+
+    body
+      .querySelectorAll(".admin__event-booking-delete-btn")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var bid = btn.getAttribute("data-event-booking-id");
+          if (!bid) return;
+          if (
+            !window.confirm(
+              "Are you sure you want to delete this cancelled event booking permanently? This cannot be undone."
+            )
+          )
+            return;
+          apiDelete("/api/admin/event-bookings/" + bid).then(function (res) {
+            if (res.ok) {
+              var row = body.querySelector(
+                "tr[data-event-booking-id='" + bid + "']"
+              );
+              if (row) row.remove();
+              if (panel === "bookingsTab")
+                bookingsTabEventBookingsCache =
+                  bookingsTabEventBookingsCache.filter(function (x) {
+                    return (x._id || x.id || "").toString() !== bid;
+                  });
+              else
+                eventBookingsCache = eventBookingsCache.filter(function (x) {
+                  return (x._id || x.id || "").toString() !== bid;
+                });
+              loadEvents();
+              if (
+                body.querySelectorAll("tr").length === 0 &&
+                empty
+              ) {
+                empty.style.display = "block";
+              }
+            }
+          });
+        });
       });
   }
 
@@ -1088,8 +1489,6 @@
   }
 
   // ─── Bookings ─────────────────────────────────────────────────────────────────
-  var applyFilterBtn = document.getElementById("applyFilterBtn");
-  var clearFilterBtn = document.getElementById("clearFilterBtn");
   var filterStatus = document.getElementById("filterStatus");
   var filterUpcoming = document.getElementById("filterUpcoming");
 
@@ -1105,6 +1504,11 @@
   }
 
   function loadBookings() {
+    if (bookingsViewMode === "event") {
+      loadEventBookingsForPanel("bookingsTab");
+      return;
+    }
+
     if (bookingsBody)
       bookingsBody.innerHTML =
         "<tr><td colspan='9' style='text-align:center;padding:1.5rem;color:#a89878;'>Loading…</td></tr>";
@@ -1198,13 +1602,58 @@
     });
   }
 
-  if (applyFilterBtn) applyFilterBtn.addEventListener("click", loadBookings);
+  function setBookingsView(mode) {
+    bookingsViewMode = mode;
+    if (bookingsToggleRoom && bookingsToggleEvent) {
+      var activeRoom = mode === "room";
+      bookingsToggleRoom.classList.toggle("active", activeRoom);
+      bookingsToggleEvent.classList.toggle("active", !activeRoom);
+      bookingsToggleRoom.setAttribute("aria-selected", activeRoom ? "true" : "false");
+      bookingsToggleEvent.setAttribute("aria-selected", !activeRoom ? "true" : "false");
+    }
+    if (bookingsRoomSection)
+      bookingsRoomSection.style.display = mode === "room" ? "" : "none";
+    if (bookingsEventSection)
+      bookingsEventSection.style.display = mode === "event" ? "" : "none";
+    if (filterUpcomingWrap)
+      filterUpcomingWrap.style.display = mode === "room" ? "" : "none";
+    loadBookings();
+  }
 
-  if (clearFilterBtn) {
-    clearFilterBtn.addEventListener("click", function () {
-      if (filterStatus) filterStatus.value = "";
-      if (filterUpcoming) filterUpcoming.value = "";
+  if (bookingsToggleRoom) {
+    bookingsToggleRoom.addEventListener("click", function () {
+      setBookingsView("room");
+    });
+  }
+  if (bookingsToggleEvent) {
+    bookingsToggleEvent.addEventListener("click", function () {
+      setBookingsView("event");
+    });
+  }
+  if (filterStatus) {
+    filterStatus.addEventListener("change", function () {
       loadBookings();
+    });
+  }
+  if (filterUpcoming) {
+    filterUpcoming.addEventListener("change", function () {
+      loadBookings();
+    });
+  }
+
+  var eventBookingApplyFilterBtn = document.getElementById(
+    "eventBookingApplyFilterBtn"
+  );
+  var eventBookingClearFilterBtn = document.getElementById(
+    "eventBookingClearFilterBtn"
+  );
+  if (eventBookingApplyFilterBtn) {
+    eventBookingApplyFilterBtn.addEventListener("click", loadEventBookings);
+  }
+  if (eventBookingClearFilterBtn) {
+    eventBookingClearFilterBtn.addEventListener("click", function () {
+      if (eventBookingFilterStatus) eventBookingFilterStatus.value = "";
+      loadEventBookings();
     });
   }
 

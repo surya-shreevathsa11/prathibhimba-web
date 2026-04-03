@@ -25,133 +25,12 @@
     return d.toISOString().slice(0, 10);
   }
 
-  function formatEventBookingDate(d) {
-    if (!d) return "—";
-    var x = new Date(d);
-    if (isNaN(x.getTime())) return "—";
-    return x.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  }
-
-  function renderEventBookings(bookings, opts) {
-    opts = opts || {};
-    var listEl = $("#cartEventBookingsList");
-    var emptyEl = $("#cartEventBookingsEmpty");
-    var signinEl = $("#cartEventBookingsSignin");
-    var errEl = $("#cartEventBookingsError");
-    if (!listEl) return;
-    if (errEl) {
-      errEl.style.display = "none";
-      errEl.textContent = "";
-    }
-    if (opts.unauthorized) {
-      listEl.innerHTML = "";
-      if (emptyEl) emptyEl.style.display = "none";
-      if (signinEl) signinEl.style.display = "block";
-      return;
-    }
-    if (signinEl) signinEl.style.display = "none";
-    if (opts.error && opts.message) {
-      listEl.innerHTML = "";
-      if (emptyEl) emptyEl.style.display = "none";
-      if (errEl) {
-        errEl.textContent = opts.message;
-        errEl.style.display = "block";
-      }
-      return;
-    }
-    if (!bookings || bookings.length === 0) {
-      listEl.innerHTML = "";
-      if (emptyEl) emptyEl.style.display = "block";
-      return;
-    }
-    if (emptyEl) emptyEl.style.display = "none";
-    listEl.innerHTML = bookings
-      .map(function (b) {
-        var status = (b.status || "pending").toLowerCase();
-        var guestName = b.guest && b.guest.name ? b.guest.name : "—";
-        var ev = b.eventId || b.event;
-        var title =
-          ev && ev.name
-            ? ev.name
-            : ev && ev.title
-              ? ev.title
-              : "—";
-        var start =
-          ev && ev.startDate ? formatEventBookingDate(ev.startDate) : "—";
-        var end = ev && ev.endDate ? formatEventBookingDate(ev.endDate) : "—";
-        var gc =
-          b.guest && b.guest.guestCount != null ? Number(b.guest.guestCount) : null;
-        var dateLine =
-          start + " – " + end + (gc != null && !isNaN(gc) ? " · " + gc + " guest(s)" : "");
-        return (
-          '<div class="my-bookings__item">' +
-          '<span class="my-bookings__guest">' +
-          escapeHtml(guestName) +
-          "</span>" +
-          '<span class="my-bookings__rooms">' +
-          escapeHtml(String(title)) +
-          "</span>" +
-          '<span class="my-bookings__dates">' +
-          escapeHtml(dateLine) +
-          "</span>" +
-          '<span class="my-bookings__total">₹' +
-          (b.totalAmount != null
-            ? Number(b.totalAmount).toLocaleString("en-IN")
-            : "0") +
-          "</span>" +
-          '<span class="my-bookings__status my-bookings__status--' +
-          status +
-          '">' +
-          escapeHtml(status) +
-          "</span>" +
-          "</div>"
-        );
-      })
-      .join("");
-  }
-
-  function fetchEventBookings() {
-    return fetch("/api/booking/events/bookings", { credentials: "same-origin" })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          return { ok: res.ok, data: data };
-        });
-      })
-      .then(function (r) {
-        if (!r.ok) {
-          if (r.data && r.data.message === "Unauthorized") {
-            renderEventBookings([], { unauthorized: true });
-          } else {
-            renderEventBookings([], {
-              error: true,
-              message:
-                (r.data && r.data.message) || "Could not load event bookings.",
-            });
-          }
-          return;
-        }
-        var arr = r.data && r.data.data ? r.data.data : [];
-        renderEventBookings(arr);
-      })
-      .catch(function () {
-        renderEventBookings([], { error: true, message: "Could not load event bookings." });
-      });
-  }
-
   function showStep(stepId) {
     $$(".cart-step").forEach(function (el) {
       el.classList.add("cart-step--hidden");
     });
     var step = document.getElementById(stepId);
     if (step) step.classList.remove("cart-step--hidden");
-    var grid = $("#cartBookingGrid");
-    if (grid) {
-      grid.style.display = stepId === "stepCheckout" ? "none" : "";
-    }
   }
 
   function checkAuth(cb) {
@@ -374,11 +253,9 @@
       if (result.unauthorized) {
         serverCart = [];
         showSignInRequired();
-        renderEventBookings([], { unauthorized: true });
         return;
       }
       renderCartList();
-      fetchEventBookings();
       try {
         if (sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY) === "cart") {
           sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);

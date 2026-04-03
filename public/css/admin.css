@@ -884,6 +884,22 @@ body.admin--dashboard .admin__season-form .form__group {
   padding-top: 0.5rem;
 }
 
+/* Event bookings table (Events tab): same card rhythm, separated from form/list */
+#tabContentEvents > .admin__section--event-bookings {
+  margin-top: 2.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(39, 41, 50, 0.1);
+}
+
+.admin__table--event-bookings th,
+.admin__table--event-bookings td {
+  vertical-align: top;
+}
+
+.admin__table--event-bookings .admin__edit-cell {
+  vertical-align: middle;
+}
+
 .admin__bookings-header {
   display: flex;
   flex-wrap: wrap;
@@ -901,6 +917,44 @@ body.admin--dashboard .admin__season-form .form__group {
   font-family: "Playfair Display", serif;
   font-weight: 600;
   color: var(--color-obsidian, #053827);
+}
+
+.admin__bookings-header-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.admin__bookings-toggle {
+  display: inline-flex;
+  border-radius: 999px;
+  border: 1px solid rgba(5, 56, 39, 0.22);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.admin__bookings-toggle-btn {
+  font-family: "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.45rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--color-obsidian, #053827);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.admin__bookings-toggle-btn:hover {
+  background: rgba(5, 56, 39, 0.06);
+}
+
+.admin__bookings-toggle-btn.active {
+  background: var(--color-burnt-copper, #fcc76b);
+  color: #053827;
 }
 
 .admin__bookings-filters {

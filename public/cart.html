@@ -103,47 +103,27 @@
         <h1 class="cart-page__title">Booking</h1>
         <div class="divider"></div>
 
-        <div class="cart-booking-grid" id="cartBookingGrid">
-          <!-- Step 1a: Room cart -->
-          <section class="cart-step cart-step--column" id="stepCart">
-            <h2 class="cart-step__heading">Room booking</h2>
-            <p class="cart-step__sub">Your selection</p>
-            <div class="cart__list" id="cartList"></div>
-            <p class="cart__empty" id="cartEmpty">
-              No rooms added yet.
-              <a href="/#rooms">Add rooms from the Rooms section</a>.
+        <!-- Step 1: Cart -->
+        <section class="cart-step" id="stepCart">
+          <h2 class="cart-step__heading">Your selection</h2>
+          <div class="cart__list" id="cartList"></div>
+          <p class="cart__empty" id="cartEmpty">
+            No rooms added yet.
+            <a href="/#rooms">Add rooms from the Rooms section</a>.
+          </p>
+          <div class="cart__footer" id="cartFooter" style="display: none">
+            <p class="cart__total">
+              Total: <strong id="cartTotal">₹0</strong> / night
             </p>
-            <div class="cart__footer" id="cartFooter" style="display: none">
-              <p class="cart__total">
-                Total: <strong id="cartTotal">₹0</strong> / night
-              </p>
-              <button
-                type="button"
-                class="btn btn--primary btn--full cursor-target"
-                id="cartCheckoutBtn"
-              >
-                Proceed to checkout
-              </button>
-            </div>
-          </section>
-
-          <section
-            class="cart-step cart-step--column"
-            id="stepEventBookings"
-            aria-labelledby="cartEventBookingsHeading"
-          >
-            <h2 class="cart-step__heading" id="cartEventBookingsHeading">Event booking</h2>
-            <div class="my-bookings__list cart__event-list" id="cartEventBookingsList"></div>
-            <p class="cart__empty" id="cartEventBookingsEmpty" style="display: none">
-              No event bookings yet.
-              <a href="/#events">Browse upcoming events</a>.
-            </p>
-            <p class="cart__empty" id="cartEventBookingsSignin" style="display: none">
-              Sign in to view your event bookings.
-            </p>
-            <p class="form__error" id="cartEventBookingsError" style="display: none"></p>
-          </section>
-        </div>
+            <button
+              type="button"
+              class="btn btn--primary btn--full cursor-target"
+              id="cartCheckoutBtn"
+            >
+              Proceed to checkout
+            </button>
+          </div>
+        </section>
 
         <!-- Step 2: Guest details (name, email, phone) -->
         <section class="cart-step cart-step--hidden" id="stepCheckout">

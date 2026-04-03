@@ -224,7 +224,31 @@
           <div id="tabContentBookings" class="admin__tab-content active" role="tabpanel">
             <section class="admin__section admin__section--bookings">
               <div class="admin__bookings-header">
-                <h2 class="admin__bookings-title">All Bookings</h2>
+                <div class="admin__bookings-header-main">
+                  <h2 class="admin__bookings-title">All Bookings</h2>
+                  <div class="admin__bookings-toggle" role="tablist" aria-label="Booking type">
+                    <button
+                      type="button"
+                      class="admin__bookings-toggle-btn active"
+                      id="bookingsToggleRoom"
+                      data-bookings-view="room"
+                      role="tab"
+                      aria-selected="true"
+                    >
+                      Room booking
+                    </button>
+                    <button
+                      type="button"
+                      class="admin__bookings-toggle-btn"
+                      id="bookingsToggleEvent"
+                      data-bookings-view="event"
+                      role="tab"
+                      aria-selected="false"
+                    >
+                      Event booking
+                    </button>
+                  </div>
+                </div>
                 <div class="admin__bookings-filters">
                   <div class="form__group admin__filter-inline">
                     <label for="filterStatus">Status</label>
@@ -236,38 +260,68 @@
                       <option value="blocked">Blocked</option>
                     </select>
                   </div>
-                  <div class="form__group admin__filter-inline">
+                  <div class="form__group admin__filter-inline" id="filterUpcomingWrap">
                     <label for="filterUpcoming">Show</label>
                     <select id="filterUpcoming">
                       <option value="">All bookings</option>
                       <option value="true">Upcoming only</option>
                     </select>
                   </div>
-                  <button type="button" class="btn btn--outline btn--sm" id="applyFilterBtn">Apply</button>
-                  <button type="button" class="btn btn--ghost btn--sm" id="clearFilterBtn">Clear</button>
                 </div>
               </div>
-              <div class="admin__table-wrap">
-                <table class="admin__table admin__table--bookings" id="bookingsTable">
-                  <thead>
-                    <tr>
-                      <th>Guest</th>
-                      <th>Phone</th>
-                      <th>Rooms</th>
-                      <th>Guests</th>
-                      <th>Check-in</th>
-                      <th>Check-out</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                      <th class="admin__th-actions">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="bookingsBody"></tbody>
-                </table>
+              <div id="bookingsRoomSection">
+                <div class="admin__table-wrap">
+                  <table class="admin__table admin__table--bookings" id="bookingsTable">
+                    <thead>
+                      <tr>
+                        <th>Guest</th>
+                        <th>Phone</th>
+                        <th>Rooms</th>
+                        <th>Guests</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th class="admin__th-actions">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bookingsBody"></tbody>
+                  </table>
+                </div>
+                <div class="admin__empty admin__empty--bookings" id="bookingsEmpty" style="display: none">
+                  <p>No bookings found.</p>
+                  <p class="admin__empty-hint">Try changing the status or date filter.</p>
+                </div>
               </div>
-              <div class="admin__empty admin__empty--bookings" id="bookingsEmpty" style="display: none">
-                <p>No bookings found.</p>
-                <p class="admin__empty-hint">Try changing the status or date filter.</p>
+              <div id="bookingsEventSection" class="admin__bookings-event-panel" style="display: none">
+                <div class="admin__table-wrap">
+                  <table
+                    class="admin__table admin__table--bookings admin__table--event-bookings"
+                    id="bookingsTabEventBookingsTable"
+                  >
+                    <thead>
+                      <tr>
+                        <th>Guest</th>
+                        <th>Phone</th>
+                        <th>Event</th>
+                        <th>Guests</th>
+                        <th>Event dates</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th class="admin__th-actions">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bookingsTabEventBookingsBody"></tbody>
+                  </table>
+                </div>
+                <div
+                  class="admin__empty admin__empty--bookings"
+                  id="bookingsTabEventBookingsEmpty"
+                  style="display: none"
+                >
+                  <p>No event bookings found.</p>
+                  <p class="admin__empty-hint">Try changing the status filter.</p>
+                </div>
               </div>
             </section>
           </div>
@@ -359,6 +413,73 @@
                   <div class="admin__events-list" id="eventsList" aria-live="polite"></div>
                   <p class="admin__empty admin__events-empty" id="eventsEmpty">No events added yet. Create an event to display it on the website.</p>
                 </div>
+              </div>
+            </section>
+
+            <section
+              class="admin__section admin__section--bookings admin__section--event-bookings"
+              aria-labelledby="eventBookingsHeading"
+            >
+              <div class="admin__bookings-header">
+                <h2 class="admin__bookings-title" id="eventBookingsHeading">
+                  Event bookings
+                </h2>
+                <div class="admin__bookings-filters">
+                  <div class="form__group admin__filter-inline">
+                    <label for="eventBookingFilterStatus">Status</label>
+                    <select id="eventBookingFilterStatus">
+                      <option value="">All Status</option>
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="cancelled">Cancelled</option>
+                      <option value="blocked">Blocked</option>
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn--outline btn--sm"
+                    id="eventBookingApplyFilterBtn"
+                  >
+                    Apply
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    id="eventBookingClearFilterBtn"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div class="admin__table-wrap">
+                <table
+                  class="admin__table admin__table--bookings admin__table--event-bookings"
+                  id="eventBookingsTable"
+                >
+                  <thead>
+                    <tr>
+                      <th>Guest</th>
+                      <th>Phone</th>
+                      <th>Event</th>
+                      <th>Guests</th>
+                      <th>Event dates</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th class="admin__th-actions">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eventBookingsBody"></tbody>
+                </table>
+              </div>
+              <div
+                class="admin__empty admin__empty--bookings"
+                id="eventBookingsEmpty"
+                style="display: none"
+              >
+                <p>No event bookings found.</p>
+                <p class="admin__empty-hint">
+                  Try changing the status filter.
+                </p>
               </div>
             </section>
           </div>

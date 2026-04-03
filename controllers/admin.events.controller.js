@@ -29,29 +29,30 @@ function respondEventImageUploadSignature(res, folder) {
 
 // GET /api/admin/events/cloudinary-signature/banner
 export const getEventBannerCloudinarySignature = (req, res) => {
-  respondEventImageUploadSignature(res, "summer-green/events/banner");
+  respondEventImageUploadSignature(res, "prathibhimba/events/banner");
 };
 
 // GET /api/admin/events/cloudinary-signature/images
 export const getEventImagesCloudinarySignature = (req, res) => {
-  respondEventImageUploadSignature(res, "summer-green/events/images");
+  respondEventImageUploadSignature(res, "prathibhimba/events/images");
 };
 
 // GET /api/admin/events/cloudinary-signature (legacy: same folder as before)
 export const getEventCloudinarySignature = (req, res) => {
-  respondEventImageUploadSignature(res, "summer-green/events");
+  respondEventImageUploadSignature(res, "prathibhimba/events");
 };
 
 // ─── Cloudinary Signature (PDFs / Raw files) ─────────────────────────────────
 // GET /api/admin/events/cloudinary-signature/raw
 export const getEventCloudinaryRawSignature = (req, res) => {
   const timestamp = Math.round(Date.now() / 1000);
-  const folder = "summer-green/events";
+  const folder = "prathibhimba/events";
   const source = "uw";
   const resource_type = "raw";
 
+  // Widget's string to sign omits resource_type; signing it caused invalid signature for raw/PDF.
   const signature = cloudinary.utils.api_sign_request(
-    { timestamp, folder, source, resource_type },
+    { timestamp, folder, source },
     process.env.CLOUDINARY_API_SECRET
   );
 

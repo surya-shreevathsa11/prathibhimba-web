@@ -439,23 +439,34 @@
         setMsg(eventsMsg, "Cloudinary widget is loading. Try again in a moment.", true);
         return;
       }
-      apiGet("/api/admin/events/cloudinary-signature")
+      var sigPath =
+        type === "brochure"
+          ? "/api/admin/events/cloudinary-signature/raw"
+          : "/api/admin/events/cloudinary-signature/banner";
+      apiGet(sigPath)
         .then(function (r) {
           if (!r.ok || !r.data) {
             setMsg(eventsMsg, "Could not get upload signature.", true);
             return;
           }
           var d = r.data;
+          var widgetOpts = {
+            cloudName: d.cloudName,
+            apiKey: d.apiKey,
+            uploadSignature: d.signature,
+            uploadSignatureTimestamp: d.timestamp,
+            folder: d.folder,
+            sources: ["local", "camera"],
+            multiple: false,
+          };
+          if (d.resource_type) {
+            widgetOpts.resourceType = d.resource_type;
+          }
+          if (type === "brochure") {
+            widgetOpts.clientAllowedFormats = ["pdf"];
+          }
           var widget = cloudinary.createUploadWidget(
-            {
-              cloudName: d.cloudName,
-              apiKey: d.apiKey,
-              uploadSignature: d.signature,
-              uploadSignatureTimestamp: d.timestamp,
-              folder: d.folder,
-              sources: ["local", "camera"],
-              multiple: false,
-            },
+            widgetOpts,
             function (error, result) {
               if (error) return;
               if (result.event === "success") {

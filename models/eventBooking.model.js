@@ -44,6 +44,7 @@ const EventBookingSchema = new Schema(
     amountPaid: {
       type: Number,
       required: true,
+      default: 0,
     },
 
     // Razorpay payment fields

@@ -21,6 +21,12 @@ const eventSchema = new mongoose.Schema(
       min: 1,
     },
 
+    pricePerPerson: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+
     curPeopleEnrolled: {
       type: Number,
       default: 0,

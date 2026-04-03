@@ -411,7 +411,7 @@ cloudinary.config({
 // GET /api/admin/cloudinary-signature
 export const getCloudinarySignature = (req, res) => {
   const timestamp = Math.round(Date.now() / 1000);
-  const folder = "summer-green";
+  const folder = "prathibhimba";
   const source = "uw";
 
   const signature = cloudinary.utils.api_sign_request(

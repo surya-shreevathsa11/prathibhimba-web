@@ -18,12 +18,21 @@ import {
   removeGalleryImage,
   getCloudinarySignature,
 } from "../controllers/admin.controller.js";
+import {
+  getEventBookings,
+  updateEventBooking,
+  deleteEventBooking,
+} from "../controllers/admin.eventBookings.controller.js";
 
 const router = Router();
 
 router.get("/bookings", verifyJWT, getBooking); // Get all bookings
 router.patch("/bookings/:bookingId", verifyJWT, updateBooking); // Update booking
 router.delete("/bookings/:bookingId", verifyJWT, deleteBooking); // Delete cancelled booking permanently
+
+router.get("/event-bookings", verifyJWT, getEventBookings);
+router.patch("/event-bookings/:eventBookingId", verifyJWT, updateEventBooking);
+router.delete("/event-bookings/:eventBookingId", verifyJWT, deleteEventBooking);
 
 router.put("/base-price", verifyJWT, updateBasePrices);
 router.post("/seasonal-price", verifyJWT, addSeasonalPrice);

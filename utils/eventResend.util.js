@@ -389,3 +389,70 @@ export async function sendPaymentFailedMailToGuest(booking) {
   });
 }
 
+function buildEventCancellationHtml(event, booking) {
+  const eventRange = formatRange(event?.startDate, event?.endDate);
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><title>Event Booking Cancelled – Prathibhimba</title></head>
+<body style="margin:0;padding:0;background:#edeae2;font-family:Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#edeae2;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+          <tr>
+            <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:12px 12px 0 0;padding:48px 40px 36px;">
+              <p style="margin:0 0 8px;font-size:11px;letter-spacing:4px;color:#c9a84c;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;">Lakeside Retreat</p>
+              <h1 style="margin:0;font-family:'Georgia',serif;font-size:38px;color:#f5f0e8;font-weight:normal;">Prathibhimba</h1>
+              <div style="width:48px;height:2px;background:#c9a84c;margin:16px auto 0;"></div>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="background:#6a3028;padding:14px 40px;">
+              <p style="margin:0;font-size:12px;letter-spacing:3px;color:#fff;text-transform:uppercase;font-family:Helvetica,Arial,sans-serif;font-weight:bold;">&#10005; &nbsp; Event Booking Cancelled</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#ffffff;padding:40px;">
+              <p style="margin:0 0 16px;font-family:'Georgia',serif;font-size:20px;color:#1a4035;">Dear ${booking.guest.name},</p>
+              <p style="margin:0 0 24px;font-size:14px;color:#5a5548;line-height:1.8;">
+                Your event booking at Prathibhimba has been cancelled. If you have questions about refunds or next steps, please contact us on WhatsApp.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f9f7f2;border:1px solid #ddd8cc;border-radius:8px;margin-bottom:24px;">
+                <tr>
+                  <td style="padding:16px 24px;">
+                    <table width="100%" cellpadding="4" cellspacing="0" border="0">
+                      <tr><td style="font-size:12px;color:#7a7260;">Event</td><td align="right" style="font-size:12px;color:#1a4035;">${event?.name || "—"}</td></tr>
+                      <tr><td style="font-size:12px;color:#7a7260;">Dates</td><td align="right" style="font-size:12px;color:#1a4035;">${eventRange}</td></tr>
+                      <tr><td style="font-size:12px;color:#7a7260;">Booking ID</td><td align="right" style="font-size:12px;font-family:'Courier New',monospace;color:#1a4035;">${booking._id}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="background:linear-gradient(160deg,#0d2b22 0%,#1a4035 100%);border-radius:0 0 12px 12px;padding:24px 40px;">
+              <p style="margin:0;font-family:'Georgia',serif;font-size:15px;color:#f5f0e8;">Prathibhimba Lakeside Retreat</p>
+              <p style="margin:6px 0 0;font-size:12px;color:#3a5a50;font-family:Helvetica,Arial,sans-serif;">Madikeri, Coorg, Karnataka</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+}
+
+export async function sendEventCancellationMailToGuest(booking) {
+  const event = await getEventForBooking(booking);
+  await resend.emails.send({
+    from: mailFromGuest,
+    to: booking.guest.email,
+    subject: `Event Booking Cancelled – Prathibhimba (#${booking._id})`,
+    html: buildEventCancellationHtml(event, booking),
+  });
+}
+

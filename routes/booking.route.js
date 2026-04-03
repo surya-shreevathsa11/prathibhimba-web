@@ -10,6 +10,10 @@ import {
   bookRooms,
   listBookings,
 } from "../controllers/booking.controller.js";
+import {
+  bookEvents,
+  listEventsBooked,
+} from "../controllers/eventBooking.controller.js";
 import isAuthenticated from "../middleware/auth.middleware.js";
 
 router.get("/rooms", listRooms);
@@ -21,5 +25,9 @@ router.delete("/cart", isAuthenticated, deleteRoomFromCart);
 
 //booking
 router.post("/checkout", isAuthenticated, bookRooms);
+
+// events booking
+router.post("/events/checkout", isAuthenticated, bookEvents);
+router.get("/events/bookings", isAuthenticated, listEventsBooked);
 
 export default router;

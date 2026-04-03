@@ -4,6 +4,8 @@
   var refreshChatbotAuthUI = null;
   /** Room limit: set from backend after validating /api/booking/rooms response. Only these room IDs are allowed for cart/booking. */
   let validRoomIdsFromBackend = [];
+  /** Per-room guest limits from GET /api/booking/rooms (capacity synced from config/room.js). Key: roomId e.g. "R1". */
+  let roomsCapacityByRoomId = {};
 
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
@@ -185,6 +187,16 @@
     bookRoomCheckOut.addEventListener("change", checkDatesAvailability);
   }
 
+  var bookRoomAdultsEl = $("#bookRoomAdults");
+  var bookRoomChildrenEl = $("#bookRoomChildren");
+  function onBookRoomGuestInput() {
+    if (pendingBookRoom && pendingBookRoom.capacity) {
+      clampBookRoomGuests(pendingBookRoom.capacity);
+    }
+  }
+  if (bookRoomAdultsEl) bookRoomAdultsEl.addEventListener("input", onBookRoomGuestInput);
+  if (bookRoomChildrenEl) bookRoomChildrenEl.addEventListener("input", onBookRoomGuestInput);
+
   var bookRoomForm = $("#bookRoomForm");
   if (bookRoomForm) {
     bookRoomForm.addEventListener("submit", async function (e) {
@@ -202,6 +214,17 @@
       var adults = parseInt($("#bookRoomAdults").value, 10) || 1;
       var children = parseInt($("#bookRoomChildren").value, 10) || 0;
       errEl.textContent = "";
+      var cap = pendingBookRoom && pendingBookRoom.capacity;
+      if (cap) {
+        clampBookRoomGuests(cap);
+        adults = parseInt($("#bookRoomAdults").value, 10) || cap.minAdults;
+        children = parseInt($("#bookRoomChildren").value, 10) || 0;
+      }
+      var guestErr = validateGuestAgainstCapacity(cap, adults, children);
+      if (guestErr) {
+        errEl.textContent = guestErr;
+        return;
+      }
       if (submitBtn) submitBtn.disabled = true;
       try {
         var availRes = await fetch("/api/booking/checkAvailability", {
@@ -340,6 +363,131 @@
       });
     });
   }
+  function escapeBookingHtml(s) {
+    return String(s == null ? "" : s).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function renderMyBookingsRoomRow(b) {
+    var status = (b.status || "pending").toLowerCase();
+    var guestName = b.guest && b.guest.name ? b.guest.name : "—";
+    var rooms = b.rooms || [];
+    var roomsSummary = rooms.length
+      ? rooms
+          .map(function (r) {
+            return r.roomName || r.roomId || "—";
+          })
+          .join(", ")
+      : "—";
+    var checkIn =
+      rooms[0] && rooms[0].checkIn
+        ? new Date(rooms[0].checkIn).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "—";
+    var checkOut =
+      rooms[0] && rooms[0].checkOut
+        ? new Date(rooms[0].checkOut).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "—";
+    return (
+      '<div class="my-bookings__item">' +
+      '<span class="my-bookings__guest">' +
+      escapeBookingHtml(guestName) +
+      "</span>" +
+      '<span class="my-bookings__rooms">' +
+      escapeBookingHtml(roomsSummary) +
+      "</span>" +
+      '<span class="my-bookings__dates">' +
+      checkIn +
+      " – " +
+      checkOut +
+      "</span>" +
+      '<span class="my-bookings__total">₹' +
+      (b.totalAmount != null ? Number(b.totalAmount).toLocaleString("en-IN") : "0") +
+      "</span>" +
+      '<span class="my-bookings__status my-bookings__status--' +
+      status +
+      '">' +
+      status +
+      "</span>" +
+      "</div>"
+    );
+  }
+  function renderMyBookingsEventRow(b) {
+    var status = (b.status || "pending").toLowerCase();
+    var guestName = b.guest && b.guest.name ? b.guest.name : "—";
+    var event = b.eventId || b.event;
+    var title =
+      event && event.name
+        ? event.name
+        : event && event._id
+          ? String(event._id)
+          : "—";
+    var checkIn =
+      event && event.startDate
+        ? new Date(event.startDate).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "—";
+    var checkOut =
+      event && event.endDate
+        ? new Date(event.endDate).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "—";
+    return (
+      '<div class="my-bookings__item">' +
+      '<span class="my-bookings__guest">' +
+      escapeBookingHtml(guestName) +
+      "</span>" +
+      '<span class="my-bookings__rooms">' +
+      escapeBookingHtml(title) +
+      "</span>" +
+      '<span class="my-bookings__dates">' +
+      checkIn +
+      " – " +
+      checkOut +
+      "</span>" +
+      '<span class="my-bookings__total">₹' +
+      (b.totalAmount != null ? Number(b.totalAmount).toLocaleString("en-IN") : "0") +
+      "</span>" +
+      '<span class="my-bookings__status my-bookings__status--' +
+      status +
+      '">' +
+      status +
+      "</span>" +
+      "</div>"
+    );
+  }
+  function fillMyBookingsModal(roomsBookings, eventBookings) {
+    var listRoomsEl = $("#myBookingsRoomsList");
+    var listEventsEl = $("#myBookingsEventsList");
+    var emptyRoomsEl = $("#myBookingsRoomsEmpty");
+    var emptyEventsEl = $("#myBookingsEventsEmpty");
+    var rooms = roomsBookings || [];
+    var events = eventBookings || [];
+    if (listRoomsEl) {
+      listRoomsEl.innerHTML = rooms.map(renderMyBookingsRoomRow).join("");
+    }
+    if (emptyRoomsEl) {
+      emptyRoomsEl.style.display = rooms.length === 0 ? "block" : "none";
+    }
+    if (listEventsEl) {
+      listEventsEl.innerHTML = events.map(renderMyBookingsEventRow).join("");
+    }
+    if (emptyEventsEl) {
+      emptyEventsEl.style.display = events.length === 0 ? "block" : "none";
+    }
+  }
+
   const navProfileBookings = $("#navProfileBookings");
   if (navProfileBookings) {
     navProfileBookings.addEventListener("click", (e) => {
@@ -348,53 +496,58 @@
       const navLinks = $("#navLinks");
       if (navLinks) navLinks.classList.remove("open");
 
-      var listEl = $("#myBookingsList");
       var emptyEl = $("#myBookingsError");
-      var emptyMsgEl = $("#myBookingsEmpty");
-      if (listEl) listEl.innerHTML = "";
-      if (emptyEl) { emptyEl.style.display = "none"; emptyEl.textContent = ""; }
-      if (emptyMsgEl) emptyMsgEl.style.display = "none";
+      if (emptyEl) {
+        emptyEl.style.display = "none";
+        emptyEl.textContent = "";
+      }
 
       fetch("/api/booking/bookings", { credentials: "same-origin" })
-        .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
         .then(function (result) {
           if (!result.ok) {
             if (emptyEl) {
-              emptyEl.textContent = result.data && result.data.message ? result.data.message : "Please sign in to view bookings.";
+              emptyEl.textContent =
+                result.data && result.data.message
+                  ? result.data.message
+                  : "Please sign in to view bookings.";
               emptyEl.style.display = "block";
             }
+            fillMyBookingsModal([], []);
             openModal("#myBookingsModal");
             return;
           }
-          var bookings = result.data && result.data.data ? result.data.data : [];
-          if (bookings.length === 0) {
-            if (emptyMsgEl) emptyMsgEl.style.display = "block";
-          } else if (listEl) {
-            listEl.innerHTML = bookings.map(function (b) {
-              var rooms = b.rooms || [];
-              var roomsSummary = rooms.map(function (r) { return r.roomName || r.roomId || "—"; }).join(", ");
-              var checkIn = rooms[0] && rooms[0].checkIn ? new Date(rooms[0].checkIn).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
-              var checkOut = rooms[0] && rooms[0].checkOut ? new Date(rooms[0].checkOut).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—";
-              var status = (b.status || "pending").toLowerCase();
-              var guestName = (b.guest && b.guest.name) ? b.guest.name : "—";
-              return (
-                "<div class=\"my-bookings__item\">" +
-                "<span class=\"my-bookings__guest\">" + (guestName.replace(/</g, "&lt;").replace(/>/g, "&gt;")) + "</span>" +
-                "<span class=\"my-bookings__rooms\">" + (roomsSummary.replace(/</g, "&lt;").replace(/>/g, "&gt;")) + "</span>" +
-                "<span class=\"my-bookings__dates\">" + checkIn + " – " + checkOut + "</span>" +
-                "<span class=\"my-bookings__total\">₹" + (b.totalAmount != null ? Number(b.totalAmount).toLocaleString("en-IN") : "0") + "</span>" +
-                "<span class=\"my-bookings__status my-bookings__status--" + status + "\">" + status + "</span>" +
-                "</div>"
-              );
-            }).join("");
-          }
-          openModal("#myBookingsModal");
+          var roomsBookings = result.data && result.data.data ? result.data.data : [];
+
+          fetch("/api/booking/events/bookings", { credentials: "same-origin" })
+            .then(function (res) {
+              return res.json().then(function (data) {
+                return { ok: res.ok, data: data };
+              });
+            })
+            .then(function (eventsResult) {
+              var eventBookings =
+                eventsResult && eventsResult.ok && eventsResult.data
+                  ? eventsResult.data.data || eventsResult.data
+                  : [];
+              fillMyBookingsModal(roomsBookings, Array.isArray(eventBookings) ? eventBookings : []);
+              openModal("#myBookingsModal");
+            })
+            .catch(function () {
+              fillMyBookingsModal(roomsBookings, []);
+              openModal("#myBookingsModal");
+            });
         })
         .catch(function () {
           if (emptyEl) {
             emptyEl.textContent = "Could not load bookings.";
             emptyEl.style.display = "block";
           }
+          fillMyBookingsModal([], []);
           openModal("#myBookingsModal");
         });
     });
@@ -449,8 +602,75 @@
 
   let pendingBookRoom = null;
 
+  function clampBookRoomGuests(cap) {
+    var adultsEl = $("#bookRoomAdults");
+    var childrenEl = $("#bookRoomChildren");
+    if (!adultsEl || !childrenEl || !cap) return;
+    var a = parseInt(adultsEl.value, 10);
+    var c = parseInt(childrenEl.value, 10);
+    if (Number.isNaN(a)) a = cap.minAdults;
+    if (Number.isNaN(c)) c = 0;
+    if (a < cap.minAdults) a = cap.minAdults;
+    if (a > cap.maxAdults) a = cap.maxAdults;
+    if (c < 0) c = 0;
+    if (c > cap.maxChildren) c = cap.maxChildren;
+    if (a + c > cap.maxTotal) {
+      c = Math.min(c, cap.maxTotal - a);
+      if (c < 0) c = 0;
+      if (a + c > cap.maxTotal) {
+        a = Math.max(cap.minAdults, cap.maxTotal - c);
+        if (a > cap.maxAdults) {
+          a = cap.maxAdults;
+          c = Math.max(0, cap.maxTotal - a);
+          if (c > cap.maxChildren) c = cap.maxChildren;
+        }
+      }
+    }
+    adultsEl.value = String(a);
+    childrenEl.value = String(c);
+  }
+
+  function applyBookRoomGuestLimits(cap) {
+    var adultsEl = $("#bookRoomAdults");
+    var childrenEl = $("#bookRoomChildren");
+    if (!adultsEl || !childrenEl || !cap) return;
+    adultsEl.setAttribute("min", String(cap.minAdults));
+    adultsEl.setAttribute("max", String(cap.maxAdults));
+    childrenEl.setAttribute("min", "0");
+    childrenEl.setAttribute("max", String(cap.maxChildren));
+    adultsEl.value = String(cap.minAdults);
+    childrenEl.value = "0";
+    clampBookRoomGuests(cap);
+  }
+
+  function validateGuestAgainstCapacity(cap, adults, children) {
+    if (!cap) {
+      return "Guest limits are not available. Please refresh the page.";
+    }
+    if (adults < cap.minAdults) {
+      return "At least " + cap.minAdults + " adult(s) required.";
+    }
+    if (adults > cap.maxAdults) {
+      return "Too many adults for this room.";
+    }
+    if (children > cap.maxChildren) {
+      return "Too many children for this room.";
+    }
+    if (adults + children > cap.maxTotal) {
+      return "Total guest limit exceeded for this room.";
+    }
+    return null;
+  }
+
   function openBookRoomModal(roomId, roomName, roomPrice) {
-    pendingBookRoom = { id: roomId, name: roomName, price: roomPrice };
+    var roomKey = "R" + roomId;
+    var cap = roomsCapacityByRoomId[roomKey];
+    pendingBookRoom = {
+      id: roomId,
+      name: roomName,
+      price: roomPrice,
+      capacity: cap || null,
+    };
     const nameEl = $("#bookRoomName");
     if (nameEl) nameEl.textContent = roomName;
     const errEl = $("#bookRoomError");
@@ -468,8 +688,20 @@
     }
     const adults = $("#bookRoomAdults");
     const children = $("#bookRoomChildren");
-    if (adults) adults.value = 1;
-    if (children) children.value = 0;
+    if (cap) {
+      applyBookRoomGuestLimits(cap);
+    } else {
+      if (adults) {
+        adults.value = "1";
+        adults.removeAttribute("max");
+        adults.setAttribute("min", "1");
+      }
+      if (children) {
+        children.value = "0";
+        children.removeAttribute("max");
+        children.setAttribute("min", "0");
+      }
+    }
     openModal("#bookRoomModal");
   }
 
@@ -498,6 +730,13 @@
       validRoomIdsFromBackend = data.rooms.map(function (r) {
         return r.roomId || (r.id != null ? "R" + r.id : "");
       }).filter(Boolean);
+      roomsCapacityByRoomId = {};
+      data.rooms.forEach(function (r) {
+        var rid = r.roomId || (r.id != null ? "R" + r.id : "");
+        if (rid && r.capacity && typeof r.capacity === "object") {
+          roomsCapacityByRoomId[rid] = r.capacity;
+        }
+      });
       const grid = $("#roomsGrid");
       grid.innerHTML = data.rooms
         .map(
@@ -710,6 +949,22 @@
     var subtitleEl = document.querySelector(".events__content .section__subtitle");
     var textEls = document.querySelectorAll(".events__text");
     var brochureBtn = document.querySelector(".events__brochure-btn");
+    var bookEventBtn = document.querySelector(".events__book-btn");
+    var activeEvent = null;
+    var pendingBookEvent = null;
+
+    var bookEventForm = $("#bookEventForm");
+    var bookEventGuestNameInput = $("#bookEventGuestName");
+    var bookEventEmailInput = $("#bookEventEmail");
+    var bookEventPhoneInput = $("#bookEventPhone");
+    var bookEventGuestCountInput = $("#bookEventGuestCount");
+    var bookEventErrorEl = $("#bookEventError");
+    var bookEventSuccessEl = $("#bookEventSuccess");
+    var bookEventNameEl = $("#bookEventName");
+    var bookEventInfoEl = $("#bookEventInfo");
+    var bookEventTotalInfoEl = $("#bookEventTotalInfo");
+    var bookEventSubmitBtn = $("#bookEventSubmitBtn");
+
     if (!sectionEl || !imgEl || !prevBtn || !nextBtn || !titleEl || !subtitleEl || textEls.length < 1) return;
 
     function showEventsEmptyState() {
@@ -725,11 +980,260 @@
       if (textEls[1]) textEls[1].style.display = "none";
       prevBtn.style.display = "none";
       nextBtn.style.display = "none";
+      activeEvent = null;
+      pendingBookEvent = null;
+      if (bookEventBtn) bookEventBtn.style.display = "none";
       if (brochureBtn) {
         brochureBtn.style.display = "";
         brochureBtn.href = "/brochure.pdf";
       }
     }
+
+    function formatISODate(d) {
+      return d ? new Date(d).toISOString().slice(0, 10) : "—";
+    }
+
+    function openBookEventModal(ev) {
+      if (!ev) return;
+      pendingBookEvent = ev;
+      activeEvent = ev;
+
+      if (bookEventNameEl) bookEventNameEl.textContent = ev.title || "Event";
+
+      var startLabel = ev.startDate ? formatISODate(ev.startDate) : "—";
+      var endLabel = ev.endDate ? formatISODate(ev.endDate) : "—";
+      if (bookEventInfoEl)
+        bookEventInfoEl.textContent = "Dates: " + startLabel + " - " + endLabel;
+
+      var pricePerPerson = ev.pricePerPerson != null ? Number(ev.pricePerPerson) : 0;
+      var availableSpots =
+        ev.maxPeopleAllowed != null && ev.curPeopleEnrolled != null
+          ? Number(ev.maxPeopleAllowed) - Number(ev.curPeopleEnrolled)
+          : 0;
+      var maxGuest = Math.min(2, Math.max(1, availableSpots));
+
+      if (bookEventGuestCountInput) {
+        bookEventGuestCountInput.max = String(maxGuest);
+        bookEventGuestCountInput.value =
+          Number(bookEventGuestCountInput.value) > maxGuest
+            ? String(maxGuest)
+            : bookEventGuestCountInput.value || "1";
+      }
+
+      if (bookEventErrorEl) bookEventErrorEl.textContent = "";
+      if (bookEventSuccessEl) {
+        bookEventSuccessEl.textContent = "";
+        bookEventSuccessEl.style.display = "none";
+      }
+
+      function syncTotal() {
+        if (!pendingBookEvent || !bookEventTotalInfoEl || !bookEventGuestCountInput)
+          return;
+        var count = Number(bookEventGuestCountInput.value) || 1;
+        var total = pricePerPerson * count;
+        bookEventTotalInfoEl.textContent =
+          "₹" +
+          pricePerPerson +
+          " per person · Total: ₹" +
+          Number(total).toLocaleString("en-IN");
+      }
+
+      syncTotal();
+
+      if (availableSpots <= 0 && bookEventSubmitBtn) {
+        bookEventSubmitBtn.disabled = true;
+        if (bookEventErrorEl) bookEventErrorEl.textContent = "No spots available for this event.";
+      } else if (bookEventSubmitBtn) {
+        bookEventSubmitBtn.disabled = false;
+      }
+
+      openModal("#bookEventModal");
+
+      if (bookEventGuestCountInput) {
+        bookEventGuestCountInput.oninput = syncTotal;
+      }
+    }
+
+    function initBookEventForm() {
+      if (!bookEventForm) return;
+
+      if (bookEventGuestCountInput) {
+        bookEventGuestCountInput.addEventListener("input", function () {
+          if (!pendingBookEvent) return;
+          if (!bookEventTotalInfoEl || !bookEventGuestCountInput) return;
+          var pricePerPerson =
+            pendingBookEvent.pricePerPerson != null
+              ? Number(pendingBookEvent.pricePerPerson)
+              : 0;
+          var count = Number(bookEventGuestCountInput.value) || 1;
+          var total = pricePerPerson * count;
+          bookEventTotalInfoEl.textContent =
+            "₹" +
+            pricePerPerson +
+            " per person · Total: ₹" +
+            Number(total).toLocaleString("en-IN");
+        });
+      }
+
+      bookEventForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!pendingBookEvent) return;
+
+        var guestName = bookEventGuestNameInput ? bookEventGuestNameInput.value.trim() : "";
+        var guestEmail = bookEventEmailInput ? bookEventEmailInput.value.trim() : "";
+        var guestPhone = bookEventPhoneInput ? bookEventPhoneInput.value.trim() : "";
+        var guestCount = bookEventGuestCountInput ? Number(bookEventGuestCountInput.value) : 0;
+
+        if (bookEventErrorEl) bookEventErrorEl.textContent = "";
+        if (bookEventSuccessEl) bookEventSuccessEl.style.display = "none";
+
+        if (!guestName || !guestEmail || !guestPhone || !guestCount) {
+          if (bookEventErrorEl) bookEventErrorEl.textContent = "Please fill all guest details.";
+          return;
+        }
+
+        if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = true;
+
+        fetch("/api/booking/events/checkout", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eventId: pendingBookEvent.eventId,
+            guest: {
+              name: guestName,
+              email: guestEmail,
+              phone: guestPhone,
+              guestCount: guestCount,
+            },
+          }),
+        })
+          .then(function (res) {
+            return res.json().then(function (data) {
+              return { status: res.status, data: data };
+            });
+          })
+          .then(function (result) {
+            if (
+              result.status === 201 &&
+              result.data &&
+              result.data.data &&
+              result.data.data.razorpayOrderId &&
+              result.data.data.key
+            ) {
+              closeAllModals();
+
+              if (!window.Razorpay) {
+                alert("Razorpay checkout script not loaded. Please refresh and try again.");
+                if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+                openBookEventModal(pendingBookEvent);
+                return;
+              }
+
+              var bookingData = result.data.data;
+
+              var options = {
+                key: bookingData.key,
+                amount: bookingData.totalAmount * 100,
+                currency: "INR",
+                order_id: bookingData.razorpayOrderId,
+                name: "Prathibhimba",
+                description: "Event Booking",
+                prefill: {
+                  name: guestName,
+                  email: guestEmail,
+                  contact: guestPhone,
+                },
+                handler: function (response) {
+                  fetch("/api/payment/verify-event", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      razorpay_order_id: response.razorpay_order_id,
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_signature: response.razorpay_signature,
+                    }),
+                  })
+                    .then(function (r) {
+                      return r.json();
+                    })
+                    .then(function (data) {
+                      if (data && data.success) {
+                        if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+                      } else {
+                        alert(
+                          data && data.message
+                            ? data.message
+                            : "Payment verification failed. Please contact support."
+                        );
+                        if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+                        openBookEventModal(pendingBookEvent);
+                      }
+                    })
+                    .catch(function () {
+                      alert("Could not verify payment. Please contact support.");
+                      if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+                      openBookEventModal(pendingBookEvent);
+                    });
+                },
+                modal: {
+                  ondismiss: function () {
+                    if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+                    openBookEventModal(pendingBookEvent);
+                  },
+                },
+              };
+
+              var rzp = new window.Razorpay(options);
+
+              rzp.on("payment.failed", function (response) {
+                alert(
+                  "Payment failed: " +
+                    (response && response.error && response.error.description
+                      ? response.error.description
+                      : "Please try again.")
+                );
+                if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+                openBookEventModal(pendingBookEvent);
+              });
+
+              rzp.open();
+            } else {
+              if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+              if (bookEventErrorEl) {
+                bookEventErrorEl.textContent =
+                  (result.data && result.data.message) || "Could not create booking. Please try again.";
+              }
+            }
+          })
+          .catch(function () {
+            if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+            if (bookEventErrorEl) bookEventErrorEl.textContent = "Network error. Please try again.";
+          });
+      });
+    }
+
+    // Hook up the "Book an Event" click
+    if (bookEventBtn) {
+      bookEventBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (!activeEvent) return;
+        if (typeof checkAuth === "function") {
+          checkAuth(function (loggedIn) {
+            if (!loggedIn) {
+              openModal("#signInModal");
+              return;
+            }
+            openBookEventModal(activeEvent);
+          });
+        } else {
+          openBookEventModal(activeEvent);
+        }
+      });
+    }
+
+    initBookEventForm();
 
     fetch("/api/events")
       .then(function (res) {
@@ -751,15 +1255,45 @@
             firstSentence = desc.slice(0, dotIdx + 1);
             secondSentence = desc.slice(dotIdx + 2);
           }
-          if (secondSentence) {
-            secondSentence = secondSentence;
-          } else {
-            secondSentence = "Max guests: " + (ev.maxPeopleAllowed != null ? ev.maxPeopleAllowed : "—");
+
+          function formatISODate(d) {
+            return d ? new Date(d).toISOString().slice(0, 10) : "—";
           }
+
+          var maxGuests =
+            ev.maxPeopleAllowed != null ? ev.maxPeopleAllowed : "—";
+          var enrolled =
+            ev.curPeopleEnrolled != null ? ev.curPeopleEnrolled : 0;
+          var pricePerPerson =
+            ev.pricePerPerson != null ? ev.pricePerPerson : 0;
+          var startLabel = ev.startDate ? formatISODate(ev.startDate) : "—";
+          var endLabel = ev.endDate ? formatISODate(ev.endDate) : "—";
+
+          var meta =
+            "Max guests: " +
+            maxGuests +
+            "  --  enrolled: " +
+            enrolled +
+            "\n" +
+            "Price per person: ₹" +
+            pricePerPerson +
+            "\n" +
+            "Dates: " +
+            startLabel +
+            " - " +
+            endLabel;
+
+          var secondLine = (secondSentence ? secondSentence + "\n\n" : "") + meta;
           return {
             subtitle: "Upcoming Events",
             title: ev.name || "Event",
-            lines: [firstSentence, secondSentence],
+            eventId: ev._id || ev.id,
+            maxPeopleAllowed: ev.maxPeopleAllowed,
+            curPeopleEnrolled: ev.curPeopleEnrolled,
+            pricePerPerson: ev.pricePerPerson,
+            startDate: ev.startDate,
+            endDate: ev.endDate,
+            lines: [firstSentence, secondLine],
             image:
               ev.banner ||
               "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&h=800&q=80",
@@ -773,6 +1307,7 @@
         function showEvent(nextIdx) {
           idx = (nextIdx + events.length) % events.length;
           var ev = events[idx];
+          activeEvent = ev;
           imgEl.style.opacity = "0";
           imgEl.style.filter = "blur(4px) scale(1.02)";
           setTimeout(function () {

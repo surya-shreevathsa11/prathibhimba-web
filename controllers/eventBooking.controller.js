@@ -36,10 +36,15 @@ export const bookEvents = async (req, res) => {
       const availableSpots = event.maxPeopleAllowed - event.curPeopleEnrolled;
       return res
         .status(400)
-        .json({ message: "Only ${ availableSpots} slot(s) available" });
+        .json({
+          message: `Only ${availableSpots} slot(s) available`,
+        });
     }
 
-    const totalPrice = event.pricePerPerson * Number(guest.guestCount);
+    const totalPrice =
+      Number(event.pricePerPerson || 0) * Number(guest.guestCount);
+    const amountPaise = Math.max(100, Math.round(totalPrice * 100));
+    const chargedTotal = amountPaise / 100;
 
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
@@ -49,7 +54,7 @@ export const bookEvents = async (req, res) => {
     const receiptId = crypto.randomBytes(6).toString("hex");
 
     const order = await razorpay.orders.create({
-      amount: totalPrice * 100,
+      amount: amountPaise,
       currency: "INR",
       receipt: `booking_${receiptId}`,
     });
@@ -65,9 +70,9 @@ export const bookEvents = async (req, res) => {
       userId: req.user._id,
       eventId,
       guest: guestInfo,
-      totalAmount: totalPrice,
+      totalAmount: chargedTotal,
       amountPaid: 0,
-      razorpayOrderId: order._id,
+      razorpayOrderId: order.id,
       status: "pending",
     });
 
@@ -85,8 +90,28 @@ export const bookEvents = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("bookEvents:", error);
     return res
       .status(500)
-      .json({ message: "Something went wrong while bookign events" });
+      .json({ message: "Something went wrong while booking events" });
+  }
+};
+
+// GET /api/booking/events/bookings
+// Lists the authenticated user's event bookings for "My Bookings"
+export const listEventsBooked = async (req, res) => {
+  try {
+    const userId = req?.user?._id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const bookings = await EventBooking.find({ userId })
+      .populate("eventId")
+      .lean()
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ data: bookings });
+  } catch (error) {
+    console.error("Error listing event bookings:", error);
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };

@@ -9,7 +9,7 @@
     <title>Prathibhimba | Lakeside Retreat in Coorg</title>
     <meta
       name="description"
-      content="Boutique Coorg homestay near Madikeri: Prathibhimba offers lake views amid coffee estates. Private rooms, dorms, estate walks—book your peaceful getaway."
+      content="Lakeside Coorg homestay near Madikeri: Prathibhimba offers lake views amid coffee estates. Private rooms, dorms, estate walks—book your peaceful getaway."
     />
     <link rel="canonical" href="https://prathibhimbastays.com/" />
     <meta property="og:type" content="website" />
@@ -20,7 +20,7 @@
     />
     <meta
       property="og:description"
-      content="Boutique Coorg homestay near Madikeri: Prathibhimba offers lake views amid coffee estates. Private rooms, dorms, estate walks—book your peaceful getaway."
+      content="Lakeside Coorg homestay near Madikeri: Prathibhimba offers lake views amid coffee estates. Private rooms, dorms, estate walks—book your peaceful getaway."
     />
     <meta
       property="og:image"
@@ -30,11 +30,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Prathibhimba | Boutique Coorg Homestay near Madikeri"
+      content="Prathibhimba | Lakeside Coorg Homestay near Madikeri"
     />
     <meta
       name="twitter:description"
-      content="Boutique Coorg homestay near Madikeri: Prathibhimba offers lake views amid coffee estates. Private rooms, dorms, estate walks—book your peaceful getaway."
+      content="Lakeside Coorg homestay near Madikeri: Prathibhimba offers lake views amid coffee estates. Private rooms, dorms, estate walks—book your peaceful getaway."
     />
     <meta
       name="twitter:image"
@@ -797,7 +797,6 @@
                 type="number"
                 id="bookRoomAdults"
                 min="1"
-                max="20"
                 value="1"
                 required
               />
@@ -808,7 +807,6 @@
                 type="number"
                 id="bookRoomChildren"
                 min="0"
-                max="20"
                 value="0"
               />
             </div>
@@ -840,14 +838,94 @@
       </div>
     </div>
 
+    <!-- Book Event modal -->
+    <div
+      class="modal"
+      id="bookEventModal"
+      aria-modal="true"
+      aria-label="Book event"
+    >
+      <div class="modal__overlay" data-close></div>
+      <div class="modal__content modal__content--book-event">
+        <button class="modal__close" data-close aria-label="Close">&times;</button>
+        <h3 class="modal__title" id="bookEventModalTitle">Book an event</h3>
+        <p class="modal__room-name" id="bookEventName"></p>
+        <p class="modal__room-info" id="bookEventInfo"></p>
+        <form id="bookEventForm" class="form form--stacked">
+          <div class="form__row form__row--split-labels">
+            <div class="form__group">
+              <label for="bookEventGuestName">Full name</label>
+              <input
+                type="text"
+                id="bookEventGuestName"
+                placeholder="Your name"
+                required
+              />
+            </div>
+            <div class="form__group">
+              <label for="bookEventEmail">Email</label>
+              <input
+                type="email"
+                id="bookEventEmail"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+          </div>
+          <div class="form__row form__row--split-labels">
+            <div class="form__group">
+              <label for="bookEventPhone">Phone number</label>
+              <input
+                type="tel"
+                id="bookEventPhone"
+                placeholder="+91 90009 00009"
+                required
+              />
+            </div>
+            <div class="form__group">
+              <label for="bookEventGuestCount">Guests</label>
+              <input
+                type="number"
+                id="bookEventGuestCount"
+                min="1"
+                max="2"
+                value="1"
+                required
+              />
+            </div>
+          </div>
+          <p class="form__error" id="bookEventError"></p>
+          <p class="modal__room-info" id="bookEventTotalInfo" style="margin-bottom: 0.75rem"></p>
+          <button
+            type="submit"
+            class="btn btn--primary btn--full cursor-target"
+            id="bookEventSubmitBtn"
+          >
+            Book &amp; Pay
+          </button>
+          <p class="form__success" id="bookEventSuccess" style="display: none"></p>
+        </form>
+      </div>
+    </div>
+
     <!-- My Bookings modal (list from API) -->
     <div class="modal modal--my-bookings" id="myBookingsModal" aria-label="My Bookings">
       <div class="modal__overlay" data-close></div>
       <div class="modal__content modal__content--my-bookings">
         <button class="modal__close" data-close aria-label="Close">&times;</button>
         <h3 class="modal__title">My Bookings</h3>
-        <div class="my-bookings__list" id="myBookingsList"></div>
-        <p class="my-bookings__empty" id="myBookingsEmpty" style="display: none;">No upcoming bookings.</p>
+        <div class="my-bookings__columns">
+          <div class="my-bookings__column">
+            <h4 class="my-bookings__column-title">Room booking</h4>
+            <div class="my-bookings__list" id="myBookingsRoomsList"></div>
+            <p class="my-bookings__empty my-bookings__empty--column" id="myBookingsRoomsEmpty" style="display: none;">No room bookings.</p>
+          </div>
+          <div class="my-bookings__column">
+            <h4 class="my-bookings__column-title">Event booking</h4>
+            <div class="my-bookings__list" id="myBookingsEventsList"></div>
+            <p class="my-bookings__empty my-bookings__empty--column" id="myBookingsEventsEmpty" style="display: none;">No event bookings.</p>
+          </div>
+        </div>
         <p class="my-bookings__error" id="myBookingsError" style="display: none;"></p>
       </div>
     </div>
@@ -921,6 +999,7 @@
       </div>
     </div>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="/js/main.js"></script>
     <script src="/js/animations.js"></script>
     <script src="/js/reveal.js"></script>

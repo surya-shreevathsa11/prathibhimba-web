@@ -394,6 +394,11 @@
           '<div class="admin__events-item-actions">' +
           '<button type="button" class="btn btn--ghost btn--sm admin__event-edit" data-event-id="' + (id || "") + '">Edit</button>' +
           '<button type="button" class="btn btn--ghost btn--sm admin__event-banner" data-event-id="' + (id || "") + '">Banner</button>' +
+          (ev.banner
+            ? '<button type="button" class="btn btn--ghost btn--sm admin__event-remove-banner" data-event-id="' +
+              (id || "") +
+              '">Remove banner</button>'
+            : "") +
           '<button type="button" class="btn btn--ghost btn--sm admin__event-brochure" data-event-id="' + (id || "") + '">Brochure</button>' +
           (ev.brochure
             ? '<button type="button" class="btn btn--ghost btn--sm admin__event-remove-brochure" data-event-id="' + (id || "") + '">Remove brochure</button>'
@@ -523,6 +528,32 @@
           var id = btn.getAttribute("data-event-id");
           if (!id) return;
           openEventUpload(id, "banner");
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-remove-banner")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          if (!window.confirm("Remove the uploaded banner for this event?")) return;
+          apiDelete("/api/admin/events/" + id + "/banner")
+            .then(function (r) {
+              if (r.ok) {
+                setMsg(eventsMsg, "Banner removed.", false);
+                loadEvents();
+              } else {
+                setMsg(
+                  eventsMsg,
+                  (r.data && r.data.message) || "Could not remove banner.",
+                  true
+                );
+              }
+            })
+            .catch(function () {
+              setMsg(eventsMsg, "Network error. Please try again.", true);
+            });
         });
       });
 

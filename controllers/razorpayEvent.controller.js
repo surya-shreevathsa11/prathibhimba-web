@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { Event } from "../models/events.model.js";
 import { EventBooking } from "../models/eventBooking.model.js";
 
 import {
@@ -95,6 +96,7 @@ async function handlePaymentCaptured(payload) {
       return;
     }
 
+    const wasConfirmed = eventBooking.status === "confirmed";
     const totalPrice = eventBooking.totalAmount || 0;
 
     // Update booking with payment details
@@ -104,6 +106,14 @@ async function handlePaymentCaptured(payload) {
     eventBooking.amountPaid = amountPaid;
 
     await eventBooking.save();
+
+    // Keep event availability in sync (used by maxPeopleAllowed checks)
+    if (!wasConfirmed) {
+      const increment = Number(eventBooking?.guest?.guestCount) || 1;
+      await Event.findByIdAndUpdate(eventBooking.eventId, {
+        $inc: { curPeopleEnrolled: increment },
+      });
+    }
 
     // Send confirmation emails
     await sendConfirmationMailToGuest(eventBooking);
@@ -156,8 +166,12 @@ async function handleOrderPaid(payload) {
     }
 
     if (booking.status !== "confirmed") {
+      const increment = Number(booking?.guest?.guestCount) || 1;
       booking.status = "confirmed";
       await booking.save();
+      await Event.findByIdAndUpdate(booking.eventId, {
+        $inc: { curPeopleEnrolled: increment },
+      });
       console.log("Booking confirmed via order.paid:", booking._id);
     }
   } catch (error) {
@@ -203,10 +217,19 @@ export const verifyPayment = async (req, res) => {
       });
     }
 
+    const wasConfirmed = booking.status === "confirmed";
+
     // Update booking
     booking.status = "confirmed";
     booking.razorpayPaymentId = razorpay_payment_id;
     await booking.save();
+
+    if (!wasConfirmed) {
+      const increment = Number(booking?.guest?.guestCount) || 1;
+      await Event.findByIdAndUpdate(booking.eventId, {
+        $inc: { curPeopleEnrolled: increment },
+      });
+    }
 
     //  await sendConfirmationMailToGuest(booking);
     // await sendConfirmationMailToAdmin(booking)

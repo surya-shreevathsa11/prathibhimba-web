@@ -308,6 +308,7 @@ export const listRooms = async (_req, res) => {
       description: r.description,
       type: r.type,
       price: r.pricePerNight,
+      capacity: r.capacity || null,
       images: r.images
         ? { banner: r.images.banner || null, gallery: r.images.gallery || [] }
         : { banner: null, gallery: [] },

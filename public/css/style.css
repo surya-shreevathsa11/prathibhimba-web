@@ -19,7 +19,14 @@ html.lenis { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
-.lenis.lenis-smooth iframe { pointer-events: none; }
+/* Lenis disables iframe hits so scroll isn't stolen by embeds; Razorpay checkout is an iframe and must receive clicks */
+.lenis.lenis-smooth iframe:not([src*="razorpay"]) {
+  pointer-events: none;
+}
+.lenis.lenis-smooth [class*="razorpay"] iframe,
+.lenis.lenis-smooth [id*="razorpay"] iframe {
+  pointer-events: auto !important;
+}
 
 body {
   min-height: 100%;
@@ -145,6 +152,18 @@ body {
   html.custom-cursor-active body,
   html.custom-cursor-active body * {
     cursor: none !important;
+  }
+  /*
+   * Razorpay (and similar) checkout sits above the blob cursor (higher z-index).
+   * cursor:none on body * would hide the pointer there with no blob visible.
+   * Restore the native cursor on iframes and Razorpay-injected roots.
+   */
+  html.custom-cursor-active iframe,
+  html.custom-cursor-active [class*="razorpay"],
+  html.custom-cursor-active [class*="Razorpay"],
+  html.custom-cursor-active [id*="razorpay"],
+  html.custom-cursor-active [id*="Razorpay"] {
+    cursor: auto !important;
   }
 }
 
@@ -1091,6 +1110,7 @@ main {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  max-width: 480px; /* keep event text wrapping neat */
 }
 
 .events__nav--prev {
@@ -1195,6 +1215,7 @@ main {
   line-height: 1.75;
   color: var(--text-secondary);
   margin-bottom: 1rem;
+  white-space: pre-line;
 }
 
 .events__text:last-child {
@@ -2493,6 +2514,45 @@ main {
 .modal__content--sm {
   max-width: 340px;
 }
+#bookEventModal .modal__content--book-event {
+  max-width: min(520px, calc(100vw - 2rem));
+  width: 100%;
+  padding: 1.75rem 1.75rem 1.5rem;
+  box-sizing: border-box;
+}
+#bookEventModal .modal__content--book-event .modal__title {
+  margin-bottom: 0.65rem;
+}
+#bookEventModal .modal__content--book-event .modal__room-name {
+  margin-bottom: 0.35rem;
+}
+#bookEventModal .modal__content--book-event .modal__room-info {
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+#bookEventModal .modal__content--book-event .form--stacked {
+  margin-top: 0.25rem;
+}
+#bookEventModal .modal__content--book-event .form__row {
+  align-items: start;
+}
+#bookEventModal .modal__content--book-event .form__group input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+#bookEventModal .modal__content--book-event .form__group input[type="number"]::-webkit-outer-spin-button,
+#bookEventModal .modal__content--book-event .form__group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#bookEventModal .modal__content--book-event .btn--full {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+}
 .modal__content--room-added {
   display: flex;
   flex-direction: column;
@@ -2505,10 +2565,49 @@ main {
   min-width: 0;
 }
 .modal__content--my-bookings {
-  max-width: 520px;
+  max-width: min(940px, calc(100vw - 2rem));
+  width: 100%;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+}
+.my-bookings__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem 2rem;
+  margin-top: 0.75rem;
+  align-items: start;
+  min-width: 0;
+}
+@media (max-width: 700px) {
+  .my-bookings__columns {
+    grid-template-columns: 1fr;
+  }
+}
+.my-bookings__column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.my-bookings__column-title {
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted, #6b7280);
+  margin-bottom: 0.6rem;
+  font-weight: 600;
+}
+.modal__content--my-bookings .my-bookings__column .my-bookings__list {
+  overflow-y: auto;
+  margin: 0;
+  max-height: min(52vh, 420px);
+  padding-right: 0.4rem;
+}
+.my-bookings__empty--column {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
 }
 .my-bookings__list {
   overflow-y: auto;
@@ -2664,8 +2763,8 @@ body.page-cart .nav {
   left: 50%;
   top: 8rem;
   transform: translateX(-50%);
-  max-width: 520px;
-  width: calc(100% - 3rem);
+  max-width: min(960px, calc(100vw - 2rem));
+  width: calc(100% - 2rem);
   max-height: calc(100vh - 11rem);
   min-height: 0;
   background: var(--color-urban-white);
@@ -2678,6 +2777,47 @@ body.page-cart .nav {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+.cart-booking-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2rem;
+  align-items: start;
+  margin-top: 0.5rem;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.cart-page .container .cart-booking-grid .cart-step--column:first-child {
+  padding-right: 0.25rem;
+  border-right: 1px solid var(--border-light, rgba(0, 0, 0, 0.08));
+}
+.cart-page .container .cart-booking-grid .cart-step--column {
+  margin-top: 0;
+  overflow: hidden;
+}
+.cart-step__sub {
+  font-size: 0.85rem;
+  color: var(--text-muted, #6b7280);
+  margin: -0.35rem 0 0.85rem;
+  font-family: "Montserrat", sans-serif;
+}
+.cart-page .container .cart__event-list {
+  margin-top: 0;
+  max-height: min(42vh, 320px);
+  overflow-y: auto;
+  padding-right: 0.35rem;
+}
+@media (max-width: 768px) {
+  .cart-booking-grid {
+    grid-template-columns: 1fr;
+  }
+  .cart-page .container .cart-booking-grid .cart-step--column:first-child {
+    padding-right: 0;
+    border-right: none;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-light, rgba(0, 0, 0, 0.08));
+  }
 }
 .cart-page .container:hover {
   transform: translateX(-50%) translateY(-6px) scale(1.02);

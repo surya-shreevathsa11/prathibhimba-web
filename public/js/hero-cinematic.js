@@ -12,6 +12,15 @@ window.initHeroCinematic = function () {
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReducedMotion) return;
 
+  /* Touch / iPad / ≤1024px: skip scrub parallax so scrolling stays native-smooth */
+  if (
+    window.matchMedia &&
+    (window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(max-width: 1024px)").matches)
+  ) {
+    return;
+  }
+
   var hero = document.querySelector(".hero");
   var heroSlides = document.querySelector(".hero__slides");
   var heroVideo = document.querySelector(".hero__video");

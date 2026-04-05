@@ -10,6 +10,11 @@
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (prefersReducedMotion) return;
 
+  var skipScrollLinkedEffects =
+    window.matchMedia &&
+    (window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(max-width: 1024px)").matches);
+
   var easeOutExpo = "cubic-bezier(0.22, 1, 0.36, 1)";
   var PARALLAX_PX = 40;
   var COUNTER_DURATION = 1200;
@@ -71,10 +76,12 @@
 
   /* ----- 3. Image parallax (hero handled by hero-cinematic.js; only non-hero here) ----- */
   var parallaxEls = document.querySelectorAll(".about__img-wrap");
-  parallaxEls.forEach(function (el) {
-    el.classList.add("parallax-img");
-  });
-  if (parallaxEls.length) {
+  if (!skipScrollLinkedEffects) {
+    parallaxEls.forEach(function (el) {
+      el.classList.add("parallax-img");
+    });
+  }
+  if (!skipScrollLinkedEffects && parallaxEls.length) {
     var ticking = false;
 
     function updateParallax() {
@@ -181,7 +188,7 @@
   /* ----- 6. Card stack (gallery slides move at different speeds) ----- */
   var gallerySection = document.querySelector(".section--gallery");
   var gallerySlides = document.querySelectorAll(".gallery-reel__slide");
-  if (gallerySection && gallerySlides.length) {
+  if (!skipScrollLinkedEffects && gallerySection && gallerySlides.length) {
     var stackTicking = false;
     var depthFactors = [0.6, 0.4, 0.2, 0.15, 0.1, 0.08];
 

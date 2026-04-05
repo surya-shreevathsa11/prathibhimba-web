@@ -13,9 +13,13 @@
   // --- Nav scroll + contrast by section (cream vs dark green) ---
   var navEl = $("#nav");
   if (navEl) {
-    window.addEventListener("scroll", () => {
-      navEl.classList.toggle("scrolled", window.scrollY > 60);
-    });
+    window.addEventListener(
+      "scroll",
+      () => {
+        navEl.classList.toggle("scrolled", window.scrollY > 60);
+      },
+      { passive: true }
+    );
 
     var sections = $$("section[data-nav-theme]");
     var heroEl = $(".hero");

@@ -8,19 +8,26 @@
   var lenisInstance = null;
   window.getLenis = function () { return lenisInstance; };
 
+  /** Phone / iPad / narrow viewports: native scroll only (Lenis + touch = lag). Laptop unchanged. */
+  function useNativeScrollOnly() {
+    if (typeof window.matchMedia !== "function") return false;
+    if (window.matchMedia("(pointer: coarse)").matches) return true;
+    if (window.matchMedia("(max-width: 1024px)").matches) return true;
+    return false;
+  }
+
   function initLenis() {
     if (typeof Lenis === "undefined") return null;
+    if (useNativeScrollOnly()) {
+      return null;
+    }
     try {
-      // Mobile/iPad should feel less "twitchy" than desktop
-      var narrow =
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(max-width: 1024px)").matches;
       var lenis = new Lenis({
         smoothWheel: true,
-        smoothTouch: true,
-        duration: narrow ? 1.08 : 0.8,
+        smoothTouch: false,
+        duration: 0.8,
         wheelMultiplier: 1,
-        touchMultiplier: narrow ? 0.85 : 2,
+        touchMultiplier: 1,
         infinite: false,
         // Disable Lenis only for the chatbot so it uses native scrolling
         prevent: function (node) {

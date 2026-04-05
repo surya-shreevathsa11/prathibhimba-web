@@ -803,6 +803,46 @@ body.admin--dashboard .admin__grid {
   text-overflow: ellipsis;
 }
 
+.admin__event-gallery-hint {
+  font-size: 0.72rem;
+  color: #8a7a60;
+  margin: 0.5rem 0 0;
+}
+
+.admin__event-gallery-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: flex-start;
+  margin-top: 0.5rem;
+}
+
+.admin__event-gallery-item {
+  position: relative;
+  display: inline-flex;
+}
+
+.admin__event-gallery-item img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #eadfcb;
+  display: block;
+}
+
+.admin__event-gallery-remove {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  min-width: 1.35rem !important;
+  min-height: 1.35rem !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  font-size: 0.95rem !important;
+  border-radius: 50%;
+}
+
 .admin__events-item-actions {
   display: flex;
   flex-wrap: wrap;

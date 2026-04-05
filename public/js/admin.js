@@ -389,6 +389,32 @@
             .trim();
         var startLabel = ev.startDate ? formatDate(ev.startDate) : "—";
         var endLabel = ev.endDate ? formatDate(ev.endDate) : "—";
+        var galleryUrls = Array.isArray(ev.gallery)
+          ? ev.gallery.filter(function (u) {
+              return u && String(u).trim();
+            })
+          : [];
+        var galleryStripHtml =
+          galleryUrls.length > 0
+            ? '<div class="admin__event-gallery-strip">' +
+              galleryUrls
+                .map(function (u) {
+                  return (
+                    '<span class="admin__event-gallery-item">' +
+                    '<img src="' +
+                    escapeHtml(u) +
+                    '" alt="" width="48" height="48" loading="lazy" />' +
+                    '<button type="button" class="btn btn--ghost btn--sm admin__event-gallery-remove" data-event-id="' +
+                    escapeHtml(String(id || "")) +
+                    '" data-gallery-url="' +
+                    escapeHtml(u) +
+                    '" title="Remove photo">&times;</button>' +
+                    "</span>"
+                  );
+                })
+                .join("") +
+              "</div>"
+            : '<p class="admin__event-gallery-hint">No gallery photos yet. Use Upload photos to add images for the website.</p>';
         return (
           '<article class="admin__events-item" data-event-id="' + (id || "") + '">' +
           '<div class="admin__events-item-main">' +
@@ -404,6 +430,7 @@
           endLabel +
           "</p>" +
           '<p class="admin__events-item-desc">' + escapeHtml(desc) + "</p>" +
+          galleryStripHtml +
           "</div>" +
           '<div class="admin__events-item-actions">' +
           '<button type="button" class="btn btn--ghost btn--sm admin__event-edit" data-event-id="' + (id || "") + '">Edit</button>' +
@@ -417,6 +444,9 @@
           (ev.brochure
             ? '<button type="button" class="btn btn--ghost btn--sm admin__event-remove-brochure" data-event-id="' + (id || "") + '">Remove brochure</button>'
             : "") +
+          '<button type="button" class="btn btn--ghost btn--sm admin__event-gallery-upload" data-event-id="' +
+          (id || "") +
+          '">Upload photos</button>' +
           (ev.curPeopleEnrolled != null && ev.curPeopleEnrolled > 0
             ? '<button type="button" class="btn btn--ghost btn--sm admin__event-cancel-enrollment" data-event-id="' + (id || "") + '">Cancel enrollment</button>'
             : "") +
@@ -461,7 +491,9 @@
       var sigPath =
         type === "brochure"
           ? "/api/admin/events/cloudinary-signature/raw"
-          : "/api/admin/events/cloudinary-signature/banner";
+          : type === "gallery"
+            ? "/api/admin/events/cloudinary-signature/images"
+            : "/api/admin/events/cloudinary-signature/banner";
       apiGet(sigPath)
         .then(function (r) {
           if (!r.ok || !r.data) {
@@ -476,7 +508,7 @@
             uploadSignatureTimestamp: d.timestamp,
             folder: d.folder,
             sources: ["local", "camera"],
-            multiple: false,
+            multiple: type === "gallery",
           };
           if (d.resource_type) {
             widgetOpts.resourceType = d.resource_type;
@@ -500,6 +532,10 @@
                   req = apiPatch("/api/admin/events/" + eventId + "/brochure", {
                     url: url,
                   });
+                } else if (type === "gallery") {
+                  req = apiPost("/api/admin/events/" + eventId + "/gallery", {
+                    url: url,
+                  });
                 } else {
                   return;
                 }
@@ -510,7 +546,9 @@
                         eventsMsg,
                         type === "banner"
                           ? "Banner updated."
-                          : "Brochure updated.",
+                          : type === "brochure"
+                            ? "Brochure updated."
+                            : "Photo added to event gallery.",
                         false
                       );
                       loadEvents();
@@ -597,6 +635,43 @@
                 setMsg(
                   eventsMsg,
                   (r.data && r.data.message) || "Could not remove brochure.",
+                  true
+                );
+              }
+            })
+            .catch(function () {
+              setMsg(eventsMsg, "Network error. Please try again.", true);
+            });
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-gallery-upload")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          if (!id) return;
+          openEventUpload(id, "gallery");
+        });
+      });
+
+    eventsListEl
+      .querySelectorAll(".admin__event-gallery-remove")
+      .forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = btn.getAttribute("data-event-id");
+          var url = btn.getAttribute("data-gallery-url");
+          if (!id || !url) return;
+          if (!window.confirm("Remove this photo from the event gallery?")) return;
+          apiPatch("/api/admin/events/" + id + "/gallery/remove", { url: url })
+            .then(function (r) {
+              if (r.ok) {
+                setMsg(eventsMsg, "Photo removed.", false);
+                loadEvents();
+              } else {
+                setMsg(
+                  eventsMsg,
+                  (r.data && r.data.message) || "Could not remove photo.",
                   true
                 );
               }

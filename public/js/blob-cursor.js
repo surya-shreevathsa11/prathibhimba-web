@@ -23,15 +23,18 @@
       y = 0;
     var rx = 0,
       ry = 0;
-    var lerpRate = 0.72;
+    var lerpRate = 0.36;
     var visible = false;
     var hovering = false;
     var down = false;
+    var moving = false;
+    var moveClear = null;
     var activeHoverEl = null;
 
     function setVisible(v) {
       visible = v;
       container.classList.toggle("is-visible", v);
+      if (!v) container.classList.remove("is-over-dark-green");
     }
     function updateClasses() {
       container.classList.toggle("is-hover", hovering);
@@ -41,13 +44,31 @@
     var textSelector =
       "h1, h2, h3, h4, h5, h6, p, .hero__title, .hero__subtitle, .hero__desc, .section__title, .section__subtitle, .cart-page__title, .cart-step__heading";
     var hoverSelector =
-      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item, .gallery-card, .cart__item-remove, .terms__accept, .modal__close';
+      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item, .gallery-card, .cart__item-remove, .terms__accept, .modal__close, .room-gallery__nav, .events__nav, .gallery-reel__nav';
+    var headerSelector = ".nav, .admin__header, .footer";
+    function isOverHeader(el) {
+      return el && el.closest && el.closest(headerSelector);
+    }
+
     window.addEventListener(
       "mousemove",
       function (e) {
         x = e.clientX;
         y = e.clientY;
         setVisible(true);
+        moving = true;
+        if (moveClear) clearTimeout(moveClear);
+        moveClear = setTimeout(function () {
+          moving = false;
+        }, 100);
+        var under = document.elementFromPoint(e.clientX, e.clientY);
+        if (under) {
+          var onGreen =
+            !isOverHeader(under) &&
+            under.closest &&
+            under.closest(".hero, #about, .section.section--about");
+          container.classList.toggle("is-over-dark-green", Boolean(onGreen));
+        }
       },
       { passive: true }
     );
@@ -62,10 +83,6 @@
       down = false;
       updateClasses();
     });
-    var headerSelector = ".nav, .admin__header, .footer";
-    function isOverHeader(el) {
-      return el && el.closest && el.closest(headerSelector);
-    }
     document.addEventListener("mouseover", function (e) {
       var target =
         e.target && e.target.closest && e.target.closest(hoverSelector);
@@ -88,6 +105,7 @@
         hovering = false;
         container.classList.remove("is-hover-text");
         container.classList.remove("is-over-header");
+        container.classList.remove("is-over-dark-green");
         if (activeHoverEl) activeHoverEl.classList.remove("cursor-target");
         activeHoverEl = null;
         updateClasses();
@@ -110,7 +128,7 @@
       if (visible) {
         rx += (x - rx) * lerpRate;
         ry += (y - ry) * lerpRate;
-        var scale = down ? 0.9 : hovering ? 1.24 : 1;
+        var scale = down ? 0.86 : hovering ? 1.38 : moving ? 1.12 : 1;
         blob.style.transform =
           "translate(" +
           rx +

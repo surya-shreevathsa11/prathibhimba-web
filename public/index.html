@@ -400,6 +400,9 @@
                 <div class="events__actions">
                   <a href="#contact" class="btn btn--outline events__book-btn">Book an Event</a>
                   <a href="/brochure.pdf" download class="btn btn--primary events__brochure-btn">Download Brochure</a>
+                  <button type="button" class="btn events__photos-btn" id="eventsPhotosBtn" style="display: none">
+                    Photos
+                  </button>
                 </div>
               </div>
               <div class="events__media" data-reveal="fade-up" data-reveal-delay="120">
@@ -764,6 +767,43 @@
           alt="Expanded gallery photo"
           class="gallery-lightbox__img"
         />
+      </div>
+    </div>
+
+    <!-- Event photos (from admin event gallery) -->
+    <div
+      class="modal modal--fullscreen"
+      id="eventPhotosModal"
+      aria-modal="true"
+      aria-labelledby="eventPhotosModalTitle"
+    >
+      <div class="modal__overlay" data-close></div>
+      <div class="modal__content modal__content--fullscreen modal__content--event-photos">
+        <button type="button" class="modal__close" data-close aria-label="Close">&times;</button>
+        <h2 class="event-photos-modal__title" id="eventPhotosModalTitle">Event photos</h2>
+        <button
+          type="button"
+          class="room-gallery__nav room-gallery__nav--prev"
+          id="eventPhotosPrev"
+          aria-label="Previous photo"
+        >
+          &#9664;
+        </button>
+        <img
+          id="eventPhotosModalImg"
+          src=""
+          alt=""
+          class="gallery-lightbox__img"
+        />
+        <button
+          type="button"
+          class="room-gallery__nav room-gallery__nav--next"
+          id="eventPhotosNext"
+          aria-label="Next photo"
+        >
+          &#9654;
+        </button>
+        <p class="room-gallery__counter" id="eventPhotosCounter"></p>
       </div>
     </div>
 

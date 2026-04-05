@@ -950,6 +950,15 @@
     var textEls = document.querySelectorAll(".events__text");
     var brochureBtn = document.querySelector(".events__brochure-btn");
     var bookEventBtn = document.querySelector(".events__book-btn");
+    var photosBtn = document.getElementById("eventsPhotosBtn");
+    var eventPhotosModal = document.getElementById("eventPhotosModal");
+    var eventPhotosModalTitle = document.getElementById("eventPhotosModalTitle");
+    var eventPhotosModalImg = document.getElementById("eventPhotosModalImg");
+    var eventPhotosPrev = document.getElementById("eventPhotosPrev");
+    var eventPhotosNext = document.getElementById("eventPhotosNext");
+    var eventPhotosCounter = document.getElementById("eventPhotosCounter");
+    var eventPhotosUrls = [];
+    var eventPhotosIdx = 0;
     var activeEvent = null;
     var pendingBookEvent = null;
 
@@ -987,6 +996,7 @@
         brochureBtn.style.display = "";
         brochureBtn.href = "/brochure.pdf";
       }
+      if (photosBtn) photosBtn.style.display = "none";
     }
 
     function formatISODate(d) {
@@ -1233,6 +1243,50 @@
       });
     }
 
+    function showEventPhotoAt(index) {
+      if (!eventPhotosUrls.length || !eventPhotosModalImg) return;
+      var n = eventPhotosUrls.length;
+      eventPhotosIdx = ((index % n) + n) % n;
+      eventPhotosModalImg.src = eventPhotosUrls[eventPhotosIdx];
+      eventPhotosModalImg.alt =
+        (activeEvent && activeEvent.title ? activeEvent.title + " — " : "") +
+        "photo " +
+        (eventPhotosIdx + 1) +
+        " of " +
+        n;
+      if (eventPhotosCounter) {
+        eventPhotosCounter.textContent = eventPhotosIdx + 1 + " / " + n;
+      }
+      var showNav = n > 1;
+      if (eventPhotosPrev) eventPhotosPrev.style.display = showNav ? "flex" : "none";
+      if (eventPhotosNext) eventPhotosNext.style.display = showNav ? "flex" : "none";
+    }
+
+    if (photosBtn && eventPhotosModal && eventPhotosModalImg) {
+      photosBtn.addEventListener("click", function () {
+        if (!activeEvent || !activeEvent.gallery || activeEvent.gallery.length === 0) return;
+        if (eventPhotosModalTitle) {
+          eventPhotosModalTitle.textContent = (activeEvent.title || "Event") + " — photos";
+        }
+        eventPhotosUrls = activeEvent.gallery.slice();
+        showEventPhotoAt(0);
+        openModal("#eventPhotosModal");
+      });
+    }
+
+    if (eventPhotosPrev) {
+      eventPhotosPrev.addEventListener("click", function (e) {
+        e.stopPropagation();
+        showEventPhotoAt(eventPhotosIdx - 1);
+      });
+    }
+    if (eventPhotosNext) {
+      eventPhotosNext.addEventListener("click", function (e) {
+        e.stopPropagation();
+        showEventPhotoAt(eventPhotosIdx + 1);
+      });
+    }
+
     initBookEventForm();
 
     fetch("/api/events")
@@ -1298,6 +1352,11 @@
               ev.banner ||
               "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&h=800&q=80",
             brochure: ev.brochure || null,
+            gallery: Array.isArray(ev.gallery)
+              ? ev.gallery.filter(function (u) {
+                  return u && String(u).trim();
+                })
+              : [],
           };
         });
 
@@ -1335,6 +1394,13 @@
               brochureBtn.href = ev.brochure;
             } else {
               brochureBtn.style.display = "none";
+            }
+          }
+          if (photosBtn) {
+            if (ev.gallery && ev.gallery.length > 0) {
+              photosBtn.style.display = "";
+            } else {
+              photosBtn.style.display = "none";
             }
           }
         }
@@ -1430,15 +1496,18 @@
       y = 0;
     let rx = 0,
       ry = 0;
-    const lerpRate = 0.42;
+    const lerpRate = 0.36;
     let visible = false;
     let hovering = false;
     let down = false;
+    let moving = false;
+    let moveClear = null;
     let activeHoverEl = null;
 
     function setVisible(v) {
       visible = v;
       container.classList.toggle("is-visible", v);
+      if (!v) container.classList.remove("is-over-dark-green");
     }
 
     function updateClasses() {
@@ -1452,6 +1521,19 @@
         x = e.clientX;
         y = e.clientY;
         setVisible(true);
+        moving = true;
+        if (moveClear) clearTimeout(moveClear);
+        moveClear = setTimeout(() => {
+          moving = false;
+        }, 100);
+        var under = document.elementFromPoint(e.clientX, e.clientY);
+        if (under) {
+          var onGreen =
+            !isOverHeader(under) &&
+            under.closest &&
+            under.closest(".hero, #about, .section.section--about");
+          container.classList.toggle("is-over-dark-green", Boolean(onGreen));
+        }
       },
       { passive: true },
     );
@@ -1469,7 +1551,7 @@
     var textSelector =
       "h1, h2, h3, h4, h5, h6, p, .hero__title, .hero__subtitle, .hero__desc, .section__title, .section__subtitle";
     var hoverSelector =
-      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item, .gallery-card, .events__nav, .gallery-reel__nav';
+      'a, button, .btn, input, textarea, [role="button"], .room-card, .gallery__item, .gallery-card, .events__nav, .gallery-reel__nav, .room-gallery__nav';
     var headerSelector = ".nav, .admin__header, .footer";
     function isOverHeader(el) {
       return el && el.closest && el.closest(headerSelector);
@@ -1497,6 +1579,7 @@
         hovering = false;
         container.classList.remove("is-hover-text");
         container.classList.remove("is-over-header");
+        container.classList.remove("is-over-dark-green");
         if (activeHoverEl) activeHoverEl.classList.remove("cursor-target");
         activeHoverEl = null;
         updateClasses();
@@ -1520,7 +1603,7 @@
       if (visible) {
         rx += (x - rx) * lerpRate;
         ry += (y - ry) * lerpRate;
-        var scale = down ? 0.9 : hovering ? 1.24 : 1;
+        var scale = down ? 0.86 : hovering ? 1.38 : moving ? 1.12 : 1;
         blob.style.transform =
           "translate(" +
           rx +

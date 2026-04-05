@@ -1118,17 +1118,29 @@ body.page-cart .nav .nav__inner {
   color: var(--color-deep-black);
 }
 
-/* ===== BLOB CURSOR — Orange over green nav ===== */
+/* ===== BLOB CURSOR — ring + dot over green nav ===== */
 .blob-cursor.is-over-header .blob-cursor__blob {
-  background: var(--color-orange);
-  box-shadow: 0 2px 12px rgba(252, 199, 107, 0.5), 0 0 0 1px rgba(252, 199, 107, 0.2);
+  background: transparent;
+  border-color: rgba(252, 199, 107, 0.65);
+  box-shadow: 0 0 22px rgba(252, 199, 107, 0.12);
 }
 .blob-cursor.is-over-header.is-hover .blob-cursor__blob {
-  background: var(--color-copper-light);
-  box-shadow: 0 4px 18px rgba(252, 199, 107, 0.55), 0 0 0 1px rgba(252, 199, 107, 0.25);
+  border-color: var(--color-orange);
+  box-shadow: 0 0 28px rgba(252, 199, 107, 0.22);
 }
 .blob-cursor.is-over-header .blob-cursor__inner {
-  background: var(--color-green);
+  background: var(--color-orange);
+}
+.blob-cursor.is-over-header.is-hover .blob-cursor__inner {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.blob-cursor.is-over-dark-green .blob-cursor__blob {
+  border-width: 3px;
+}
+.blob-cursor.is-over-dark-green .blob-cursor__inner {
+  background: var(--color-orange);
+  box-shadow: 0 0 18px rgba(252, 199, 107, 0.95);
 }
 
 /* ===== ADMIN — Green header ===== */

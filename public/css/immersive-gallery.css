@@ -113,6 +113,7 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding: 0.5rem 0;
+  overscroll-behavior-x: contain;
 }
 
 .gallery-reel__track::-webkit-scrollbar {
@@ -242,13 +243,23 @@
   }
 }
 
-/* Mobile / iPad: no arrow buttons — swipe / drag the track horizontally (scroll already enabled) */
-@media (max-width: 1024px) {
+/* Tablet / iPad only: hide arrows — use swipe */
+@media (min-width: 768px) and (max-width: 1024px) {
   .gallery-reel__nav {
     display: none !important;
   }
+}
 
-  .gallery-reel__track {
-    overscroll-behavior-x: contain;
+/* Phone: show prev/next arrows */
+@media (max-width: 767px) {
+  .gallery-reel__nav {
+    display: flex !important;
+  }
+}
+
+/* Mobile: clearer rectangular slide framing */
+@media (max-width: 767px) {
+  .gallery-reel__img-wrap {
+    aspect-ratio: 16 / 9;
   }
 }

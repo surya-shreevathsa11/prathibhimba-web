@@ -17,6 +17,9 @@ import {
   addGalleryImage,
   removeGalleryImage,
   getCloudinarySignature,
+  getSiteGalleryAdmin,
+  addSiteGalleryImage,
+  removeSiteGalleryImage,
 } from "../controllers/admin.controller.js";
 import {
   getEventBookings,
@@ -44,6 +47,9 @@ router.post("/block-dates", verifyJWT, addBlockedDate);
 router.delete("/block-dates/:id", verifyJWT, deleteBlockedDate);
 
 router.get("/cloud-signature", verifyJWT, getCloudinarySignature);
+router.get("/site-gallery", verifyJWT, getSiteGalleryAdmin);
+router.patch("/site-gallery/add", verifyJWT, addSiteGalleryImage);
+router.patch("/site-gallery/remove", verifyJWT, removeSiteGalleryImage);
 router.get("/rooms/:roomId", verifyJWT, getRoomImages);
 router.patch("/rooms/:roomId/images", verifyJWT, updateRoomImages);
 router.patch("/rooms/:roomId/images/gallery/add", verifyJWT, addGalleryImage);

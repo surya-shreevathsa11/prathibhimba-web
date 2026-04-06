@@ -643,10 +643,10 @@
                     <option value="R8">R8 — Zinnia</option>
                   </select>
                 </div>
-                <div class="form__group form__group--action">
-                  <button type="button" class="btn btn--outline btn--sm" id="uploadBannerBtn">Upload banner</button>
-                  <button type="button" class="btn btn--outline btn--sm" id="uploadGalleryBtn">Add to gallery</button>
+                <div class="form__group form__group--action admin__room-images-actions">
+                  <button type="button" class="btn btn--outline btn--sm" id="uploadBannerBtn">Upload banner image</button>
                 </div>
+                <p class="admin__room-images-hint">Banner is the main photo on the room card.</p>
               </div>
               <div class="room-images__file-list-wrap" id="roomImagesFileListWrap" style="display: none;">
                 <table class="room-images__file-table" id="roomImagesFileTable" role="table">
@@ -664,6 +664,15 @@
               <div class="room-images__strip-wrap" id="roomImagesEmptyWrap">
                 <div class="room-images__strip" id="roomImagesStrip"></div>
               </div>
+              <h3 class="admin__subsection-title">Homepage gallery</h3>
+              <p class="admin__msg" id="siteGalleryMsg" style="display: none"></p>
+              <p class="admin__room-images-hint">
+                These photos appear in the main site <strong>Gallery</strong> section (“A Glimpse Into Our World”). They are not saved to room galleries.
+              </p>
+              <div class="form__group form__group--action">
+                <button type="button" class="btn btn--primary btn--sm" id="uploadSiteGalleryBtn">Upload homepage gallery photo</button>
+              </div>
+              <div id="siteGalleryStrip" class="site-gallery-admin__strip"></div>
             </section>
           </div>
         </div>

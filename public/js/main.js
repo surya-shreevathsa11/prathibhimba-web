@@ -890,6 +890,14 @@
     openModal("#roomGalleryModal");
   }
 
+  function isIpadTouchView() {
+    try {
+      return window.matchMedia("(min-width: 768px) and (max-width: 1024px) and (hover: none)").matches;
+    } catch (err) {
+      return false;
+    }
+  }
+
   var roomsGridEl = $("#roomsGrid");
   if (roomsGridEl) {
     roomsGridEl.addEventListener("click", function (e) {
@@ -897,14 +905,33 @@
       if (!card) return;
       if (e.target.closest("[data-add-cart]") || e.target.closest(".room-card__actions")) return;
       var raw = card.getAttribute("data-room-images");
-      if (!raw) return;
       var urls = [];
-      try {
-        urls = JSON.parse(raw);
-      } catch (err) {}
+      if (raw) {
+        try {
+          urls = JSON.parse(raw);
+        } catch (err) {}
+      }
+      var name = card.getAttribute("data-room-name") || "";
+
+      if (isIpadTouchView()) {
+        if (e.target.closest(".room-card__media")) {
+          if (!urls.length) return;
+          e.preventDefault();
+          openRoomGallery(urls, name);
+          return;
+        }
+        var rect = card.getBoundingClientRect();
+        var lowerHalf = e.clientY > rect.top + rect.height * 0.5;
+        if (lowerHalf) {
+          e.preventDefault();
+          card.classList.toggle("room-card--ipad-desc-open");
+        }
+        return;
+      }
+
+      if (!raw) return;
       if (!urls.length) return;
       e.preventDefault();
-      var name = card.getAttribute("data-room-name") || "";
       openRoomGallery(urls, name);
     });
   }
@@ -1875,4 +1902,61 @@
     }
   });
   renderRooms();
+
+  function escapeAttrSiteGallery(s) {
+    return String(s || "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  var DEFAULT_SITE_GALLERY_URLS = [
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&h=600&q=80",
+    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&h=600&q=80",
+    "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=900&h=600&q=80",
+    "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=900&h=600&q=80",
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=900&h=600&q=80",
+    "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=900&h=600&q=80",
+  ];
+
+  function renderSiteGalleryTrack(urls) {
+    var track = document.getElementById("galleryReelTrack");
+    if (!track || !urls || !urls.length) return;
+    track.innerHTML = urls
+      .map(function (url, i) {
+        return (
+          '<article class="gallery-reel__slide" data-gallery-idx="' +
+          i +
+          '" tabindex="0">' +
+          '<div class="gallery-reel__img-wrap">' +
+          '<img src="' +
+          escapeAttrSiteGallery(url) +
+          '" alt="Prathibhimba homestay photo ' +
+          (i + 1) +
+          '" />' +
+          "</div></article>"
+        );
+      })
+      .join("");
+  }
+
+  (function loadSiteGalleryReel() {
+    var track = document.getElementById("galleryReelTrack");
+    if (!track) return;
+    fetch("/api/site-gallery")
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        var urls =
+          data && data.images && data.images.length ? data.images : DEFAULT_SITE_GALLERY_URLS;
+        renderSiteGalleryTrack(urls);
+        if (typeof window.initGalleryReel === "function") window.initGalleryReel();
+      })
+      .catch(function () {
+        renderSiteGalleryTrack(DEFAULT_SITE_GALLERY_URLS);
+        if (typeof window.initGalleryReel === "function") window.initGalleryReel();
+      });
+  })();
 })();

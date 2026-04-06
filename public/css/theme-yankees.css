@@ -547,6 +547,30 @@ h1, h2, h3, h4 {
 .section--sanctuary .room-card__desc {
   color: rgba(8, 60, 58, 0.85);
 }
+
+/* iPad (touch): description hidden until user taps lower half of card; banner tap opens gallery (see main.js) */
+@media (min-width: 768px) and (max-width: 1024px) and (hover: none) {
+  .section--sanctuary .room-card:not(.room-card--ipad-desc-open) .room-card__desc {
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition:
+      max-height 0.35s ease,
+      opacity 0.25s ease,
+      margin 0.25s ease;
+  }
+  .section--sanctuary .room-card.room-card--ipad-desc-open .room-card__desc {
+    max-height: 24rem;
+    opacity: 1;
+    margin-bottom: 0.75rem;
+    pointer-events: auto;
+  }
+}
 .section--terms-cards {
   background: var(--color-cream);
 }

@@ -1426,6 +1426,49 @@ body.admin--dashboard .admin__season-form .form__group {
   }
 }
 
+.admin__room-images-actions {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin__room-images-hint {
+  margin: 0.65rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-muted, rgba(0, 0, 0, 0.62));
+  max-width: 36rem;
+}
+
+.admin__subsection-title {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.site-gallery-admin__strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.site-gallery-admin__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-width: 168px;
+}
+
+.site-gallery-admin__thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--admin-border, #e5e7eb);
+}
+
 /* Room Images tab — structured file list (Name, Type e.g. JPEG, Delete) */
 .room-images__file-list-wrap {
   width: 100%;

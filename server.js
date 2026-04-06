@@ -72,6 +72,7 @@ import eventRazorpayRouter from "./routes/razorpayEvent.route.js";
 import eventRouter from "./routes/eventBooking.route.js";
 import adminLoginRouter from "./routes/admin.auth.route.js";
 import adminRouter from "./routes/admin.route.js";
+import { getSiteGalleryPublic } from "./controllers/admin.controller.js";
 import adminEventRouter from "./routes/admin.events.route.js";
 import publicEventsRouter from "./routes/events.route.js";
 import chatRouter from "./routes/chat.route.js";
@@ -80,6 +81,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/booking", bookingRouter);
 app.use("/api/events", publicEventsRouter);
 app.use("/api/chat", chatRouter);
+app.get("/api/site-gallery", getSiteGalleryPublic);
 
 //rzp and payment
 //need to set to raw for webhooks to work

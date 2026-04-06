@@ -1,5 +1,6 @@
 import { Booking } from "../models/booking.model.js";
 import { Room, VariablePrice } from "../models/pricing.model.js";
+import { SiteGallery } from "../models/siteGallery.model.js";
 import { BlockedDate } from "../models/blocked-date.model.js";
 import { sendCancellationMailToGuest } from "../utils/resend.util.js";
 
@@ -396,6 +397,64 @@ export const getRoomImages = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching room images:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+// GET /api/site-gallery — public; single doc stores homepage horizontal gallery URLs
+export const getSiteGalleryPublic = async (req, res) => {
+  try {
+    let doc = await SiteGallery.findOne();
+    if (!doc) doc = await SiteGallery.create({ images: [] });
+    return res.status(200).json({ images: doc.images || [] });
+  } catch (error) {
+    console.error("Error fetching site gallery:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+export const getSiteGalleryAdmin = getSiteGalleryPublic;
+
+// PATCH /api/admin/site-gallery/add
+export const addSiteGalleryImage = async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ message: "url is required" });
+
+    const doc = await SiteGallery.findOneAndUpdate(
+      {},
+      { $push: { images: url } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Image added", data: { images: doc.images } });
+  } catch (error) {
+    console.error("Error adding site gallery image:", error);
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+// PATCH /api/admin/site-gallery/remove
+export const removeSiteGalleryImage = async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ message: "url is required" });
+
+    const doc = await SiteGallery.findOneAndUpdate(
+      {},
+      { $pull: { images: url } },
+      { new: true }
+    );
+
+    if (!doc) return res.status(404).json({ message: "Gallery not found" });
+
+    return res
+      .status(200)
+      .json({ message: "Image removed", data: { images: doc.images } });
+  } catch (error) {
+    console.error("Error removing site gallery image:", error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };

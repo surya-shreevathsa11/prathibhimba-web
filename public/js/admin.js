@@ -1757,7 +1757,7 @@
           uploadSignatureTimestamp: d.timestamp,
           folder: d.folder,
           sources: ["local", "camera"],
-          multiple: false,
+          multiple: type === "gallery",
         },
         function (error, result) {
           if (error) return;
@@ -1767,6 +1767,11 @@
             if (type === "banner") {
               apiPatch("/api/admin/rooms/" + roomId + "/images", { banner: url }).then(function (res) {
                 setMsg(document.getElementById("roomImagesMsg"), res.ok ? "Banner updated." : (res.data && res.data.message) || "Update failed.", !res.ok);
+                if (res.ok && res.data && res.data.data) renderRoomImagesStrip(res.data.data);
+              });
+            } else if (type === "gallery") {
+              apiPatch("/api/admin/rooms/" + roomId + "/images/gallery/add", { url: url }).then(function (res) {
+                setMsg(document.getElementById("roomImagesMsg"), res.ok ? "Image added to room gallery." : (res.data && res.data.message) || "Add failed.", !res.ok);
                 if (res.ok && res.data && res.data.data) renderRoomImagesStrip(res.data.data);
               });
             }
@@ -1781,6 +1786,7 @@
 
   var imageRoomSelect = document.getElementById("imageRoom");
   var uploadBannerBtn = document.getElementById("uploadBannerBtn");
+  var uploadGalleryBtn = document.getElementById("uploadGalleryBtn");
   var uploadSiteGalleryBtn = document.getElementById("uploadSiteGalleryBtn");
   var roomImagesStrip = document.getElementById("roomImagesStrip");
   var roomImagesViewerWrap = document.getElementById("roomImagesViewerWrap");
@@ -1965,6 +1971,11 @@
   if (uploadBannerBtn && imageRoomSelect) {
     uploadBannerBtn.addEventListener("click", function () {
       openCloudinaryUpload(imageRoomSelect.value, "banner");
+    });
+  }
+  if (uploadGalleryBtn && imageRoomSelect) {
+    uploadGalleryBtn.addEventListener("click", function () {
+      openCloudinaryUpload(imageRoomSelect.value, "gallery");
     });
   }
 

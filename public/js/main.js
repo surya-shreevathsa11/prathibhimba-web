@@ -788,28 +788,71 @@
   }
 
   // --- Room card hover: JS-driven description expand (desktop only) ---
+  function isIpadWideTouchNoHover() {
+    try {
+      return window.matchMedia(
+        "(min-width: 1025px) and (max-width: 1366px) and (hover: none)"
+      ).matches;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** iPad / touch tablet only: coarse pointer + no hover (excludes laptop mouse: pointer fine + hover). */
+  function isIpadTouchView() {
+    try {
+      return window.matchMedia(
+        "(min-width: 768px) and (max-width: 1366px) and (pointer: coarse) and (hover: none)"
+      ).matches;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function expandRoomDesc(card) {
+    var desc = card.querySelector(".room-card__desc");
+    if (!desc) return;
+    card.classList.add("is-hovered");
+    desc.style.setProperty("max-height", desc.scrollHeight + "px", "important");
+    desc.style.setProperty("opacity", "1", "important");
+    desc.style.setProperty("transform", "translateY(0)", "important");
+    desc.style.setProperty("margin-bottom", "1rem", "important");
+    desc.style.setProperty("overflow", "visible", "important");
+  }
+
+  function collapseRoomDesc(card) {
+    var desc = card.querySelector(".room-card__desc");
+    if (!desc) return;
+    card.classList.remove("is-hovered");
+    desc.style.setProperty("max-height", "0", "important");
+    desc.style.setProperty("opacity", "0", "important");
+    desc.style.setProperty("transform", "translateY(16px)", "important");
+    desc.style.setProperty("margin-bottom", "0", "important");
+    desc.style.setProperty("overflow", "hidden", "important");
+  }
+
+  function collapseOtherIpadDescs(exceptCard) {
+    document.querySelectorAll(".room-card[data-desc-expanded='1']").forEach(function (c) {
+      if (c !== exceptCard) {
+        collapseRoomDesc(c);
+        c.removeAttribute("data-desc-expanded");
+      }
+    });
+  }
+
   function initRoomCardHover() {
+    if (isIpadTouchView()) return;
     if (window.innerWidth <= 1024) return;
+    if (isIpadWideTouchNoHover()) return;
     document.querySelectorAll(".room-card").forEach(function (card) {
       var desc = card.querySelector(".room-card__desc");
       if (!desc) return;
 
       card.addEventListener("mouseenter", function () {
-        card.classList.add("is-hovered");
-        // Measure the full natural height and force it with highest CSS priority
-        desc.style.setProperty("max-height", desc.scrollHeight + "px", "important");
-        desc.style.setProperty("opacity", "1", "important");
-        desc.style.setProperty("transform", "translateY(0)", "important");
-        desc.style.setProperty("margin-bottom", "1rem", "important");
-        desc.style.setProperty("overflow", "visible", "important");
+        expandRoomDesc(card);
       });
       card.addEventListener("mouseleave", function () {
-        card.classList.remove("is-hovered");
-        desc.style.setProperty("max-height", "0", "important");
-        desc.style.setProperty("opacity", "0", "important");
-        desc.style.setProperty("transform", "translateY(16px)", "important");
-        desc.style.setProperty("margin-bottom", "0", "important");
-        desc.style.setProperty("overflow", "hidden", "important");
+        collapseRoomDesc(card);
       });
     });
   }
@@ -817,7 +860,10 @@
   window.initRoomCardHover = initRoomCardHover;
 
   (function cleanupDesktopHoverOnResize() {
-    var mql = window.matchMedia("(max-width: 1024px)");
+    var mqlNarrow = window.matchMedia("(max-width: 1024px)");
+    var mqlIpadTouchWide = window.matchMedia(
+      "(min-width: 1025px) and (max-width: 1366px) and (hover: none)"
+    );
     function strip() {
       document.querySelectorAll(".room-card__desc").forEach(function (desc) {
         desc.style.removeProperty("max-height");
@@ -826,9 +872,19 @@
         desc.style.removeProperty("margin-bottom");
         desc.style.removeProperty("overflow");
       });
+      document.querySelectorAll(".room-card[data-desc-expanded]").forEach(function (c) {
+        c.removeAttribute("data-desc-expanded");
+        c.classList.remove("is-hovered");
+      });
     }
-    if (mql.matches) strip();
-    mql.addEventListener("change", function (e) {
+    function stripIfNeeded() {
+      if (mqlNarrow.matches || mqlIpadTouchWide.matches) strip();
+    }
+    stripIfNeeded();
+    mqlNarrow.addEventListener("change", function (e) {
+      if (e.matches) strip();
+    });
+    mqlIpadTouchWide.addEventListener("change", function (e) {
       if (e.matches) strip();
     });
   })();
@@ -907,14 +963,6 @@
     openModal("#roomGalleryModal");
   }
 
-  function isIpadTouchView() {
-    try {
-      return window.matchMedia("(min-width: 768px) and (max-width: 1024px) and (hover: none)").matches;
-    } catch (err) {
-      return false;
-    }
-  }
-
   var roomsGridEl = $("#roomsGrid");
   if (roomsGridEl) {
     roomsGridEl.addEventListener("click", function (e) {
@@ -931,15 +979,22 @@
       var name = card.getAttribute("data-room-name") || "";
 
       if (isIpadTouchView()) {
-        // iPad touch: open gallery ONLY when tapping the photo area.
-        // Description should be visible by default via iPad CSS.
+        // iPad: banner → gallery; rest of card → same expand/collapse as desktop hover
         if (e.target.closest(".room-card__media")) {
           if (!urls.length) return;
           e.preventDefault();
           openRoomGallery(urls, name);
           return;
         }
-        // Tapping the rest of the card should NOT open gallery or toggle layout.
+        e.preventDefault();
+        collapseOtherIpadDescs(card);
+        if (card.getAttribute("data-desc-expanded") === "1") {
+          collapseRoomDesc(card);
+          card.removeAttribute("data-desc-expanded");
+        } else {
+          expandRoomDesc(card);
+          card.setAttribute("data-desc-expanded", "1");
+        }
         return;
       }
 

@@ -971,6 +971,14 @@ main {
 
 /* Laptop only: set a consistent card length + clean content alignment */
 @media (min-width: 1025px) {
+  .section--sanctuary .rooms__grid {
+    align-items: stretch;
+  }
+  .section--sanctuary .rooms__grid > .room-card {
+    align-self: stretch;
+    height: 100%;
+    box-sizing: border-box;
+  }
   .room-card {
     min-height: 440px;
   }
@@ -1470,6 +1478,58 @@ main {
     margin-left: auto;
     margin-right: auto;
     background-position: center center;
+  }
+}
+
+/* Mobile only: center Events section copy + photo in the viewport */
+@media (max-width: 767px) {
+  .section--events .events__content {
+    text-align: center;
+    width: 100%;
+    max-width: min(100%, 40rem);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+  .section--events .events__text {
+    text-align: center;
+  }
+  .section--events .events__actions {
+    justify-content: center;
+    width: 100%;
+    max-width: min(100%, 40rem);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+  .section--events .section__title--left {
+    text-align: center;
+  }
+  .section--events .divider--left {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section--events .events__media {
+    display: block;
+    width: 100%;
+    max-width: min(100%, 40rem);
+    min-width: 0;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+  }
+  .section--events .events__img-single {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    transform-origin: center center;
   }
 }
 
@@ -2137,6 +2197,30 @@ main {
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.9rem;
   z-index: 2;
+}
+
+/* Room gallery lightbox — mobile / iPad: lighter chrome (transparent controls, smaller arrows) */
+@media (max-width: 1024px) {
+  #roomGalleryModal .room-gallery__nav {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+    background: transparent;
+    border: none;
+  }
+  #roomGalleryModal .room-gallery__nav:hover {
+    background: rgba(255, 255, 255, 0.07);
+  }
+  #roomGalleryModal .modal__close {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  #roomGalleryModal .modal__close:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+  }
 }
 
 /* ========== FOOTER — multi-column (legacy) & compact ========== */

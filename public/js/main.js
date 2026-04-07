@@ -816,6 +816,23 @@
 
   window.initRoomCardHover = initRoomCardHover;
 
+  (function cleanupDesktopHoverOnResize() {
+    var mql = window.matchMedia("(max-width: 1024px)");
+    function strip() {
+      document.querySelectorAll(".room-card__desc").forEach(function (desc) {
+        desc.style.removeProperty("max-height");
+        desc.style.removeProperty("opacity");
+        desc.style.removeProperty("transform");
+        desc.style.removeProperty("margin-bottom");
+        desc.style.removeProperty("overflow");
+      });
+    }
+    if (mql.matches) strip();
+    mql.addEventListener("change", function (e) {
+      if (e.matches) strip();
+    });
+  })();
+
   // --- Gallery filter ---
   $$(".gallery__filter").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -914,18 +931,15 @@
       var name = card.getAttribute("data-room-name") || "";
 
       if (isIpadTouchView()) {
+        // iPad touch: open gallery ONLY when tapping the photo area.
+        // Description should be visible by default via iPad CSS.
         if (e.target.closest(".room-card__media")) {
           if (!urls.length) return;
           e.preventDefault();
           openRoomGallery(urls, name);
           return;
         }
-        var rect = card.getBoundingClientRect();
-        var lowerHalf = e.clientY > rect.top + rect.height * 0.5;
-        if (lowerHalf) {
-          e.preventDefault();
-          card.classList.toggle("room-card--ipad-desc-open");
-        }
+        // Tapping the rest of the card should NOT open gallery or toggle layout.
         return;
       }
 

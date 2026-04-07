@@ -82,11 +82,11 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 38px;
-  height: 38px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: transparent;
-  border: 3px solid rgba(176, 94, 60, 0.62);
+  border: 2px solid rgba(176, 94, 60, 0.62);
   box-shadow: none;
   will-change: transform;
   transition:
@@ -110,15 +110,15 @@ body {
 }
 /* Hero + About (dark green): high-contrast ring & dot */
 .blob-cursor.is-over-dark-green .blob-cursor__blob {
-  border-width: 3px;
+  border-width: 2px;
   border-color: rgba(255, 252, 245, 0.95);
   box-shadow:
     0 0 0 2px rgba(0, 0, 0, 0.2),
     0 8px 36px rgba(0, 0, 0, 0.35);
 }
 .blob-cursor.is-over-dark-green .blob-cursor__inner {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   background: #fcc76b;
   box-shadow: 0 0 14px rgba(252, 199, 107, 0.9);
 }
@@ -141,7 +141,7 @@ body {
 /* Over header: light ring for dark nav/footer (wins over dark-green when on nav) */
 .blob-cursor.is-over-header .blob-cursor__blob {
   background: transparent;
-  border-width: 3px;
+  border-width: 2px;
   border-color: rgba(255, 255, 255, 0.62);
   box-shadow: 0 0 24px rgba(255, 255, 255, 0.1);
 }
@@ -165,8 +165,8 @@ body {
 
 .blob-cursor__inner {
   position: absolute;
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   border-radius: 50%;
   background: rgba(176, 94, 60, 0.95);
   top: 50%;

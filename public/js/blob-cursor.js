@@ -128,7 +128,7 @@
       if (visible) {
         rx += (x - rx) * lerpRate;
         ry += (y - ry) * lerpRate;
-        var scale = down ? 0.86 : hovering ? 1.38 : moving ? 1.12 : 1;
+        var scale = down ? 0.88 : hovering ? 1.22 : moving ? 1.06 : 1;
         blob.style.transform =
           "translate(" +
           rx +

@@ -1160,7 +1160,7 @@ body.page-cart .nav .nav__inner {
 }
 
 .blob-cursor.is-over-dark-green .blob-cursor__blob {
-  border-width: 3px;
+  border-width: 2px;
 }
 .blob-cursor.is-over-dark-green .blob-cursor__inner {
   background: var(--color-orange);

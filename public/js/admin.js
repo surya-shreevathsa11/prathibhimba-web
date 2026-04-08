@@ -359,6 +359,7 @@
   var eventNameInput = document.getElementById("eventName");
   var eventDescInput = document.getElementById("eventDescription");
   var eventMaxInput = document.getElementById("eventMaxPeople");
+  var eventPriceInput = document.getElementById("eventPrice");
   var eventStartInput = document.getElementById("eventStartDate");
   var eventEndInput = document.getElementById("eventEndDate");
   var eventBookingsBody = document.getElementById("eventBookingsBody");
@@ -425,7 +426,9 @@
           (ev.curPeopleEnrolled != null
             ? " · Enrolled: " + ev.curPeopleEnrolled
             : "") +
-          " · " +
+          " · ₹" +
+          (ev.pricePerPerson != null ? Number(ev.pricePerPerson).toLocaleString("en-IN") : "0") +
+          " / person · " +
           startLabel +
           " – " +
           endLabel +
@@ -469,6 +472,12 @@
         eventDescInput.value = ev.description || "";
         eventMaxInput.value =
           ev.maxPeopleAllowed != null ? String(ev.maxPeopleAllowed) : "";
+        if (eventPriceInput) {
+          eventPriceInput.value =
+            ev.pricePerPerson != null && ev.pricePerPerson !== ""
+              ? String(ev.pricePerPerson)
+              : "0";
+        }
         if (eventStartInput) {
           eventStartInput.value = ev.startDate
             ? new Date(ev.startDate).toISOString().slice(0, 10)
@@ -1395,11 +1404,17 @@
       var nameVal = eventNameInput.value.trim();
       var descVal = eventDescInput.value.trim();
       var maxVal = parseInt(eventMaxInput.value, 10) || 0;
+      var priceVal = eventPriceInput ? Number(eventPriceInput.value) : 0;
       var startVal = eventStartInput.value;
       var endVal = eventEndInput.value;
 
       if (!nameVal || !descVal || !maxVal || !startVal || !endVal) {
         setMsg(eventsMsg, "Please fill in all required fields.", true);
+        return;
+      }
+
+      if (eventPriceInput && (Number.isNaN(priceVal) || priceVal < 0)) {
+        setMsg(eventsMsg, "Enter a valid price per person (₹).", true);
         return;
       }
 
@@ -1412,6 +1427,7 @@
         name: nameVal,
         description: descVal,
         maxPeopleAllowed: maxVal,
+        pricePerPerson: Number.isNaN(priceVal) ? 0 : priceVal,
         startDate: startVal,
         endDate: endVal,
       };

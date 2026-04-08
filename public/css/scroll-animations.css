@@ -82,13 +82,22 @@
   transition-delay: 0ms;
 }
 
-/* Rooms section: cards reveal symmetrically from bottom (all together) */
-.section--sanctuary .card-grid-reveal .room-card {
-  transform: translateY(60px);
+/* Rooms section: no transform/opacity transitions on cards (stable grid vs GSAP + card-grid-reveal) */
+.section--sanctuary .rooms__grid .room-card,
+.section--sanctuary .rooms__grid.card-grid-reveal .room-card,
+.section--sanctuary .rooms__grid.card-grid-reveal.is-visible .room-card {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  will-change: auto !important;
 }
-.section--sanctuary .card-grid-reveal.is-visible .room-card {
-  transform: translateY(0);
-  transition-delay: 0ms;
+
+@media (min-width: 1025px) {
+  .section--sanctuary .rooms__grid .room-card:hover,
+  .section--sanctuary .rooms__grid .room-card.is-hovered {
+    transform: translateY(-4px) scale(1.04) !important;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
 }
 
 /* ----- 4. Cinematic image zoom (hero & feature images) ----- */
@@ -196,15 +205,9 @@
   z-index: 2 !important;
 }
 
-/* Mobile/iPad: keep room cards static (no entrance animation) */
+/* Mobile/iPad: room cards in sanctuary use rules above; keep overflow for tap/hover */
 @media (max-width: 1024px) {
   .room-card {
     overflow: visible !important;
-  }
-  .card-grid-reveal .room-card,
-  .card-grid-reveal.is-visible .room-card {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
   }
 }

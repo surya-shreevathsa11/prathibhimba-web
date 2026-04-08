@@ -755,7 +755,7 @@
               roomImages.push(...room.images.gallery);
             const roomImagesJson = roomImages.length ? JSON.stringify(roomImages) : "";
             return `
-        <div class="room-card" data-reveal="slide-down" data-reveal-delay="${Math.min(idx * 100, 400)}"${roomImagesJson ? ' data-room-images="' + roomImagesJson.replace(/"/g, "&quot;") + '" data-room-name="' + (room.name || "").replace(/"/g, "&quot;") + '"' : ""}>
+        <div class="room-card"${roomImagesJson ? ' data-room-images="' + roomImagesJson.replace(/"/g, "&quot;") + '" data-room-name="' + (room.name || "").replace(/"/g, "&quot;") + '"' : ""}>
           <div class="room-card__media">
             <img loading="lazy" alt="${escapeHtml(room.name)} cover" src="${imgSrc}">
           </div>

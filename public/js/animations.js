@@ -104,6 +104,12 @@
     });
     sections.forEach(function (section) {
       var els = gsap.utils.toArray("[data-reveal]", section);
+      /* #rooms: room cards use CSS-only layout — GSAP stagger/double-target caused misalignment on refresh */
+      if (section.id === "rooms") {
+        els = els.filter(function (el) {
+          return !(el.classList && el.classList.contains("room-card"));
+        });
+      }
       if (els.length === 0) return;
       if (section.dataset.revealed === "1") {
         gsap.set(els, { opacity: 1, y: 0, scaleX: 1, clearProps: "transform" });
@@ -116,6 +122,11 @@
           ? ".room-card, .review-card, .terms-card, .gallery-reel__slide"
           : ".room-card, .review-card, .activity-card, .terms-card, .gallery-reel__slide";
       var cards = gsap.utils.toArray(cardSelector, section);
+      if (section.id === "rooms") {
+        cards = cards.filter(function (el) {
+          return !(el.classList && el.classList.contains("room-card"));
+        });
+      }
 
       var trigger = st.create({
         trigger: section,

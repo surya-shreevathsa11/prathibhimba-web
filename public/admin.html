@@ -384,6 +384,10 @@
                       <label for="eventMaxPeople">Maximum guests <span class="form__required">*</span></label>
                       <input type="number" id="eventMaxPeople" name="eventMaxPeople" min="1" step="1" placeholder="e.g., 30" required />
                     </div>
+                    <div class="form__group">
+                      <label for="eventPrice">Price per person (₹) <span class="form__required">*</span></label>
+                      <input type="number" id="eventPrice" name="eventPrice" min="0" step="1" placeholder="e.g., 1500" required />
+                    </div>
                     <div class="admin__form-row admin__form-row--two">
                       <div class="form__group">
                         <label for="eventStartDate">Start date <span class="form__required">*</span></label>
@@ -621,6 +625,26 @@
                     <button type="button" class="btn admin__btn-block-dates" id="addBlockDateBtn">Block Dates</button>
                   </div>
                 </div>
+              </div>
+              <div class="admin__blocked-list-card">
+                <div class="admin__blocked-list-header">
+                  <h3 class="admin__blocked-list-title">Current blocked periods</h3>
+                  <div class="admin__blocked-list-filter">
+                    <label for="blockDatesFilterRoom">Room</label>
+                    <select id="blockDatesFilterRoom" aria-label="Filter blocked dates by room">
+                      <option value="">All rooms</option>
+                      <option value="R1">R1 — Silver Oak Haven</option>
+                      <option value="R2">R2 — Rosewood retreat</option>
+                      <option value="R3">R3 — Banyan House</option>
+                      <option value="R4">R4 — Rain Tree Grove</option>
+                      <option value="R5">R5 — Dahlia</option>
+                      <option value="R6">R6 — Gardenia</option>
+                      <option value="R7">R7 — Petunia</option>
+                      <option value="R8">R8 — Zinnia</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="blockDatesList" class="admin__blocked-list"></div>
               </div>
             </section>
           </div>

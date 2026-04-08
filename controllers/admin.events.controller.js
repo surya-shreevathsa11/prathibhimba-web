@@ -74,6 +74,7 @@ export const createEvent = async (req, res) => {
       name,
       description,
       maxPeopleAllowed,
+      pricePerPerson,
       startDate,
       endDate,
       banner,
@@ -94,10 +95,19 @@ export const createEvent = async (req, res) => {
         .json({ message: "startDate must be before or equal to endDate" });
     }
 
+    const price =
+      pricePerPerson !== undefined && pricePerPerson !== null && pricePerPerson !== ""
+        ? Math.max(0, Number(pricePerPerson))
+        : 0;
+    if (Number.isNaN(price)) {
+      return res.status(400).json({ message: "Invalid price per person" });
+    }
+
     const event = await Event.create({
       name,
       description,
       maxPeopleAllowed,
+      pricePerPerson: price,
       startDate,
       endDate,
       banner: banner || null,
@@ -156,12 +166,21 @@ export const editEvent = async (req, res) => {
       "name",
       "description",
       "maxPeopleAllowed",
+      "pricePerPerson",
       "startDate",
       "endDate",
     ];
     const updates = {};
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
+    if (updates.pricePerPerson !== undefined) {
+      const p = Math.max(0, Number(updates.pricePerPerson));
+      if (Number.isNaN(p)) {
+        return res.status(400).json({ message: "Invalid price per person" });
+      }
+      updates.pricePerPerson = p;
     }
 
     if (

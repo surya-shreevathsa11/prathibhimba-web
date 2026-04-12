@@ -665,6 +665,10 @@ body.admin--dashboard .admin__grid {
   background: #fff;
 }
 
+.admin__pricing-base .admin__price-row input {
+  color: #0a0a0a;
+}
+
 /* ── Events admin tab ─────────────────────────────────────────────────────── */
 .admin__events-section {
   display: flex;

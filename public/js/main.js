@@ -10,6 +10,128 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
+  // ─── API wiring (multi-property backend) ────────────────────────────────────
+  // The backend lives in a different repo; this frontend is property-scoped.
+  // Configure these via injected globals (preferred) or fall back to defaults.
+  const API_BASE_URL =
+    (window.__PB_CONFIG__ && window.__PB_CONFIG__.API_BASE_URL) ||
+    (window.__ENV__ && window.__ENV__.API_BASE_URL) ||
+    (window.ENV && window.ENV.API_BASE_URL) ||
+    "http://localhost:3000";
+  const PROPERTY_SLUG =
+    (window.__PB_CONFIG__ && window.__PB_CONFIG__.PROPERTY_SLUG) ||
+    (window.__ENV__ && window.__ENV__.PROPERTY_SLUG) ||
+    (window.ENV && window.ENV.PROPERTY_SLUG) ||
+    "prathibhimba";
+  const GOOGLE_CLIENT_ID =
+    (window.__PB_CONFIG__ && window.__PB_CONFIG__.GOOGLE_CLIENT_ID) ||
+    (window.__ENV__ && window.__ENV__.GOOGLE_CLIENT_ID) ||
+    (window.ENV && window.ENV.GOOGLE_CLIENT_ID) ||
+    "505975960167-kc4buclfdjmf74oq9nsmu2lfgmmfuddk.apps.googleusercontent.com";
+
+  const GUEST_TOKEN_STORAGE_KEY = "guestAccessToken";
+  function getGuestToken() {
+    try {
+      return localStorage.getItem(GUEST_TOKEN_STORAGE_KEY) || "";
+    } catch (_) {
+      return "";
+    }
+  }
+  function clearGuestToken() {
+    try {
+      localStorage.removeItem(GUEST_TOKEN_STORAGE_KEY);
+    } catch (_) { }
+  }
+  function setGuestToken(token) {
+    try {
+      if (!token) localStorage.removeItem(GUEST_TOKEN_STORAGE_KEY);
+      else localStorage.setItem(GUEST_TOKEN_STORAGE_KEY, String(token));
+    } catch (_) { }
+  }
+
+  function publicApiPath(path) {
+    return (
+      API_BASE_URL +
+      "/api/public/properties/" +
+      encodeURIComponent(PROPERTY_SLUG) +
+      path
+    );
+  }
+  function guestApiPath(path) {
+    return API_BASE_URL + "/api/guest" + path;
+  }
+
+  function apiFetch(url, opts) {
+    const token = getGuestToken();
+    const headers = Object.assign({}, (opts && opts.headers) || {});
+    if (!headers["Content-Type"] && !(opts && opts.body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
+    if (token) headers["Authorization"] = "Bearer " + token;
+    return fetch(url, Object.assign({}, opts || {}, { headers, credentials: "include" }));
+  }
+
+  // ─── Guest Google sign-in (Google Identity Services) ────────────────────────
+  function initGoogleIdentity() {
+    try {
+      if (
+        !window.google ||
+        !window.google.accounts ||
+        !window.google.accounts.id ||
+        !GOOGLE_CLIENT_ID
+      ) {
+        return;
+      }
+      if (initGoogleIdentity._inited) return;
+      initGoogleIdentity._inited = true;
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: function (response) {
+          if (!response || !response.credential) return;
+          fetch(API_BASE_URL + "/api/guest-auth/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              propertySlug: PROPERTY_SLUG,
+              credential: response.credential,
+            }),
+          })
+            .then(function (res) {
+              return res.json().catch(function () {
+                return {};
+              }).then(function (data) {
+                return { ok: res.ok, data: data };
+              });
+            })
+            .then(function (r) {
+              if (!r.ok) {
+                var errEl = $("#signInError");
+                if (errEl) errEl.textContent = (r.data && r.data.message) || "Google sign-in failed.";
+                return;
+              }
+              if (!r.data || r.data.success !== true || !r.data.token) {
+                var errEl2 = $("#signInError");
+                if (errEl2) errEl2.textContent = "Google sign-in failed (missing token).";
+                return;
+              }
+              setGuestToken(r.data.token);
+              currentUser = r.data.guest || { name: "Guest" };
+              updateAuthUI();
+              fetchCartCount();
+              closeAllModals();
+            })
+            .catch(function (err) {
+              console.error("Google sign-in error:", err);
+              var errEl = $("#signInError");
+              if (errEl) errEl.textContent = "Google sign-in failed. Please try again.";
+            });
+        },
+      });
+    } catch (_) { }
+  }
+
   // --- Nav scroll + contrast by section (cream vs dark green) ---
   var navEl = $("#nav");
   if (navEl) {
@@ -141,7 +263,7 @@
       "form__availability--ok",
       "form__availability--error",
     );
-    fetch("/api/booking/checkAvailability", {
+    fetch(publicApiPath("/quote"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -231,7 +353,7 @@
       }
       if (submitBtn) submitBtn.disabled = true;
       try {
-        var availRes = await fetch("/api/booking/checkAvailability", {
+        var availRes = await fetch(publicApiPath("/quote"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -248,9 +370,8 @@
             availData.message || "Selected dates are not available.";
           return;
         }
-        var cartRes = await fetch("/api/booking/cart", {
+        var cartRes = await apiFetch(guestApiPath("/bookings/cart/items"), {
           method: "POST",
-          credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             roomId: roomId,
@@ -361,10 +482,9 @@
   const navProfileLogout = $("#navProfileLogout");
   if (navProfileLogout) {
     navProfileLogout.addEventListener("click", () => {
-      fetch("/api/auth/logout", { method: "POST" }).then(() => {
-        currentUser = null;
-        updateAuthUI();
-      });
+      clearGuestToken();
+      currentUser = null;
+      updateAuthUI();
     });
   }
   function escapeBookingHtml(s) {
@@ -376,26 +496,26 @@
     var rooms = b.rooms || [];
     var roomsSummary = rooms.length
       ? rooms
-          .map(function (r) {
-            return r.roomName || r.roomId || "—";
-          })
-          .join(", ")
+        .map(function (r) {
+          return r.roomName || r.roomId || "—";
+        })
+        .join(", ")
       : "—";
     var checkIn =
       rooms[0] && rooms[0].checkIn
         ? new Date(rooms[0].checkIn).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
         : "—";
     var checkOut =
       rooms[0] && rooms[0].checkOut
         ? new Date(rooms[0].checkOut).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
         : "—";
     return (
       '<div class="my-bookings__item">' +
@@ -434,18 +554,18 @@
     var checkIn =
       event && event.startDate
         ? new Date(event.startDate).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
         : "—";
     var checkOut =
       event && event.endDate
         ? new Date(event.endDate).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })
         : "—";
     return (
       '<div class="my-bookings__item">' +
@@ -506,7 +626,7 @@
         emptyEl.textContent = "";
       }
 
-      fetch("/api/booking/bookings", { credentials: "same-origin" })
+      apiFetch(guestApiPath("/bookings"))
         .then(function (res) {
           return res.json().then(function (data) {
             return { ok: res.ok, data: data };
@@ -525,9 +645,12 @@
             openModal("#myBookingsModal");
             return;
           }
-          var roomsBookings = result.data && result.data.data ? result.data.data : [];
+          var roomsBookings =
+            (result.data && result.data.data) ||
+            (result.data && result.data.bookings) ||
+            [];
 
-          fetch("/api/booking/events/bookings", { credentials: "same-origin" })
+          apiFetch(guestApiPath("/event-bookings"))
             .then(function (res) {
               return res.json().then(function (data) {
                 return { ok: res.ok, data: data };
@@ -558,22 +681,29 @@
   }
 
   // --- Google Sign In ---
-  $("#googleSignInBtn").addEventListener("click", () => {
-    window.location.href = "/api/auth/google";
-  });
+  const googleSignInBtn = $("#googleSignInBtn");
+  if (googleSignInBtn) {
+    googleSignInBtn.addEventListener("click", () => {
+      initGoogleIdentity();
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.prompt();
+        return;
+      }
+      const el = $("#signInError");
+      if (el) {
+        el.textContent =
+          "Google sign-in is not available right now. Please disable blockers and refresh.";
+      }
+    });
+  }
 
   // --- Auth check: used before booking and for redirect after sign-in ---
   async function checkAuth(cb) {
     try {
-      const res = await fetch("/api/auth/status", {
-        credentials: "same-origin",
-      });
-      const data = await res.json();
-      if (data.loggedIn) {
-        currentUser = data.user;
-        updateAuthUI();
-        fetchCartCount();
-      } else {
+      // We don't have an auth/status endpoint in the new backend contract.
+      // Best-effort: if a token exists and guest cart call succeeds, treat as logged in.
+      const token = getGuestToken();
+      if (!token) {
         currentUser = null;
         updateAuthUI();
         const countEl = $("#navCartCount");
@@ -581,27 +711,41 @@
           countEl.textContent = "0";
           countEl.setAttribute("data-count", "0");
         }
+        if (cb) cb(null);
+        return;
       }
-      if (cb) cb(data.loggedIn ? data.user : null);
+
+      const res = await apiFetch(guestApiPath("/bookings/cart"));
+      if (!res.ok) throw new Error("unauthorized");
+      currentUser = { name: "Guest" };
+      updateAuthUI();
+      fetchCartCount();
+      if (cb) cb(currentUser);
     } catch {
+      currentUser = null;
+      updateAuthUI();
       if (cb) cb(null);
     }
   }
 
   async function fetchCartCount() {
     try {
-      const res = await fetch("/api/booking/cart", {
-        credentials: "same-origin",
-      });
+      const res = await apiFetch(guestApiPath("/bookings/cart"));
       if (!res.ok) return;
       const data = await res.json();
-      const count = Array.isArray(data.message) ? data.message.length : 0;
+      const items =
+        (data && data.items) ||
+        (data && data.data && data.data.items) ||
+        (data && data.cart && data.cart.items) ||
+        (data && data.message) ||
+        [];
+      const count = Array.isArray(items) ? items.length : 0;
       const countEl = $("#navCartCount");
       if (countEl) {
         countEl.textContent = count;
         countEl.setAttribute("data-count", count);
       }
-    } catch (_) {}
+    } catch (_) { }
   }
 
   let pendingBookRoom = null;
@@ -728,21 +872,26 @@
   // --- Render rooms ---
   async function renderRooms() {
     try {
-      const res = await fetch("/api/booking/rooms");
+      const res = await fetch(publicApiPath("/rooms"));
       const data = await res.json();
-      if (!data.success || !Array.isArray(data.rooms)) return;
-      validRoomIdsFromBackend = data.rooms.map(function (r) {
+      const rooms =
+        (data && data.rooms) ||
+        (data && data.data && data.data.rooms) ||
+        (data && data.data) ||
+        [];
+      if (!Array.isArray(rooms) || rooms.length === 0) return;
+      validRoomIdsFromBackend = rooms.map(function (r) {
         return r.roomId || (r.id != null ? "R" + r.id : "");
       }).filter(Boolean);
       roomsCapacityByRoomId = {};
-      data.rooms.forEach(function (r) {
+      rooms.forEach(function (r) {
         var rid = r.roomId || (r.id != null ? "R" + r.id : "");
         if (rid && r.capacity && typeof r.capacity === "object") {
           roomsCapacityByRoomId[rid] = r.capacity;
         }
       });
       const grid = $("#roomsGrid");
-      grid.innerHTML = data.rooms
+      grid.innerHTML = rooms
         .map(
           (room, idx) => {
             const imgSrc =
@@ -759,18 +908,18 @@
           <div class="room-card__media">
             <img loading="lazy" alt="${escapeHtml(room.name)} cover" src="${imgSrc}">
           </div>
-          <span class="room-card__number">0${room.id}</span>
+          <span class="room-card__number">${room.id != null ? "0" + room.id : ""}</span>
           <h3 class="room-card__name">${escapeHtml(room.name)}</h3>
           <p class="room-card__desc">${escapeHtml(room.description)}</p>
-          <p class="room-card__price"><span>₹${room.price}</span> / night</p>
+          <p class="room-card__price"><span>₹${room.price != null ? room.price : (room.pricePerNight != null ? room.pricePerNight : 0)}</span> / night</p>
           <div class="room-card__actions">
-            <button type="button" class="btn btn--outline btn--sm" data-add-cart="${room.id}" data-name="${escapeHtml(room.name)}" data-price="${room.price}">Add to cart</button>
+            <button type="button" class="btn btn--outline btn--sm" data-add-cart="${room.id != null ? room.id : (room.roomId ? String(room.roomId).replace(/^R/i, "") : "")}" data-name="${escapeHtml(room.name)}" data-price="${room.price != null ? room.price : (room.pricePerNight != null ? room.pricePerNight : 0)}">Add to cart</button>
           </div>
           <div class="room-card__overlay">
             <div class="room-card__overlay-inner">
               <h3 class="room-card__overlay-title">${escapeHtml(room.name)}</h3>
               <p class="room-card__overlay-desc">${escapeHtml(room.description)}</p>
-              <p class="room-card__overlay-meta">From ₹${room.price} / night</p>
+              <p class="room-card__overlay-meta">From ₹${room.price != null ? room.price : (room.pricePerNight != null ? room.pricePerNight : 0)} / night</p>
             </div>
           </div>
         </div>
@@ -974,7 +1123,7 @@
       if (raw) {
         try {
           urls = JSON.parse(raw);
-        } catch (err) {}
+        } catch (err) { }
       }
       var name = card.getAttribute("data-room-name") || "";
 
@@ -1204,9 +1353,8 @@
 
         if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = true;
 
-        fetch("/api/booking/events/checkout", {
+        apiFetch(guestApiPath("/event-bookings"), {
           method: "POST",
-          credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             eventId: pendingBookEvent.eventId,
@@ -1255,9 +1403,8 @@
                   contact: guestPhone,
                 },
                 handler: function (response) {
-                  fetch("/api/payment/verify-event", {
+                  apiFetch(guestApiPath("/event-payments/verify"), {
                     method: "POST",
-                    credentials: "same-origin",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                       razorpay_order_id: response.razorpay_order_id,
@@ -1300,9 +1447,9 @@
               rzp.on("payment.failed", function (response) {
                 alert(
                   "Payment failed: " +
-                    (response && response.error && response.error.description
-                      ? response.error.description
-                      : "Please try again.")
+                  (response && response.error && response.error.description
+                    ? response.error.description
+                    : "Please try again.")
                 );
                 if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
                 openBookEventModal(pendingBookEvent);
@@ -1389,7 +1536,7 @@
 
     initBookEventForm();
 
-    fetch("/api/events")
+    fetch(publicApiPath("/events"))
       .then(function (res) {
         return res.json();
       })
@@ -1454,8 +1601,8 @@
             brochure: ev.brochure || null,
             gallery: Array.isArray(ev.gallery)
               ? ev.gallery.filter(function (u) {
-                  return u && String(u).trim();
-                })
+                return u && String(u).trim();
+              })
               : [],
           };
         });
@@ -1740,7 +1887,7 @@
       windowEl.setAttribute("data-lenis-prevent", "true");
       messagesEl.setAttribute("data-lenis-prevent", "true");
       inputEl.setAttribute("data-lenis-prevent", "true");
-    } catch (_) {}
+    } catch (_) { }
 
     var chatbotHistory = [];
     var isSending = false;
@@ -1882,7 +2029,7 @@
       setTimeout(function () {
         try {
           if (currentUser && inputEl && !inputEl.disabled) inputEl.focus();
-        } catch (_) {}
+        } catch (_) { }
       }, 50);
     });
 
@@ -1959,7 +2106,8 @@
   setupDirections();
   setupHeroSlider();
   setupBlobCursor();
-  setupChatbotWidget();
+  // Chatbot endpoints are not part of the new backend contract; keep UI off.
+  // setupChatbotWidget();
   checkAuth(function (user) {
     if (user) {
       try {
@@ -1967,7 +2115,7 @@
           sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
           window.location.href = "/cart";
         }
-      } catch (_) {}
+      } catch (_) { }
     }
   });
   renderRooms();
@@ -2013,13 +2161,17 @@
   (function loadSiteGalleryReel() {
     var track = document.getElementById("galleryReelTrack");
     if (!track) return;
-    fetch("/api/site-gallery")
+    fetch(publicApiPath("/site-gallery"))
       .then(function (r) {
         return r.json();
       })
       .then(function (data) {
         var urls =
-          data && data.images && data.images.length ? data.images : DEFAULT_SITE_GALLERY_URLS;
+          (data && data.images && data.images.length
+            ? data.images
+            : data && data.data && data.data.images && data.data.images.length
+              ? data.data.images
+              : DEFAULT_SITE_GALLERY_URLS);
         renderSiteGalleryTrack(urls);
         if (typeof window.initGalleryReel === "function") window.initGalleryReel();
       })

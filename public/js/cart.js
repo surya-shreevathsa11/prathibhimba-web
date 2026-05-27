@@ -12,6 +12,102 @@
   var serverCart = [];
   var currentUser = null;
 
+  // ─── API wiring (multi-property backend) ────────────────────────────────────
+  var API_BASE_URL =
+    (window.__PB_CONFIG__ && window.__PB_CONFIG__.API_BASE_URL) ||
+    (window.__ENV__ && window.__ENV__.API_BASE_URL) ||
+    (window.ENV && window.ENV.API_BASE_URL) ||
+    "http://localhost:3000";
+  var PROPERTY_SLUG =
+    (window.__PB_CONFIG__ && window.__PB_CONFIG__.PROPERTY_SLUG) ||
+    (window.__ENV__ && window.__ENV__.PROPERTY_SLUG) ||
+    (window.ENV && window.ENV.PROPERTY_SLUG) ||
+    "prathibhimba";
+  var GOOGLE_CLIENT_ID =
+    (window.__PB_CONFIG__ && window.__PB_CONFIG__.GOOGLE_CLIENT_ID) ||
+    (window.__ENV__ && window.__ENV__.GOOGLE_CLIENT_ID) ||
+    (window.ENV && window.ENV.GOOGLE_CLIENT_ID) ||
+    "505975960167-kc4buclfdjmf74oq9nsmu2lfgmmfuddk.apps.googleusercontent.com";
+  var GUEST_TOKEN_STORAGE_KEY = "guestAccessToken";
+  function getGuestToken() {
+    try {
+      return localStorage.getItem(GUEST_TOKEN_STORAGE_KEY) || "";
+    } catch (_) {
+      return "";
+    }
+  }
+  function setGuestToken(token) {
+    try {
+      if (!token) localStorage.removeItem(GUEST_TOKEN_STORAGE_KEY);
+      else localStorage.setItem(GUEST_TOKEN_STORAGE_KEY, String(token));
+    } catch (_) { }
+  }
+  function guestApiPath(path) {
+    return API_BASE_URL + "/api/guest" + path;
+  }
+  function apiFetch(url, opts) {
+    var token = getGuestToken();
+    var headers = Object.assign({}, (opts && opts.headers) || {});
+    if (!headers["Content-Type"] && !(opts && opts.body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
+    if (token) headers["Authorization"] = "Bearer " + token;
+    return fetch(url, Object.assign({}, opts || {}, { headers: headers, credentials: "include" }));
+  }
+
+  function initGoogleIdentity() {
+    try {
+      if (
+        !window.google ||
+        !window.google.accounts ||
+        !window.google.accounts.id ||
+        !GOOGLE_CLIENT_ID
+      ) {
+        return;
+      }
+      if (initGoogleIdentity._inited) return;
+      initGoogleIdentity._inited = true;
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: function (response) {
+          if (!response || !response.credential) return;
+          fetch(API_BASE_URL + "/api/guest-auth/google", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              propertySlug: PROPERTY_SLUG,
+              credential: response.credential,
+            }),
+          })
+            .then(function (res) {
+              return res.json().catch(function () {
+                return {};
+              }).then(function (data) {
+                return { ok: res.ok, data: data };
+              });
+            })
+            .then(function (r) {
+              if (!r.ok || !r.data || r.data.success !== true || !r.data.token) {
+                alert((r.data && r.data.message) || "Google sign-in failed.");
+                return;
+              }
+              setGuestToken(r.data.token);
+              // Reload cart now that auth exists
+              fetchCart().then(function (result) {
+                if (result && result.unauthorized) showSignInRequired();
+                else renderCartList();
+              });
+            })
+            .catch(function () {
+              alert("Google sign-in failed. Please try again.");
+            });
+        },
+      });
+    } catch (_) { }
+  }
+
   function escapeHtml(s) {
     var div = document.createElement("div");
     div.textContent = s;
@@ -34,17 +130,10 @@
   }
 
   function checkAuth(cb) {
-    fetch("/api/auth/status", { credentials: "same-origin" })
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (data) {
-        currentUser = data.loggedIn ? data.user : null;
-        if (cb) cb(currentUser);
-      })
-      .catch(function () {
-        if (cb) cb(null);
-      });
+    // No /api/auth/status in new backend; infer from token presence.
+    var t = getGuestToken();
+    currentUser = t ? { name: "Guest" } : null;
+    if (cb) cb(currentUser);
   }
 
   function updateNavCartCount(count) {
@@ -56,15 +145,17 @@
   }
 
   function fetchCart() {
-    return fetch("/api/booking/cart", { credentials: "same-origin" })
+    return apiFetch(guestApiPath("/bookings/cart"))
       .then(function (res) {
         if (res.status === 401) return { unauthorized: true };
         return res.json().then(function (data) {
-          if (data.message && Array.isArray(data.message)) {
-            serverCart = data.message;
-          } else {
-            serverCart = [];
-          }
+          var items =
+            (data && data.items) ||
+            (data && data.data && data.data.items) ||
+            (data && data.cart && data.cart.items) ||
+            (data && data.message) ||
+            [];
+          serverCart = Array.isArray(items) ? items : [];
           return { ok: res.ok, unauthorized: res.status === 401 };
         });
       })
@@ -120,7 +211,7 @@
               return (
                 '<div class="cart__item-breakdown__row">' +
                 (d ? escapeHtml(d) + " — " : "") +
-                "₹" +   
+                "₹" +
                 p +
                 (r ? " (" + r + ")" : "") +
                 "</div>"
@@ -142,9 +233,9 @@
         checkOut +
         (adults || children
           ? " · " +
-            adults +
-            " adult(s)" +
-            (children ? ", " + children + " kid(s)" : "")
+          adults +
+          " adult(s)" +
+          (children ? ", " + children + " kid(s)" : "")
           : "") +
         "</div>" +
         '<div class="cart__item-price">' +
@@ -175,9 +266,8 @@
   }
 
   function removeFromCart(roomId, checkIn, checkOut) {
-    fetch("/api/booking/cart", {
+    apiFetch(guestApiPath("/bookings/cart/items"), {
       method: "DELETE",
-      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         roomId: roomId,
@@ -232,8 +322,14 @@
         btn.addEventListener("click", function () {
           try {
             sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, "cart");
-          } catch (_) {}
-          window.location.href = "/api/auth/google";
+          } catch (_) { }
+          initGoogleIdentity();
+          if (window.google && window.google.accounts && window.google.accounts.id) {
+            window.google.accounts.id.prompt();
+          } else {
+            // Fallback: send user back to homepage sign-in modal
+            window.location.href = "/";
+          }
         });
       }
     }
@@ -261,7 +357,7 @@
           sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY);
           if (serverCart.length > 0) showStep("stepCheckout");
         }
-      } catch (_) {}
+      } catch (_) { }
     });
 
     var cartCheckoutBtn = $("#cartCheckoutBtn");
@@ -317,9 +413,8 @@
           };
         });
 
-        fetch("/api/booking/checkout", {
+        apiFetch(guestApiPath("/payments/order"), {
           method: "POST",
-          credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: name,
@@ -338,8 +433,8 @@
               result.status === 201 &&
               result.data &&
               result.data.data &&
-              result.data.data.razorpayOrderId &&
-              result.data.data.key
+              (result.data.data.razorpayOrderId || result.data.data.orderId) &&
+              (result.data.data.key || result.data.data.razorpayKeyId)
             ) {
               closeTermsModal();
 
@@ -352,12 +447,14 @@
               }
 
               var bookingData = result.data.data;
+              var orderId = bookingData.razorpayOrderId || bookingData.orderId;
+              var keyId = bookingData.key || bookingData.razorpayKeyId;
 
               var options = {
-                key: bookingData.key,
+                key: keyId,
                 amount: bookingData.totalAmount * 100, // paise
                 currency: "INR",
-                order_id: bookingData.razorpayOrderId,
+                order_id: orderId,
                 name: "Summer Green",
                 description: "Room Booking",
                 prefill: {
@@ -369,9 +466,8 @@
                 // ✅ Called by Razorpay on successful payment
                 handler: function (response) {
                   // Verify payment signature on backend before redirecting
-                  fetch("/api/payment/verify", {
+                  apiFetch(guestApiPath("/payments/verify"), {
                     method: "POST",
-                    credentials: "same-origin",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                       razorpay_order_id: response.razorpay_order_id,
@@ -389,7 +485,7 @@
                       } else {
                         alert(
                           "Payment verification failed. Please contact support with your payment ID: " +
-                            response.razorpay_payment_id
+                          response.razorpay_payment_id
                         );
                         termsProceedBtn.disabled = false;
                       }
@@ -397,7 +493,7 @@
                     .catch(function () {
                       alert(
                         "Could not verify payment. Please contact support with your payment ID: " +
-                          response.razorpay_payment_id
+                        response.razorpay_payment_id
                       );
                       termsProceedBtn.disabled = false;
                     });
@@ -418,7 +514,7 @@
                 console.error("Payment failed:", response.error);
                 alert(
                   "Payment failed: " +
-                    (response.error.description || "Please try again.")
+                  (response.error.description || "Please try again.")
                 );
                 termsProceedBtn.disabled = false;
               });
@@ -427,7 +523,7 @@
             } else {
               alert(
                 result.data.message ||
-                  "Could not create payment order. Please try again."
+                "Could not create payment order. Please try again."
               );
               termsProceedBtn.disabled = false;
             }

@@ -1,0 +1,9 @@
+{
+  "buildCommand": "",
+  "outputDirectory": "public",
+  "rewrites": [
+    { "source": "/cart", "destination": "/cart.html" },
+    { "source": "/reviews", "destination": "/reviews.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ]
+}

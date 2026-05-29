@@ -1,0 +1,7 @@
+# Apache / cPanel — map clean URLs to HTML files
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^cart/?$ cart.html [L]
+  RewriteRule ^reviews/?$ reviews.html [L]
+  RewriteRule ^admin/?$ admin.html [L]
+</IfModule>

@@ -5,8 +5,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "PORT=5173 node server.js",
+    "dev": "PORT=5173 nodemon server.js",
+    "serve": "node scripts/static-server.mjs"
   },
   "keywords": [],
   "author": "",

@@ -10,6 +10,13 @@
   };
 
   var serverCart = [];
+  var cartSummary = {
+    totalPrice: 0,
+    lowerPayableTotal: 0,
+    upperPayableTotal: 0,
+    lowerPercent: 0,
+    upperPercent: 0,
+  };
   var currentUser = null;
 
   // ─── API wiring (multi-property backend) ────────────────────────────────────
@@ -165,6 +172,47 @@
     return d.toISOString().slice(0, 10);
   }
 
+  function formatDateDisplay(dateStr) {
+    if (!dateStr) return "";
+    var d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  function formatINR(amount) {
+    var n = Number(amount);
+    if (isNaN(n)) return "₹0";
+    return "₹" + n.toLocaleString("en-IN");
+  }
+
+  function parseCartResponse(data) {
+    var root =
+      data && data.data && typeof data.data === "object" && !Array.isArray(data.data)
+        ? data.data
+        : data;
+    if (!root || typeof root !== "object") root = {};
+    var roomInfo = root.roomInfo;
+    if (!Array.isArray(roomInfo)) {
+      roomInfo =
+        root.items ||
+        (data && data.cart && data.cart.roomInfo) ||
+        (Array.isArray(data && data.message) ? data.message : []);
+    }
+    if (!Array.isArray(roomInfo)) roomInfo = [];
+    return {
+      roomInfo: roomInfo,
+      totalPrice: root.totalPrice != null ? root.totalPrice : 0,
+      lowerPayableTotal: root.lowerPayableTotal != null ? root.lowerPayableTotal : 0,
+      upperPayableTotal: root.upperPayableTotal != null ? root.upperPayableTotal : 0,
+      lowerPercent: root.lowerPercent != null ? root.lowerPercent : 0,
+      upperPercent: root.upperPercent != null ? root.upperPercent : 0,
+    };
+  }
+
   function showStep(stepId) {
     $$(".cart-step").forEach(function (el) {
       el.classList.add("cart-step--hidden");
@@ -203,20 +251,76 @@
       .then(function (res) {
         if (res.status === 401) return { unauthorized: true };
         return res.json().then(function (data) {
-          var items =
-            (data && data.items) ||
-            (data && data.data && data.data.items) ||
-            (data && data.cart && data.cart.items) ||
-            (data && data.message) ||
-            [];
-          serverCart = Array.isArray(items) ? items : [];
+          var parsed = parseCartResponse(data);
+          serverCart = parsed.roomInfo;
+          cartSummary = {
+            totalPrice: parsed.totalPrice,
+            lowerPayableTotal: parsed.lowerPayableTotal,
+            upperPayableTotal: parsed.upperPayableTotal,
+            lowerPercent: parsed.lowerPercent,
+            upperPercent: parsed.upperPercent,
+          };
           return { ok: res.ok, unauthorized: res.status === 401 };
         });
       })
       .catch(function () {
         serverCart = [];
+        cartSummary = {
+          totalPrice: 0,
+          lowerPayableTotal: 0,
+          upperPayableTotal: 0,
+          lowerPercent: 0,
+          upperPercent: 0,
+        };
         return { ok: false };
       });
+  }
+
+  function renderPrepaidOptionsHtml(room) {
+    if (!room.prepaidOptions || !room.prepaidOptions.length) return "";
+    var rows = room.prepaidOptions
+      .map(function (opt) {
+        var label = escapeHtml(opt.label || opt.id || "Option");
+        var pct = opt.percent != null ? opt.percent + "%" : "";
+        var amt = opt.prepaidAmount != null ? formatINR(opt.prepaidAmount) : "";
+        var refund =
+          opt.refundAvailable === true
+            ? "Refundable"
+            : opt.refundAvailable === false
+              ? "Non-refundable"
+              : "";
+        var primary = opt.isPrimary ? " · Primary" : "";
+        return (
+          '<li class="cart__item-prepaid__option">' +
+          "<span>" +
+          label +
+          (pct ? " (" + pct + ")" : "") +
+          primary +
+          "</span>" +
+          "<span>" +
+          amt +
+          (refund ? ' <em class="cart__item-prepaid__refund">' + refund + "</em>" : "") +
+          "</span>" +
+          "</li>"
+        );
+      })
+      .join("");
+    var range =
+      room.lowerPrepaidAmount != null && room.upperPrepaidAmount != null
+        ? '<p class="cart__item-prepaid__range">Pay ' +
+          formatINR(room.lowerPrepaidAmount) +
+          " – " +
+          formatINR(room.upperPrepaidAmount) +
+          " upfront</p>"
+        : "";
+    return (
+      '<div class="cart__item-prepaid">' +
+      '<p class="cart__item-prepaid__title">Payment options</p>' +
+      range +
+      '<ul class="cart__item-prepaid__list">' +
+      rows +
+      "</ul></div>"
+    );
   }
 
   function renderCartList() {
@@ -224,6 +328,7 @@
     var emptyEl = $("#cartEmpty");
     var footerEl = $("#cartFooter");
     var totalEl = $("#cartTotal");
+    var payableEl = $("#cartPayable");
     if (!listEl) return;
     listEl.innerHTML = "";
     if (serverCart.length === 0) {
@@ -234,38 +339,32 @@
     }
     if (emptyEl) emptyEl.style.display = "none";
     if (footerEl) footerEl.style.display = "block";
-    var total = 0;
     serverCart.forEach(function (room) {
       var price = room.price || 0;
-      total += price;
-      var checkIn = formatDate(room.checkIn);
-      var checkOut = formatDate(room.checkOut);
-      var adults =
-        room.adults != null
-          ? room.adults
-          : room.children && room.children.adults != null
-            ? room.children.adults
-            : 1;
+      var checkInIso = formatDate(room.checkIn);
+      var checkOutIso = formatDate(room.checkOut);
+      var checkInLabel = formatDateDisplay(room.checkIn);
+      var checkOutLabel = formatDateDisplay(room.checkOut);
+      var adults = room.adults != null ? room.adults : 1;
       var children =
         room.children != null && typeof room.children === "number"
           ? room.children
-          : room.children && room.children.children != null
-            ? room.children.children
-            : 0;
-      var roomName = room.roomId || "Room";
+          : 0;
+      var roomName = room.roomName || room.roomId || "Room";
+      var roomType = room.type ? escapeHtml(room.type) : "";
       var breakdownHtml = "";
       if (room.priceBreakdown && Array.isArray(room.priceBreakdown) && room.priceBreakdown.length > 0) {
         breakdownHtml =
           '<div class="cart__item-breakdown">' +
+          '<p class="cart__item-breakdown__title">Nightly breakdown</p>' +
           room.priceBreakdown
             .map(function (row) {
-              var d = row.date != null ? formatDate(row.date) : "";
-              var p = row.price != null ? row.price : 0;
+              var d = row.date != null ? formatDateDisplay(row.date) : "";
+              var p = row.price != null ? formatINR(row.price) : formatINR(0);
               var r = row.reason ? escapeHtml(row.reason) : "";
               return (
                 '<div class="cart__item-breakdown__row">' +
                 (d ? escapeHtml(d) + " — " : "") +
-                "₹" +
                 p +
                 (r ? " (" + r + ")" : "") +
                 "</div>"
@@ -274,36 +373,36 @@
             .join("") +
           "</div>";
       }
+      var prepaidHtml = renderPrepaidOptionsHtml(room);
       var item = document.createElement("div");
       item.className = "cart__item";
       item.innerHTML =
         '<div class="cart__item-info">' +
         '<div class="cart__item-name">' +
         escapeHtml(roomName) +
+        (roomType ? ' <span class="cart__item-type">(' + roomType + ")</span>" : "") +
         "</div>" +
         '<div class="cart__item-meta">' +
-        checkIn +
+        escapeHtml(checkInLabel) +
         " – " +
-        checkOut +
-        (adults || children
-          ? " · " +
-          adults +
-          " adult(s)" +
-          (children ? ", " + children + " kid(s)" : "")
-          : "") +
+        escapeHtml(checkOutLabel) +
+        " · " +
+        adults +
+        " adult(s)" +
+        (children ? ", " + children + " kid(s)" : "") +
         "</div>" +
         '<div class="cart__item-price">' +
-        '₹' +
-        price +
+        formatINR(price) +
         " total</div>" +
         breakdownHtml +
+        prepaidHtml +
         "</div>" +
         '<button type="button" class="cart__item-remove cursor-target" data-remove data-room-id="' +
-        escapeHtml(room.roomId) +
+        escapeHtml(room.roomId || "") +
         '" data-check-in="' +
-        escapeHtml(checkIn) +
+        escapeHtml(checkInIso) +
         '" data-check-out="' +
-        escapeHtml(checkOut) +
+        escapeHtml(checkOutIso) +
         '">Remove</button>';
       listEl.appendChild(item);
     });
@@ -315,7 +414,37 @@
         removeFromCart(roomId, checkIn, checkOut);
       });
     });
-    if (totalEl) totalEl.textContent = "₹" + total;
+    var displayTotal =
+      cartSummary.totalPrice > 0
+        ? cartSummary.totalPrice
+        : serverCart.reduce(function (sum, r) {
+            return sum + (r.price || 0);
+          }, 0);
+    if (totalEl) totalEl.textContent = formatINR(displayTotal);
+    if (payableEl) {
+      if (
+        cartSummary.lowerPayableTotal > 0 ||
+        cartSummary.upperPayableTotal > 0
+      ) {
+        payableEl.style.display = "block";
+        payableEl.innerHTML =
+          "Pay now: <strong>" +
+          formatINR(cartSummary.lowerPayableTotal) +
+          "</strong>" +
+          (cartSummary.lowerPercent != null
+            ? " (" + cartSummary.lowerPercent + "%)"
+            : "") +
+          " – <strong>" +
+          formatINR(cartSummary.upperPayableTotal) +
+          "</strong>" +
+          (cartSummary.upperPercent != null
+            ? " (" + cartSummary.upperPercent + "%)"
+            : "");
+      } else {
+        payableEl.style.display = "none";
+        payableEl.textContent = "";
+      }
+    }
     updateNavCartCount(serverCart.length);
   }
 

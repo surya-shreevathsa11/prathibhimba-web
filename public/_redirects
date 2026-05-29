@@ -1,0 +1,4 @@
+# Netlify / compatible static hosts — clean URLs without Node server.js
+/cart     /cart.html     200
+/reviews  /reviews.html  200
+/admin    /admin.html    200

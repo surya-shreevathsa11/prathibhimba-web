@@ -305,6 +305,46 @@
     return s;
   }
 
+  function normalizeCapacity(cap) {
+    if (!cap || typeof cap !== "object") return null;
+    if (cap.minAdults != null && cap.maxAdults != null) return cap;
+    if (cap.adults != null) {
+      var maxA = cap.adults;
+      var maxC = cap.children != null ? cap.children : 0;
+      return {
+        minAdults: 1,
+        maxAdults: maxA,
+        maxChildren: maxC,
+        maxTotal: maxA + maxC,
+      };
+    }
+    return null;
+  }
+
+  function roomCapacityLookupKeys(r) {
+    var keys = [];
+    if (r.roomId) {
+      keys.push(String(r.roomId), toQuoteRoomId(r.roomId));
+    }
+    if (r.id != null) {
+      keys.push(String(r.id), "R" + r.id, toQuoteRoomId(r.id));
+    }
+    return keys;
+  }
+
+  function getRoomCapacityForId(roomNumericId) {
+    var keys = [
+      toQuoteRoomId(roomNumericId),
+      "R" + roomNumericId,
+      String(roomNumericId),
+    ];
+    for (var i = 0; i < keys.length; i++) {
+      var cap = roomsCapacityByRoomId[keys[i]];
+      if (cap) return cap;
+    }
+    return null;
+  }
+
   function buildQuoteBody(checkIn, checkOut, adults, children, roomNumericId) {
     return {
       adults: adults,
@@ -437,6 +477,12 @@
           });
           errEl.textContent =
             availData.message || "Selected dates are not available.";
+          return;
+        }
+        if (!getGuestToken()) {
+          errEl.textContent = "Please sign in to add this room to your cart.";
+          openModal("#signInModal");
+          setTimeout(renderSignInButton, 50);
           return;
         }
         var cartRes = await apiFetch(guestApiPath("/bookings/cart/items"), {
@@ -808,18 +854,26 @@
     }
   }
 
+  function cartRoomCountFromResponse(data) {
+    var root =
+      data && data.data && typeof data.data === "object" && !Array.isArray(data.data)
+        ? data.data
+        : data;
+    if (!root || typeof root !== "object") return 0;
+    if (Array.isArray(root.roomInfo)) return root.roomInfo.length;
+    var items =
+      root.items ||
+      (data && data.cart && data.cart.roomInfo) ||
+      (Array.isArray(data && data.message) ? data.message : []);
+    return Array.isArray(items) ? items.length : 0;
+  }
+
   async function fetchCartCount() {
     try {
       const res = await apiFetch(guestApiPath("/bookings/cart"));
       if (!res.ok) return;
       const data = await res.json();
-      const items =
-        (data && data.items) ||
-        (data && data.data && data.data.items) ||
-        (data && data.cart && data.cart.items) ||
-        (data && data.message) ||
-        [];
-      const count = Array.isArray(items) ? items.length : 0;
+      const count = cartRoomCountFromResponse(data);
       const countEl = $("#navCartCount");
       if (countEl) {
         countEl.textContent = count;
@@ -873,7 +927,9 @@
 
   function validateGuestAgainstCapacity(cap, adults, children) {
     if (!cap) {
-      return "Guest limits are not available. Please refresh the page.";
+      if (adults < 1) return "At least 1 adult is required.";
+      if (children < 0) return "Invalid number of children.";
+      return null;
     }
     if (adults < cap.minAdults) {
       return "At least " + cap.minAdults + " adult(s) required.";
@@ -891,8 +947,7 @@
   }
 
   function openBookRoomModal(roomId, roomName, roomPrice) {
-    var roomKey = "R" + roomId;
-    var cap = roomsCapacityByRoomId[roomKey];
+    var cap = getRoomCapacityForId(roomId);
     pendingBookRoom = {
       id: roomId,
       name: roomName,
@@ -965,10 +1020,11 @@
       }).filter(Boolean);
       roomsCapacityByRoomId = {};
       rooms.forEach(function (r) {
-        var rid = r.roomId || (r.id != null ? "R" + r.id : "");
-        if (rid && r.capacity && typeof r.capacity === "object") {
-          roomsCapacityByRoomId[rid] = r.capacity;
-        }
+        var cap = normalizeCapacity(r.capacity);
+        if (!cap) return;
+        roomCapacityLookupKeys(r).forEach(function (key) {
+          if (key) roomsCapacityByRoomId[key] = cap;
+        });
       });
       const grid = $("#roomsGrid");
       grid.innerHTML = rooms

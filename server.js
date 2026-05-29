@@ -21,11 +21,32 @@ import connectDB from "./db.js";
 const app = express();
 app.use(cookieParser());
 
+const corsOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  process.env.CORS_ORIGIN,
+]
+  .filter(Boolean)
+  .flatMap(function (o) {
+    return String(o)
+      .split(",")
+      .map(function (s) {
+        return s.trim();
+      })
+      .filter(Boolean);
+  });
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: function (origin, callback) {
+      if (!origin || corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json({ limit: "128kb" }));
@@ -95,13 +116,13 @@ app.use("/api/admin", adminLoginRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/admin/events", adminEventRouter);
 
-import { addInitalPrices } from "./config/addInitialRoom.js";
-addInitalPrices();
+// import { addInitalPrices } from "./config/addInitialRoom.js";
+// addInitalPrices();
 
 connectDB().then(() => {
-  const port = process.env.PORT;
+  const port = Number(process.env.PORT) || 5173;
   app.listen(port, () => {
-    console.log("Server running at port", port);
+    console.log("Server running at http://localhost:" + port);
   });
 });
 

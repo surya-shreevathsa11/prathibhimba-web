@@ -2109,10 +2109,14 @@
         addBubble(text, "user");
         setTyping(true);
 
+        var chatHeaders = { "Content-Type": "application/json" };
+        var guestToken = getGuestToken();
+        if (guestToken) chatHeaders["Authorization"] = "Bearer " + guestToken;
+
         var res = await fetch("/api/chat/chatbot", {
           method: "POST",
           credentials: "same-origin",
-          headers: { "Content-Type": "application/json" },
+          headers: chatHeaders,
           body: JSON.stringify({
             message: text,
             history: chatbotHistory,
@@ -2161,6 +2165,7 @@
       if (isOpen) floatBtn.style.display = "none";
       else floatBtn.style.display = "";
       floatBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      windowEl.setAttribute("aria-hidden", isOpen ? "false" : "true");
       applyChatbotAuthUI();
       setTimeout(function () {
         try {
@@ -2172,6 +2177,7 @@
     if (closeBtn) {
       closeBtn.addEventListener("click", function () {
         windowEl.classList.remove("is-open");
+        windowEl.setAttribute("aria-hidden", "true");
         floatBtn.setAttribute("aria-expanded", "false");
         floatBtn.style.display = "";
       });
@@ -2233,6 +2239,7 @@
       if (e.key !== "Escape") return;
       if (!windowEl.classList.contains("is-open")) return;
       windowEl.classList.remove("is-open");
+      windowEl.setAttribute("aria-hidden", "true");
       floatBtn.setAttribute("aria-expanded", "false");
       floatBtn.style.display = "";
     });
@@ -2242,8 +2249,7 @@
   setupDirections();
   setupHeroSlider();
   setupBlobCursor();
-  // Chatbot endpoints are not part of the new backend contract; keep UI off.
-  // setupChatbotWidget();
+  setupChatbotWidget();
   checkAuth(function (user) {
     if (user) {
       try {

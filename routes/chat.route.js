@@ -16,7 +16,7 @@ import {
   isUserMessageOnScope,
   CHAT_OFF_TOPIC_REPLY,
 } from "../utils/geminiTools.js";
-import isAuthenticated from "../middleware/auth.middleware.js";
+import requireGuestJwt from "../middleware/auth.middleware.js";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
@@ -26,7 +26,7 @@ const model = genAI.getGenerativeModel({
   safetySettings,
 });
 
-router.post("/chatbot", isAuthenticated, async (req, res) => {
+router.post("/chatbot", requireGuestJwt, async (req, res) => {
   const { message, history } = req.body;
 
   if (message == null || typeof message !== "string") {

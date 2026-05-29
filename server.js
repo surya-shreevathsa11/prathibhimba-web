@@ -50,10 +50,11 @@ app.use(
 );
 
 app.use(express.json({ limit: "128kb" }));
-app.use(
-  "/api/payment/razorpay-webhook",
-  express.raw({ type: "application/json" })
-);
+// Legacy payment webhooks — moved to external backend repo
+// app.use(
+//   "/api/payment/razorpay-webhook",
+//   express.raw({ type: "application/json" })
+// );
 app.use(express.static(path.join(__dirname, "public")));
 app.get("/cart", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "cart.html"));
@@ -86,35 +87,35 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// ─── Active API: chatbot + session auth (booking/payments/admin → other repo) ───
 import authRouter from "./routes/auth.routes.js";
-import bookingRouter from "./routes/booking.route.js";
-import razorpayRouter from "./routes/razorpay.route.js";
-import eventRazorpayRouter from "./routes/razorpayEvent.route.js";
-import eventRouter from "./routes/eventBooking.route.js";
-import adminLoginRouter from "./routes/admin.auth.route.js";
-import adminRouter from "./routes/admin.route.js";
-import { getSiteGalleryPublic } from "./controllers/admin.controller.js";
-import adminEventRouter from "./routes/admin.events.route.js";
-import publicEventsRouter from "./routes/events.route.js";
 import chatRouter from "./routes/chat.route.js";
 
+// import bookingRouter from "./routes/booking.route.js";
+// import razorpayRouter from "./routes/razorpay.route.js";
+// import eventRazorpayRouter from "./routes/razorpayEvent.route.js";
+// import eventRouter from "./routes/eventBooking.route.js";
+// import adminLoginRouter from "./routes/admin.auth.route.js";
+// import adminRouter from "./routes/admin.route.js";
+// import { getSiteGalleryPublic } from "./controllers/admin.controller.js";
+// import adminEventRouter from "./routes/admin.events.route.js";
+// import publicEventsRouter from "./routes/events.route.js";
+
+// Optional legacy Google session (frontend uses external guest-auth JWT for chat)
 app.use("/api/auth", authRouter);
-app.use("/api/booking", bookingRouter);
-app.use("/api/events", publicEventsRouter);
+
+// Chatbot — protected by requireGuestJwt (Bearer guest token from external API)
 app.use("/api/chat", chatRouter);
-app.get("/api/site-gallery", getSiteGalleryPublic);
 
-//rzp and payment
-//need to set to raw for webhooks to work
-app.use("/api/payment", razorpayRouter);
-
-app.use("/api/events/payment", eventRazorpayRouter);
-app.use("/api/events", eventRouter);
-
-/////////admin routes
-app.use("/api/admin", adminLoginRouter);
-app.use("/api/admin", adminRouter);
-app.use("/api/admin/events", adminEventRouter);
+// app.use("/api/booking", bookingRouter);
+// app.use("/api/events", publicEventsRouter);
+// app.get("/api/site-gallery", getSiteGalleryPublic);
+// app.use("/api/payment", razorpayRouter);
+// app.use("/api/events/payment", eventRazorpayRouter);
+// app.use("/api/events", eventRouter);
+// app.use("/api/admin", adminLoginRouter);
+// app.use("/api/admin", adminRouter);
+// app.use("/api/admin/events", adminEventRouter);
 
 // import { addInitalPrices } from "./config/addInitialRoom.js";
 // addInitalPrices();

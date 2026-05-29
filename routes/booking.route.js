@@ -14,7 +14,7 @@ import {
   bookEvents,
   listUserEventBookings,
 } from "../controllers/eventBooking.controller.js";
-import isAuthenticated from "../middleware/auth.middleware.js";
+import { isAuthenticated } from "../middleware/auth.middleware.js";
 
 router.get("/rooms", listRooms);
 router.get("/bookings", isAuthenticated, listBookings);

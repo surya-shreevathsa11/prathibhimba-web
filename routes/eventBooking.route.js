@@ -4,7 +4,7 @@ import {
   bookEvents,
   listUserEventBookings,
 } from "../controllers/eventBooking.controller.js";
-import isAuthenticated from "../middleware/auth.middleware.js";
+import { isAuthenticated } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 

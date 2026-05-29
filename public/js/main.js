@@ -49,6 +49,26 @@
     } catch (_) { }
   }
 
+  // Decode a JWT payload without verifying signature (for display only — trust is established server-side).
+  function parseJwtPayload(token) {
+    try {
+      var parts = String(token).split(".");
+      if (parts.length < 2) return null;
+      var b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      var json = decodeURIComponent(
+        atob(b64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join("")
+      );
+      return JSON.parse(json);
+    } catch (_) {
+      return null;
+    }
+  }
+
   function publicApiPath(path) {
     return (
       API_BASE_URL +
@@ -72,6 +92,48 @@
   }
 
   // ─── Guest Google sign-in (Google Identity Services) ────────────────────────
+  function handleGsiCredential(response) {
+    if (!response || !response.credential) return;
+    fetch(API_BASE_URL + "/api/guest-auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        propertySlug: PROPERTY_SLUG,
+        credential: response.credential,
+      }),
+    })
+      .then(function (res) {
+        return res.json().catch(function () {
+          return {};
+        }).then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (r) {
+        if (!r.ok) {
+          var errEl = $("#signInError");
+          if (errEl) errEl.textContent = (r.data && r.data.message) || "Google sign-in failed.";
+          return;
+        }
+        if (!r.data || r.data.success !== true || !r.data.token) {
+          var errEl2 = $("#signInError");
+          if (errEl2) errEl2.textContent = "Google sign-in failed (missing token).";
+          return;
+        }
+        setGuestToken(r.data.token);
+        currentUser = r.data.guest || { name: "Guest" };
+        updateAuthUI();
+        fetchCartCount();
+        closeAllModals();
+      })
+      .catch(function (err) {
+        console.error("Google sign-in error:", err);
+        var errEl = $("#signInError");
+        if (errEl) errEl.textContent = "Google sign-in failed. Please try again.";
+      });
+  }
+
   function initGoogleIdentity() {
     try {
       if (
@@ -87,47 +149,34 @@
 
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: function (response) {
-          if (!response || !response.credential) return;
-          fetch(API_BASE_URL + "/api/guest-auth/google", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              propertySlug: PROPERTY_SLUG,
-              credential: response.credential,
-            }),
-          })
-            .then(function (res) {
-              return res.json().catch(function () {
-                return {};
-              }).then(function (data) {
-                return { ok: res.ok, data: data };
-              });
-            })
-            .then(function (r) {
-              if (!r.ok) {
-                var errEl = $("#signInError");
-                if (errEl) errEl.textContent = (r.data && r.data.message) || "Google sign-in failed.";
-                return;
-              }
-              if (!r.data || r.data.success !== true || !r.data.token) {
-                var errEl2 = $("#signInError");
-                if (errEl2) errEl2.textContent = "Google sign-in failed (missing token).";
-                return;
-              }
-              setGuestToken(r.data.token);
-              currentUser = r.data.guest || { name: "Guest" };
-              updateAuthUI();
-              fetchCartCount();
-              closeAllModals();
-            })
-            .catch(function (err) {
-              console.error("Google sign-in error:", err);
-              var errEl = $("#signInError");
-              if (errEl) errEl.textContent = "Google sign-in failed. Please try again.";
-            });
+        callback: handleGsiCredential,
+        // Catch One Tap suppression so we don't silently fail
+        notification_callback: function (notification) {
+          if (notification.isSkippedMoment() || notification.isDismissedMoment()) {
+            // One Tap was suppressed — the renderButton flow is already visible, nothing else to do
+            console.info("Google One Tap suppressed:", notification.getSkippedReason && notification.getSkippedReason());
+          }
         },
+      });
+    } catch (_) { }
+  }
+
+  // Render the official Google Sign-In button into #googleSignInContainer.
+  // This uses the popup/redirect flow which is NOT subject to One Tap suppression.
+  function renderSignInButton() {
+    try {
+      var container = $("#googleSignInContainer");
+      if (!container || !window.google || !window.google.accounts || !window.google.accounts.id) return;
+      initGoogleIdentity();
+      // Clear and re-render (safe to call multiple times)
+      container.innerHTML = "";
+      window.google.accounts.id.renderButton(container, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+        logo_alignment: "left",
+        width: container.offsetWidth || 280,
       });
     } catch (_) { }
   }
@@ -249,6 +298,23 @@
     }
   });
 
+  function toQuoteRoomId(id) {
+    var s = String(id == null ? "" : id).replace(/^R/i, "");
+    var n = parseInt(s, 10);
+    if (!isNaN(n)) return (n < 10 ? "0" : "") + String(n);
+    return s;
+  }
+
+  function buildQuoteBody(checkIn, checkOut, adults, children, roomNumericId) {
+    return {
+      adults: adults,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      children: children,
+      roomId: toQuoteRoomId(roomNumericId),
+    };
+  }
+
   function checkDatesAvailability() {
     var checkIn = $("#bookRoomCheckIn") && $("#bookRoomCheckIn").value;
     var checkOut = $("#bookRoomCheckOut") && $("#bookRoomCheckOut").value;
@@ -257,7 +323,8 @@
       if (availEl) availEl.textContent = "";
       return;
     }
-    var roomId = "R" + pendingBookRoom.id;
+    var adults = parseInt($("#bookRoomAdults") && $("#bookRoomAdults").value, 10) || 1;
+    var children = parseInt($("#bookRoomChildren") && $("#bookRoomChildren").value, 10) || 0;
     availEl.textContent = "Checking availability…";
     availEl.classList.remove(
       "form__availability--ok",
@@ -266,11 +333,9 @@
     fetch(publicApiPath("/quote"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        roomId: roomId,
-        checkIn: checkIn,
-        checkOut: checkOut,
-      }),
+      body: JSON.stringify(
+        buildQuoteBody(checkIn, checkOut, adults, children, pendingBookRoom.id),
+      ),
     })
       .then(function (res) {
         return res.json().then(function (data) {
@@ -319,6 +384,7 @@
     if (pendingBookRoom && pendingBookRoom.capacity) {
       clampBookRoomGuests(pendingBookRoom.capacity);
     }
+    checkDatesAvailability();
   }
   if (bookRoomAdultsEl) bookRoomAdultsEl.addEventListener("input", onBookRoomGuestInput);
   if (bookRoomChildrenEl) bookRoomChildrenEl.addEventListener("input", onBookRoomGuestInput);
@@ -330,8 +396,13 @@
       if (!pendingBookRoom) return;
       var errEl = $("#bookRoomError");
       var submitBtn = $("#bookRoomSubmitBtn");
-      var roomId = "R" + pendingBookRoom.id;
-      if (validRoomIdsFromBackend.length > 0 && validRoomIdsFromBackend.indexOf(roomId) === -1) {
+      var apiRoomId = toQuoteRoomId(pendingBookRoom.id);
+      if (
+        validRoomIdsFromBackend.length > 0 &&
+        !validRoomIdsFromBackend.some(function (id) {
+          return toQuoteRoomId(id) === apiRoomId;
+        })
+      ) {
         errEl.textContent = "This room is not available for booking.";
         return;
       }
@@ -356,11 +427,9 @@
         var availRes = await fetch(publicApiPath("/quote"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            roomId: roomId,
-            checkIn: checkIn,
-            checkOut: checkOut,
-          }),
+          body: JSON.stringify(
+            buildQuoteBody(checkIn, checkOut, adults, children, pendingBookRoom.id),
+          ),
         });
         if (!availRes.ok) {
           var availData = await availRes.json().catch(function () {
@@ -373,13 +442,9 @@
         var cartRes = await apiFetch(guestApiPath("/bookings/cart/items"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            roomId: roomId,
-            checkIn: checkIn,
-            checkOut: checkOut,
-            adults: adults,
-            children: children,
-          }),
+          body: JSON.stringify(
+            buildQuoteBody(checkIn, checkOut, adults, children, pendingBookRoom.id),
+          ),
         });
         if (!cartRes.ok) {
           var cartData = await cartRes.json().catch(function () {
@@ -681,27 +746,35 @@
   }
 
   // --- Google Sign In ---
-  const googleSignInBtn = $("#googleSignInBtn");
-  if (googleSignInBtn) {
-    googleSignInBtn.addEventListener("click", () => {
+  // Eagerly initialise and render the button once the async GSI script resolves.
+  function tryEagerGsiInit() {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
       initGoogleIdentity();
-      if (window.google && window.google.accounts && window.google.accounts.id) {
-        window.google.accounts.id.prompt();
-        return;
-      }
-      const el = $("#signInError");
-      if (el) {
-        el.textContent =
-          "Google sign-in is not available right now. Please disable blockers and refresh.";
-      }
+      renderSignInButton();
+    }
+  }
+  tryEagerGsiInit();
+  window.addEventListener("load", tryEagerGsiInit);
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(tryEagerGsiInit, { timeout: 3000 });
+  }
+
+  // Re-render the button whenever the sign-in modal is opened
+  // (the container may have been empty before GSI was ready)
+  const authBtn = $("#authBtn");
+  if (authBtn) {
+    authBtn.addEventListener("click", function () {
+      openModal("#signInModal");
+      // Small delay to let the modal become visible before measuring container width
+      setTimeout(renderSignInButton, 50);
     });
   }
 
   // --- Auth check: used before booking and for redirect after sign-in ---
   async function checkAuth(cb) {
     try {
-      // We don't have an auth/status endpoint in the new backend contract.
-      // Best-effort: if a token exists and guest cart call succeeds, treat as logged in.
+      // No /me endpoint in backend — infer auth from stored token.
+      // Decode payload locally (display only; actual trust is backend-verified at sign-in).
       const token = getGuestToken();
       if (!token) {
         currentUser = null;
@@ -717,7 +790,14 @@
 
       const res = await apiFetch(guestApiPath("/bookings/cart"));
       if (!res.ok) throw new Error("unauthorized");
-      currentUser = { name: "Guest" };
+
+      // Restore real name & avatar from the JWT payload so the nav avatar isn't always "Guest".
+      var payload = parseJwtPayload(token);
+      currentUser = {
+        name: (payload && (payload.name || payload.email)) || "Guest",
+        picture: (payload && (payload.picture || payload.avatar)) || "",
+        email: (payload && payload.email) || "",
+      };
       updateAuthUI();
       fetchCartCount();
       if (cb) cb(currentUser);

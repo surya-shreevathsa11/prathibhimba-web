@@ -42,6 +42,27 @@
       else localStorage.setItem(GUEST_TOKEN_STORAGE_KEY, String(token));
     } catch (_) { }
   }
+
+  // Decode a JWT payload without verifying signature (display only).
+  function parseJwtPayload(token) {
+    try {
+      var parts = String(token).split(".");
+      if (parts.length < 2) return null;
+      var b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      var json = decodeURIComponent(
+        atob(b64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join("")
+      );
+      return JSON.parse(json);
+    } catch (_) {
+      return null;
+    }
+  }
+
   function guestApiPath(path) {
     return API_BASE_URL + "/api/guest" + path;
   }
@@ -53,6 +74,40 @@
     }
     if (token) headers["Authorization"] = "Bearer " + token;
     return fetch(url, Object.assign({}, opts || {}, { headers: headers, credentials: "include" }));
+  }
+
+  function handleGsiCredential(response) {
+    if (!response || !response.credential) return;
+    fetch(API_BASE_URL + "/api/guest-auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        propertySlug: PROPERTY_SLUG,
+        credential: response.credential,
+      }),
+    })
+      .then(function (res) {
+        return res.json().catch(function () {
+          return {};
+        }).then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (r) {
+        if (!r.ok || !r.data || r.data.success !== true || !r.data.token) {
+          alert((r.data && r.data.message) || "Google sign-in failed.");
+          return;
+        }
+        setGuestToken(r.data.token);
+        fetchCart().then(function (result) {
+          if (result && result.unauthorized) showSignInRequired();
+          else renderCartList();
+        });
+      })
+      .catch(function () {
+        alert("Google sign-in failed. Please try again.");
+      });
   }
 
   function initGoogleIdentity() {
@@ -70,40 +125,29 @@
 
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: function (response) {
-          if (!response || !response.credential) return;
-          fetch(API_BASE_URL + "/api/guest-auth/google", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              propertySlug: PROPERTY_SLUG,
-              credential: response.credential,
-            }),
-          })
-            .then(function (res) {
-              return res.json().catch(function () {
-                return {};
-              }).then(function (data) {
-                return { ok: res.ok, data: data };
-              });
-            })
-            .then(function (r) {
-              if (!r.ok || !r.data || r.data.success !== true || !r.data.token) {
-                alert((r.data && r.data.message) || "Google sign-in failed.");
-                return;
-              }
-              setGuestToken(r.data.token);
-              // Reload cart now that auth exists
-              fetchCart().then(function (result) {
-                if (result && result.unauthorized) showSignInRequired();
-                else renderCartList();
-              });
-            })
-            .catch(function () {
-              alert("Google sign-in failed. Please try again.");
-            });
+        callback: handleGsiCredential,
+        notification_callback: function (notification) {
+          if (notification.isSkippedMoment() || notification.isDismissedMoment()) {
+            console.info("Google One Tap suppressed (cart page)");
+          }
         },
+      });
+    } catch (_) { }
+  }
+
+  // Render the official Google Sign-In button into a container element.
+  function renderSignInButton(container) {
+    try {
+      if (!container || !window.google || !window.google.accounts || !window.google.accounts.id) return;
+      initGoogleIdentity();
+      container.innerHTML = "";
+      window.google.accounts.id.renderButton(container, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+        logo_alignment: "left",
+        width: container.offsetWidth || 280,
       });
     } catch (_) { }
   }
@@ -130,9 +174,19 @@
   }
 
   function checkAuth(cb) {
-    // No /api/auth/status in new backend; infer from token presence.
+    // No /me endpoint — infer from token; decode payload for real name/avatar.
     var t = getGuestToken();
-    currentUser = t ? { name: "Guest" } : null;
+    if (!t) {
+      currentUser = null;
+      if (cb) cb(null);
+      return;
+    }
+    var payload = parseJwtPayload(t);
+    currentUser = {
+      name: (payload && (payload.name || payload.email)) || "Guest",
+      picture: (payload && (payload.picture || payload.avatar)) || "",
+      email: (payload && payload.email) || "",
+    };
     if (cb) cb(currentUser);
   }
 
@@ -315,22 +369,17 @@
     if (emptyEl) {
       emptyEl.style.display = "block";
       emptyEl.innerHTML =
-        "Please sign in to view your cart and proceed with booking.<br>" +
-        '<button type="button" class="btn btn--primary cart__sign-in-btn cursor-target" id="cartSignInBtn" style="margin-top: 0.75rem;">Sign In</button>';
-      var btn = document.getElementById("cartSignInBtn");
-      if (btn) {
-        btn.addEventListener("click", function () {
-          try {
-            sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, "cart");
-          } catch (_) { }
-          initGoogleIdentity();
-          if (window.google && window.google.accounts && window.google.accounts.id) {
-            window.google.accounts.id.prompt();
-          } else {
-            // Fallback: send user back to homepage sign-in modal
-            window.location.href = "/";
-          }
-        });
+        "Please sign in to view your cart and proceed with booking." +
+        '<div id="cartSignInContainer" style="display:flex;justify-content:center;margin-top:1rem;min-height:44px;align-items:center;">' +
+        '<span style="opacity:0.45;font-size:0.85rem;">Loading Google sign-in\u2026</span>' +
+        "</div>";
+      var container = document.getElementById("cartSignInContainer");
+      if (container) {
+        try {
+          sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, "cart");
+        } catch (_) { }
+        // If GSI is already ready, render immediately; otherwise it will be rendered by tryEagerGsiInit
+        renderSignInButton(container);
       }
     }
     updateNavCartCount(0);
@@ -344,6 +393,24 @@
         navLinks.classList.toggle("open");
       });
     }
+
+    // Eagerly initialise GSI so the "Sign In" button on this page works
+    // even when the user lands here directly (async script may already be ready).
+    function tryEagerGsiInit() {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        initGoogleIdentity();
+        // If the sign-in container is already in the DOM (rendered by showSignInRequired),
+        // inject the Google button into it now.
+        var container = document.getElementById("cartSignInContainer");
+        if (container) renderSignInButton(container);
+      }
+    }
+    tryEagerGsiInit();
+    window.addEventListener("load", tryEagerGsiInit);
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(tryEagerGsiInit, { timeout: 3000 });
+    }
+
     $("#cartList").innerHTML = "";
     fetchCart().then(function (result) {
       if (result.unauthorized) {

@@ -10,119 +10,40 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
-  // ─── API wiring (multi-property backend) ────────────────────────────────────
-  // The backend lives in a different repo; this frontend is property-scoped.
-  // Configure these via injected globals (preferred) or fall back to defaults.
-  const API_BASE_URL =
-    (window.__PB_CONFIG__ && window.__PB_CONFIG__.API_BASE_URL) ||
-    (window.__ENV__ && window.__ENV__.API_BASE_URL) ||
-    (window.ENV && window.ENV.API_BASE_URL) ||
-    "http://localhost:3000";
-  const PROPERTY_SLUG =
-    (window.__PB_CONFIG__ && window.__PB_CONFIG__.PROPERTY_SLUG) ||
-    (window.__ENV__ && window.__ENV__.PROPERTY_SLUG) ||
-    (window.ENV && window.ENV.PROPERTY_SLUG) ||
-    "prathibhimba";
-  const GOOGLE_CLIENT_ID =
-    (window.__PB_CONFIG__ && window.__PB_CONFIG__.GOOGLE_CLIENT_ID) ||
-    (window.__ENV__ && window.__ENV__.GOOGLE_CLIENT_ID) ||
-    (window.ENV && window.ENV.GOOGLE_CLIENT_ID) ||
-    "505975960167-kc4buclfdjmf74oq9nsmu2lfgmmfuddk.apps.googleusercontent.com";
+  // ─── API wiring via centralized Vara client (public/js/api/varaClient.js) ────
+  var Vara = window.VaraApi;
+  if (!Vara) {
+    console.error("VaraApi missing — load /js/api/varaClient.js before main.js");
+  }
+  var cfg = (Vara && Vara.getConfig()) || {};
+  var GOOGLE_CLIENT_ID = cfg.GOOGLE_CLIENT_ID || "";
 
-  const GUEST_TOKEN_STORAGE_KEY = "guestAccessToken";
   function getGuestToken() {
-    try {
-      return localStorage.getItem(GUEST_TOKEN_STORAGE_KEY) || "";
-    } catch (_) {
-      return "";
-    }
+    return (Vara && Vara.getGuestToken()) || "";
   }
   function clearGuestToken() {
-    try {
-      localStorage.removeItem(GUEST_TOKEN_STORAGE_KEY);
-    } catch (_) { }
+    if (Vara) Vara.clearGuestToken();
   }
   function setGuestToken(token) {
-    try {
-      if (!token) localStorage.removeItem(GUEST_TOKEN_STORAGE_KEY);
-      else localStorage.setItem(GUEST_TOKEN_STORAGE_KEY, String(token));
-    } catch (_) { }
+    if (Vara) Vara.setGuestToken(token);
   }
-
-  // Decode a JWT payload without verifying signature (for display only — trust is established server-side).
   function parseJwtPayload(token) {
-    try {
-      var parts = String(token).split(".");
-      if (parts.length < 2) return null;
-      var b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-      var json = decodeURIComponent(
-        atob(b64)
-          .split("")
-          .map(function (c) {
-            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-          })
-          .join("")
-      );
-      return JSON.parse(json);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function publicApiPath(path) {
-    return (
-      API_BASE_URL +
-      "/api/public/properties/" +
-      encodeURIComponent(PROPERTY_SLUG) +
-      path
-    );
-  }
-  function guestApiPath(path) {
-    return API_BASE_URL + "/api/guest" + path;
-  }
-
-  function apiFetch(url, opts) {
-    const token = getGuestToken();
-    const headers = Object.assign({}, (opts && opts.headers) || {});
-    if (!headers["Content-Type"] && !(opts && opts.body instanceof FormData)) {
-      headers["Content-Type"] = "application/json";
-    }
-    if (token) headers["Authorization"] = "Bearer " + token;
-    return fetch(url, Object.assign({}, opts || {}, { headers, credentials: "include" }));
+    return (Vara && Vara.parseJwtPayload(token)) || null;
   }
 
   // ─── Guest Google sign-in (Google Identity Services) ────────────────────────
   function handleGsiCredential(response) {
-    if (!response || !response.credential) return;
-    fetch(API_BASE_URL + "/api/guest-auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        propertySlug: PROPERTY_SLUG,
-        credential: response.credential,
-      }),
-    })
-      .then(function (res) {
-        return res.json().catch(function () {
-          return {};
-        }).then(function (data) {
-          return { ok: res.ok, data: data };
-        });
-      })
+    if (!response || !response.credential || !Vara) return;
+    Vara.auth
+      .google(response.credential)
       .then(function (r) {
         if (!r.ok) {
           var errEl = $("#signInError");
-          if (errEl) errEl.textContent = (r.data && r.data.message) || "Google sign-in failed.";
+          if (errEl)
+            errEl.textContent = r.message || "Google sign-in failed.";
           return;
         }
-        if (!r.data || r.data.success !== true || !r.data.token) {
-          var errEl2 = $("#signInError");
-          if (errEl2) errEl2.textContent = "Google sign-in failed (missing token).";
-          return;
-        }
-        setGuestToken(r.data.token);
-        currentUser = r.data.guest || { name: "Guest" };
+        currentUser = r.guest || { name: "Guest" };
         updateAuthUI();
         fetchCartCount();
         closeAllModals();
@@ -133,6 +54,18 @@
         if (errEl) errEl.textContent = "Google sign-in failed. Please try again.";
       });
   }
+
+  // 401 from protected routes → clear session UI and open sign-in
+  window.addEventListener(Vara ? Vara.AUTH_REQUIRED_EVENT : "vara:auth-required", function (ev) {
+    if (ev && ev.detail && ev.detail.status === 403) return;
+    currentUser = null;
+    updateAuthUI();
+    var countEl = $("#navCartCount");
+    if (countEl) {
+      countEl.textContent = "0";
+      countEl.setAttribute("data-count", "0");
+    }
+  });
 
   function initGoogleIdentity() {
     try {
@@ -370,28 +303,16 @@
       "form__availability--ok",
       "form__availability--error",
     );
-    fetch(publicApiPath("/quote"), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(
-        buildQuoteBody(checkIn, checkOut, adults, children, pendingBookRoom.id),
-      ),
-    })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          return { ok: res.ok, data: data };
-        });
-      })
+    if (!Vara) return;
+    Vara.public
+      .quote(buildQuoteBody(checkIn, checkOut, adults, children, pendingBookRoom.id))
       .then(function (result) {
         if (result.ok) {
           availEl.textContent = "Rooms are available.";
           availEl.classList.add("form__availability--ok");
           availEl.classList.remove("form__availability--error");
         } else {
-          availEl.textContent =
-            result.data && result.data.message
-              ? result.data.message
-              : "Dates not available.";
+          availEl.textContent = result.message || "Dates not available.";
           availEl.classList.add("form__availability--error");
           availEl.classList.remove("form__availability--ok");
         }
@@ -464,19 +385,21 @@
       }
       if (submitBtn) submitBtn.disabled = true;
       try {
-        var availRes = await fetch(publicApiPath("/quote"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
-            buildQuoteBody(checkIn, checkOut, adults, children, pendingBookRoom.id),
-          ),
-        });
-        if (!availRes.ok) {
-          var availData = await availRes.json().catch(function () {
-            return {};
-          });
+        if (!Vara) {
+          errEl.textContent = "Booking service unavailable. Please refresh.";
+          return;
+        }
+        var quoteBody = buildQuoteBody(
+          checkIn,
+          checkOut,
+          adults,
+          children,
+          pendingBookRoom.id,
+        );
+        var availResult = await Vara.public.quote(quoteBody);
+        if (!availResult.ok) {
           errEl.textContent =
-            availData.message || "Selected dates are not available.";
+            availResult.message || "Selected dates are not available.";
           return;
         }
         if (!getGuestToken()) {
@@ -485,18 +408,15 @@
           setTimeout(renderSignInButton, 50);
           return;
         }
-        var cartRes = await apiFetch(guestApiPath("/bookings/cart/items"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(
-            buildQuoteBody(checkIn, checkOut, adults, children, pendingBookRoom.id),
-          ),
-        });
-        if (!cartRes.ok) {
-          var cartData = await cartRes.json().catch(function () {
-            return {};
-          });
-          errEl.textContent = cartData.message || "Could not add to cart.";
+        var cartResult = await Vara.bookings.addCartItem(quoteBody);
+        if (!cartResult.ok) {
+          if (cartResult.status === 401) {
+            errEl.textContent = "Please sign in to add this room to your cart.";
+            openModal("#signInModal");
+            setTimeout(renderSignInButton, 50);
+            return;
+          }
+          errEl.textContent = cartResult.message || "Could not add to cart.";
           return;
         }
         closeAllModals();
@@ -737,48 +657,35 @@
         emptyEl.textContent = "";
       }
 
-      apiFetch(guestApiPath("/bookings"))
-        .then(function (res) {
-          return res.json().then(function (data) {
-            return { ok: res.ok, data: data };
-          });
-        })
-        .then(function (result) {
-          if (!result.ok) {
+      if (!Vara) {
+        if (emptyEl) {
+          emptyEl.textContent = "Booking service unavailable.";
+          emptyEl.style.display = "block";
+        }
+        fillMyBookingsModal([], []);
+        openModal("#myBookingsModal");
+        return;
+      }
+
+      Promise.all([Vara.bookings.listBookings(), Vara.events.listBookings()])
+        .then(function (results) {
+          var roomsResult = results[0];
+          var eventsResult = results[1];
+          if (!roomsResult.ok && roomsResult.status === 401) {
             if (emptyEl) {
               emptyEl.textContent =
-                result.data && result.data.message
-                  ? result.data.message
-                  : "Please sign in to view bookings.";
+                roomsResult.message || "Please sign in to view bookings.";
               emptyEl.style.display = "block";
             }
             fillMyBookingsModal([], []);
             openModal("#myBookingsModal");
             return;
           }
-          var roomsBookings =
-            (result.data && result.data.data) ||
-            (result.data && result.data.bookings) ||
-            [];
-
-          apiFetch(guestApiPath("/event-bookings"))
-            .then(function (res) {
-              return res.json().then(function (data) {
-                return { ok: res.ok, data: data };
-              });
-            })
-            .then(function (eventsResult) {
-              var eventBookings =
-                eventsResult && eventsResult.ok && eventsResult.data
-                  ? eventsResult.data.data || eventsResult.data
-                  : [];
-              fillMyBookingsModal(roomsBookings, Array.isArray(eventBookings) ? eventBookings : []);
-              openModal("#myBookingsModal");
-            })
-            .catch(function () {
-              fillMyBookingsModal(roomsBookings, []);
-              openModal("#myBookingsModal");
-            });
+          fillMyBookingsModal(
+            roomsResult.ok ? roomsResult.bookings : [],
+            eventsResult.ok ? eventsResult.bookings : []
+          );
+          openModal("#myBookingsModal");
         })
         .catch(function () {
           if (emptyEl) {
@@ -819,8 +726,6 @@
   // --- Auth check: used before booking and for redirect after sign-in ---
   async function checkAuth(cb) {
     try {
-      // No /me endpoint in backend — infer auth from stored token.
-      // Decode payload locally (display only; actual trust is backend-verified at sign-in).
       const token = getGuestToken();
       if (!token) {
         currentUser = null;
@@ -834,16 +739,12 @@
         return;
       }
 
-      const res = await apiFetch(guestApiPath("/bookings/cart"));
-      if (!res.ok) throw new Error("unauthorized");
+      if (!Vara) throw new Error("unavailable");
+      const cartResult = await Vara.bookings.getCart();
+      if (!cartResult.ok) throw new Error("unauthorized");
 
-      // Restore real name & avatar from the JWT payload so the nav avatar isn't always "Guest".
-      var payload = parseJwtPayload(token);
-      currentUser = {
-        name: (payload && (payload.name || payload.email)) || "Guest",
-        picture: (payload && (payload.picture || payload.avatar)) || "",
-        email: (payload && payload.email) || "",
-      };
+      var profile = Vara.guestProfileFromToken(token);
+      currentUser = profile || { name: "Guest", picture: "", email: "" };
       updateAuthUI();
       fetchCartCount();
       if (cb) cb(currentUser);
@@ -854,26 +755,12 @@
     }
   }
 
-  function cartRoomCountFromResponse(data) {
-    var root =
-      data && data.data && typeof data.data === "object" && !Array.isArray(data.data)
-        ? data.data
-        : data;
-    if (!root || typeof root !== "object") return 0;
-    if (Array.isArray(root.roomInfo)) return root.roomInfo.length;
-    var items =
-      root.items ||
-      (data && data.cart && data.cart.roomInfo) ||
-      (Array.isArray(data && data.message) ? data.message : []);
-    return Array.isArray(items) ? items.length : 0;
-  }
-
   async function fetchCartCount() {
     try {
-      const res = await apiFetch(guestApiPath("/bookings/cart"));
-      if (!res.ok) return;
-      const data = await res.json();
-      const count = cartRoomCountFromResponse(data);
+      if (!Vara || !getGuestToken()) return;
+      const result = await Vara.bookings.getCart();
+      if (!result.ok) return;
+      const count = (result.cart && result.cart.roomInfo && result.cart.roomInfo.length) || 0;
       const countEl = $("#navCartCount");
       if (countEl) {
         countEl.textContent = count;
@@ -1007,14 +894,10 @@
   // --- Render rooms ---
   async function renderRooms() {
     try {
-      const res = await fetch(publicApiPath("/rooms"));
-      const data = await res.json();
-      const rooms =
-        (data && data.rooms) ||
-        (data && data.data && data.data.rooms) ||
-        (data && data.data) ||
-        [];
-      if (!Array.isArray(rooms) || rooms.length === 0) return;
+      if (!Vara) return;
+      const result = await Vara.public.getRooms();
+      const rooms = result.rooms || [];
+      if (!result.ok || !Array.isArray(rooms) || rooms.length === 0) return;
       validRoomIdsFromBackend = rooms.map(function (r) {
         return r.roomId || (r.id != null ? "R" + r.id : "");
       }).filter(Boolean);
@@ -1022,7 +905,7 @@
       rooms.forEach(function (r) {
         var cap = normalizeCapacity(r.capacity);
         if (!cap) return;
-        roomCapacityLookupKeys(r).forEach(function (key) {
+        roomCapacityLookupKeys(r.raw || r).forEach(function (key) {
           if (key) roomsCapacityByRoomId[key] = cap;
         });
       });
@@ -1039,6 +922,7 @@
             if (room.images && room.images.gallery && room.images.gallery.length)
               roomImages.push(...room.images.gallery);
             const roomImagesJson = roomImages.length ? JSON.stringify(roomImages) : "";
+            const price = room.price != null ? room.price : 0;
             return `
         <div class="room-card"${roomImagesJson ? ' data-room-images="' + roomImagesJson.replace(/"/g, "&quot;") + '" data-room-name="' + (room.name || "").replace(/"/g, "&quot;") + '"' : ""}>
           <div class="room-card__media">
@@ -1047,15 +931,15 @@
           <span class="room-card__number">${room.id != null ? "0" + room.id : ""}</span>
           <h3 class="room-card__name">${escapeHtml(room.name)}</h3>
           <p class="room-card__desc">${escapeHtml(room.description)}</p>
-          <p class="room-card__price"><span>₹${room.price != null ? room.price : (room.pricePerNight != null ? room.pricePerNight : 0)}</span> / night</p>
+          <p class="room-card__price"><span>₹${price}</span> / night</p>
           <div class="room-card__actions">
-            <button type="button" class="btn btn--outline btn--sm" data-add-cart="${room.id != null ? room.id : (room.roomId ? String(room.roomId).replace(/^R/i, "") : "")}" data-name="${escapeHtml(room.name)}" data-price="${room.price != null ? room.price : (room.pricePerNight != null ? room.pricePerNight : 0)}">Add to cart</button>
+            <button type="button" class="btn btn--outline btn--sm" data-add-cart="${room.id != null ? room.id : (room.roomId ? String(room.roomId).replace(/^R/i, "") : "")}" data-name="${escapeHtml(room.name)}" data-price="${price}">Add to cart</button>
           </div>
           <div class="room-card__overlay">
             <div class="room-card__overlay-inner">
               <h3 class="room-card__overlay-title">${escapeHtml(room.name)}</h3>
               <p class="room-card__overlay-desc">${escapeHtml(room.description)}</p>
-              <p class="room-card__overlay-meta">From ₹${room.price != null ? room.price : (room.pricePerNight != null ? room.pricePerNight : 0)} / night</p>
+              <p class="room-card__overlay-meta">From ₹${price} / night</p>
             </div>
           </div>
         </div>
@@ -1435,6 +1319,11 @@
 
       syncTotal();
 
+      if (bookEventSubmitBtn) {
+        bookEventSubmitBtn.textContent =
+          pricePerPerson <= 0 ? "Confirm booking" : "Book & Pay";
+      }
+
       if (availableSpots <= 0 && bookEventSubmitBtn) {
         bookEventSubmitBtn.disabled = true;
         if (bookEventErrorEl) bookEventErrorEl.textContent = "No spots available for this event.";
@@ -1486,13 +1375,20 @@
           if (bookEventErrorEl) bookEventErrorEl.textContent = "Please fill all guest details.";
           return;
         }
+        if (guestCount !== 1 && guestCount !== 2) {
+          if (bookEventErrorEl) bookEventErrorEl.textContent = "Guest count must be 1 or 2.";
+          return;
+        }
 
         if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = true;
+        if (!Vara) {
+          if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+          if (bookEventErrorEl) bookEventErrorEl.textContent = "Booking service unavailable.";
+          return;
+        }
 
-        apiFetch(guestApiPath("/event-bookings"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        Vara.events
+          .createBooking({
             eventId: pendingBookEvent.eventId,
             guest: {
               name: guestName,
@@ -1500,21 +1396,43 @@
               phone: guestPhone,
               guestCount: guestCount,
             },
-          }),
-        })
-          .then(function (res) {
-            return res.json().then(function (data) {
-              return { status: res.status, data: data };
-            });
           })
           .then(function (result) {
-            if (
-              result.status === 201 &&
-              result.data &&
-              result.data.data &&
-              result.data.data.razorpayOrderId &&
-              result.data.data.key
-            ) {
+            if (!result.ok) {
+              if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+              if (bookEventErrorEl) {
+                if (result.status === 403) {
+                  bookEventErrorEl.textContent =
+                    result.message || "Event bookings are currently disabled for this property.";
+                } else if (result.status === 401) {
+                  bookEventErrorEl.textContent = "Please sign in to book this event.";
+                  openModal("#signInModal");
+                } else {
+                  bookEventErrorEl.textContent =
+                    result.message || "Could not create booking. Please try again.";
+                }
+              }
+              return;
+            }
+
+            var booking = result.booking;
+
+            // Free event: confirmed immediately — no Razorpay
+            if (booking.confirmed && !booking.needsPayment) {
+              if (bookEventSuccessEl) {
+                bookEventSuccessEl.textContent =
+                  result.message || "You're booked! This event is free — no payment needed.";
+                bookEventSuccessEl.style.display = "block";
+              }
+              if (bookEventSubmitBtn) {
+                bookEventSubmitBtn.disabled = false;
+                bookEventSubmitBtn.textContent = "Booked";
+              }
+              return;
+            }
+
+            // Paid event: open Razorpay with order from createBooking response
+            if (booking.needsPayment) {
               closeAllModals();
 
               if (!window.Razorpay) {
@@ -1524,13 +1442,11 @@
                 return;
               }
 
-              var bookingData = result.data.data;
-
               var options = {
-                key: bookingData.key,
-                amount: bookingData.totalAmount * 100,
+                key: booking.key,
+                amount: Math.round(Number(booking.totalAmount || 0) * 100),
                 currency: "INR",
-                order_id: bookingData.razorpayOrderId,
+                order_id: booking.razorpayOrderId,
                 name: "Prathibhimba",
                 description: "Event Booking",
                 prefill: {
@@ -1539,26 +1455,20 @@
                   contact: guestPhone,
                 },
                 handler: function (response) {
-                  apiFetch(guestApiPath("/event-payments/verify"), {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
+                  Vara.events
+                    .verifyPayment({
                       razorpay_order_id: response.razorpay_order_id,
                       razorpay_payment_id: response.razorpay_payment_id,
                       razorpay_signature: response.razorpay_signature,
-                    }),
-                  })
-                    .then(function (r) {
-                      return r.json();
                     })
-                    .then(function (data) {
-                      if (data && data.success) {
+                    .then(function (vr) {
+                      if (vr.ok) {
                         if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+                        window.location.href = "/?payment=success&type=event";
                       } else {
                         alert(
-                          data && data.message
-                            ? data.message
-                            : "Payment verification failed. Please contact support."
+                          vr.message ||
+                            "Payment verification failed. Please contact support."
                         );
                         if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
                         openBookEventModal(pendingBookEvent);
@@ -1592,12 +1502,13 @@
               });
 
               rzp.open();
-            } else {
-              if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
-              if (bookEventErrorEl) {
-                bookEventErrorEl.textContent =
-                  (result.data && result.data.message) || "Could not create booking. Please try again.";
-              }
+              return;
+            }
+
+            if (bookEventSubmitBtn) bookEventSubmitBtn.disabled = false;
+            if (bookEventErrorEl) {
+              bookEventErrorEl.textContent =
+                result.message || "Could not create booking. Please try again.";
             }
           })
           .catch(function () {
@@ -1672,12 +1583,13 @@
 
     initBookEventForm();
 
-    fetch(publicApiPath("/events"))
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (data) {
-        var raw = (data && (data.data || data.events)) || [];
+    if (!Vara) {
+      showEventsEmptyState();
+    } else {
+    Vara.public
+      .getEvents()
+      .then(function (result) {
+        var raw = result.ok ? result.events : [];
         if (!Array.isArray(raw) || raw.length === 0) {
           showEventsEmptyState();
           return;
@@ -1724,7 +1636,7 @@
           return {
             subtitle: "Upcoming Events",
             title: ev.name || "Event",
-            eventId: ev._id || ev.id,
+            eventId: ev.id,
             maxPeopleAllowed: ev.maxPeopleAllowed,
             curPeopleEnrolled: ev.curPeopleEnrolled,
             pricePerPerson: ev.pricePerPerson,
@@ -1820,6 +1732,7 @@
       .catch(function () {
         // If events API fails, keep existing static copy visible
       });
+    }
   })();
 
   // --- Hero slider (4 images, 5s) ---
@@ -2303,17 +2216,18 @@
   (function loadSiteGalleryReel() {
     var track = document.getElementById("galleryReelTrack");
     if (!track) return;
-    fetch(publicApiPath("/site-gallery"))
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (data) {
+    if (!Vara) {
+      renderSiteGalleryTrack(DEFAULT_SITE_GALLERY_URLS);
+      if (typeof window.initGalleryReel === "function") window.initGalleryReel();
+      return;
+    }
+    Vara.public
+      .getSiteGallery()
+      .then(function (result) {
         var urls =
-          (data && data.images && data.images.length
-            ? data.images
-            : data && data.data && data.data.images && data.data.images.length
-              ? data.data.images
-              : DEFAULT_SITE_GALLERY_URLS);
+          result.ok && result.images && result.images.length
+            ? result.images
+            : DEFAULT_SITE_GALLERY_URLS;
         renderSiteGalleryTrack(urls);
         if (typeof window.initGalleryReel === "function") window.initGalleryReel();
       })

@@ -1,10 +1,10 @@
 // Unified frontend runtime config (single source of truth).
-// This repo is frontend-only; backend runs separately.
+// This repo is frontend-only; backend runs separately on Vara.
 //
 // If you need to change API host or property, edit ONLY this file.
 
 window.__PB_CONFIG__ = {
-  API_BASE_URL: "https://www.varalabs.in",
+  API_BASE_URL: "https://api.varalabs.in",
   PROPERTY_SLUG: "prathibhimba",
 
   // Google Identity Services client id (Sign in with Google)

@@ -19,94 +19,32 @@
   };
   var currentUser = null;
 
-  // ─── API wiring (multi-property backend) ────────────────────────────────────
-  var API_BASE_URL =
-    (window.__PB_CONFIG__ && window.__PB_CONFIG__.API_BASE_URL) ||
-    (window.__ENV__ && window.__ENV__.API_BASE_URL) ||
-    (window.ENV && window.ENV.API_BASE_URL) ||
-    "http://localhost:3000";
-  var PROPERTY_SLUG =
-    (window.__PB_CONFIG__ && window.__PB_CONFIG__.PROPERTY_SLUG) ||
-    (window.__ENV__ && window.__ENV__.PROPERTY_SLUG) ||
-    (window.ENV && window.ENV.PROPERTY_SLUG) ||
-    "prathibhimba";
-  var GOOGLE_CLIENT_ID =
-    (window.__PB_CONFIG__ && window.__PB_CONFIG__.GOOGLE_CLIENT_ID) ||
-    (window.__ENV__ && window.__ENV__.GOOGLE_CLIENT_ID) ||
-    (window.ENV && window.ENV.GOOGLE_CLIENT_ID) ||
-    "505975960167-kc4buclfdjmf74oq9nsmu2lfgmmfuddk.apps.googleusercontent.com";
-  var GUEST_TOKEN_STORAGE_KEY = "guestAccessToken";
+  // ─── API wiring via centralized Vara client (public/js/api/varaClient.js) ────
+  var Vara = window.VaraApi;
+  if (!Vara) {
+    console.error("VaraApi missing — load /js/api/varaClient.js before cart.js");
+  }
+  var cfg = (Vara && Vara.getConfig()) || {};
+  var GOOGLE_CLIENT_ID = cfg.GOOGLE_CLIENT_ID || "";
   function getGuestToken() {
-    try {
-      return localStorage.getItem(GUEST_TOKEN_STORAGE_KEY) || "";
-    } catch (_) {
-      return "";
-    }
+    return (Vara && Vara.getGuestToken()) || "";
   }
   function setGuestToken(token) {
-    try {
-      if (!token) localStorage.removeItem(GUEST_TOKEN_STORAGE_KEY);
-      else localStorage.setItem(GUEST_TOKEN_STORAGE_KEY, String(token));
-    } catch (_) { }
+    if (Vara) Vara.setGuestToken(token);
   }
-
-  // Decode a JWT payload without verifying signature (display only).
   function parseJwtPayload(token) {
-    try {
-      var parts = String(token).split(".");
-      if (parts.length < 2) return null;
-      var b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-      var json = decodeURIComponent(
-        atob(b64)
-          .split("")
-          .map(function (c) {
-            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-          })
-          .join("")
-      );
-      return JSON.parse(json);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function guestApiPath(path) {
-    return API_BASE_URL + "/api/guest" + path;
-  }
-  function apiFetch(url, opts) {
-    var token = getGuestToken();
-    var headers = Object.assign({}, (opts && opts.headers) || {});
-    if (!headers["Content-Type"] && !(opts && opts.body instanceof FormData)) {
-      headers["Content-Type"] = "application/json";
-    }
-    if (token) headers["Authorization"] = "Bearer " + token;
-    return fetch(url, Object.assign({}, opts || {}, { headers: headers, credentials: "include" }));
+    return (Vara && Vara.parseJwtPayload(token)) || null;
   }
 
   function handleGsiCredential(response) {
-    if (!response || !response.credential) return;
-    fetch(API_BASE_URL + "/api/guest-auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        propertySlug: PROPERTY_SLUG,
-        credential: response.credential,
-      }),
-    })
-      .then(function (res) {
-        return res.json().catch(function () {
-          return {};
-        }).then(function (data) {
-          return { ok: res.ok, data: data };
-        });
-      })
+    if (!response || !response.credential || !Vara) return;
+    Vara.auth
+      .google(response.credential)
       .then(function (r) {
-        if (!r.ok || !r.data || r.data.success !== true || !r.data.token) {
-          alert((r.data && r.data.message) || "Google sign-in failed.");
+        if (!r.ok) {
+          alert(r.message || "Google sign-in failed.");
           return;
         }
-        setGuestToken(r.data.token);
         fetchCart().then(function (result) {
           if (result && result.unauthorized) showSignInRequired();
           else renderCartList();
@@ -116,6 +54,12 @@
         alert("Google sign-in failed. Please try again.");
       });
   }
+
+  window.addEventListener(Vara ? Vara.AUTH_REQUIRED_EVENT : "vara:auth-required", function (ev) {
+    if (ev && ev.detail && ev.detail.status === 403) return;
+    currentUser = null;
+    showSignInRequired();
+  });
 
   function initGoogleIdentity() {
     try {
@@ -190,6 +134,9 @@
   }
 
   function parseCartResponse(data) {
+    if (Vara && Vara.adapters && Vara.adapters.cart) {
+      return Vara.adapters.cart(data);
+    }
     var root =
       data && data.data && typeof data.data === "object" && !Array.isArray(data.data)
         ? data.data
@@ -222,18 +169,17 @@
   }
 
   function checkAuth(cb) {
-    // No /me endpoint — infer from token; decode payload for real name/avatar.
     var t = getGuestToken();
     if (!t) {
       currentUser = null;
       if (cb) cb(null);
       return;
     }
-    var payload = parseJwtPayload(t);
-    currentUser = {
-      name: (payload && (payload.name || payload.email)) || "Guest",
-      picture: (payload && (payload.picture || payload.avatar)) || "",
-      email: (payload && payload.email) || "",
+    var profile = Vara && Vara.guestProfileFromToken(t);
+    currentUser = profile || {
+      name: "Guest",
+      picture: "",
+      email: "",
     };
     if (cb) cb(currentUser);
   }
@@ -247,21 +193,23 @@
   }
 
   function fetchCart() {
-    return apiFetch(guestApiPath("/bookings/cart"))
-      .then(function (res) {
-        if (res.status === 401) return { unauthorized: true };
-        return res.json().then(function (data) {
-          var parsed = parseCartResponse(data);
-          serverCart = parsed.roomInfo;
-          cartSummary = {
-            totalPrice: parsed.totalPrice,
-            lowerPayableTotal: parsed.lowerPayableTotal,
-            upperPayableTotal: parsed.upperPayableTotal,
-            lowerPercent: parsed.lowerPercent,
-            upperPercent: parsed.upperPercent,
-          };
-          return { ok: res.ok, unauthorized: res.status === 401 };
-        });
+    if (!Vara) {
+      serverCart = [];
+      return Promise.resolve({ ok: false, unauthorized: !getGuestToken() });
+    }
+    return Vara.bookings
+      .getCart()
+      .then(function (result) {
+        if (result.unauthorized) return { unauthorized: true };
+        serverCart = (result.cart && result.cart.roomInfo) || [];
+        cartSummary = {
+          totalPrice: (result.cart && result.cart.totalPrice) || 0,
+          lowerPayableTotal: (result.cart && result.cart.lowerPayableTotal) || 0,
+          upperPayableTotal: (result.cart && result.cart.upperPayableTotal) || 0,
+          lowerPercent: (result.cart && result.cart.lowerPercent) || 0,
+          upperPercent: (result.cart && result.cart.upperPercent) || 0,
+        };
+        return { ok: result.ok, unauthorized: result.unauthorized };
       })
       .catch(function () {
         serverCart = [];
@@ -449,17 +397,12 @@
   }
 
   function removeFromCart(roomId, checkIn, checkOut) {
-    apiFetch(guestApiPath("/bookings/cart/items"), {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    if (!Vara) return;
+    Vara.bookings
+      .removeCartItem({
         roomId: roomId,
         checkIn: checkIn,
         checkOut: checkOut,
-      }),
-    })
-      .then(function (res) {
-        return res.json();
       })
       .then(function () {
         return fetchCart().then(function () {
@@ -609,29 +552,21 @@
           };
         });
 
-        apiFetch(guestApiPath("/payments/order"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+        if (!Vara) {
+          alert("Booking service unavailable. Please refresh.");
+          termsProceedBtn.disabled = false;
+          return;
+        }
+
+        Vara.payments
+          .createOrder({
             name: name,
             email: email,
             phone: phone,
             rooms: rooms,
-          }),
-        })
-          .then(function (res) {
-            return res.json().then(function (data) {
-              return { status: res.status, data: data };
-            });
           })
           .then(function (result) {
-            if (
-              result.status === 201 &&
-              result.data &&
-              result.data.data &&
-              (result.data.data.razorpayOrderId || result.data.data.orderId) &&
-              (result.data.data.key || result.data.data.razorpayKeyId)
-            ) {
+            if (result.ok && result.order && result.order.razorpayOrderId && result.order.key) {
               closeTermsModal();
 
               if (!window.Razorpay) {
@@ -642,16 +577,14 @@
                 return;
               }
 
-              var bookingData = result.data.data;
-              var orderId = bookingData.razorpayOrderId || bookingData.orderId;
-              var keyId = bookingData.key || bookingData.razorpayKeyId;
+              var bookingData = result.order;
 
               var options = {
-                key: keyId,
-                amount: bookingData.totalAmount * 100, // paise
+                key: bookingData.key,
+                amount: Math.round(Number(bookingData.totalAmount || 0) * 100),
                 currency: "INR",
-                order_id: orderId,
-                name: "Summer Green",
+                order_id: bookingData.razorpayOrderId,
+                name: "Prathibhimba",
                 description: "Room Booking",
                 prefill: {
                   name: name,
@@ -659,24 +592,15 @@
                   contact: phone,
                 },
 
-                // ✅ Called by Razorpay on successful payment
                 handler: function (response) {
-                  // Verify payment signature on backend before redirecting
-                  apiFetch(guestApiPath("/payments/verify"), {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
+                  Vara.payments
+                    .verify({
                       razorpay_order_id: response.razorpay_order_id,
                       razorpay_payment_id: response.razorpay_payment_id,
                       razorpay_signature: response.razorpay_signature,
-                    }),
-                  })
-                    .then(function (res) {
-                      return res.json();
                     })
-                    .then(function (data) {
-                      if (data.success) {
-                        // Clear cart then redirect to success page
+                    .then(function (vr) {
+                      if (vr.ok) {
                         window.location.href = "/?payment=success";
                       } else {
                         alert(
@@ -696,7 +620,6 @@
                 },
 
                 modal: {
-                  // User closed modal without paying — re-enable button
                   ondismiss: function () {
                     termsProceedBtn.disabled = false;
                   },
@@ -705,7 +628,6 @@
 
               var rzp = new window.Razorpay(options);
 
-              // Handle payment failure inside the modal (e.g. wrong card)
               rzp.on("payment.failed", function (response) {
                 console.error("Payment failed:", response.error);
                 alert(
@@ -718,7 +640,7 @@
               rzp.open();
             } else {
               alert(
-                result.data.message ||
+                result.message ||
                 "Could not create payment order. Please try again."
               );
               termsProceedBtn.disabled = false;

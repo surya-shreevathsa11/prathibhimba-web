@@ -312,6 +312,24 @@
     };
   }
 
+  function adaptBooking(b) {
+    if (!b || typeof b !== "object") return b;
+    var status = String(b.status || "").toLowerCase();
+    return Object.assign({}, b, {
+      id: b._id || b.id || b.bookingId || "",
+      bookingId: b.bookingId || b._id || b.id || "",
+      status: status,
+      expiresAt: b.expiresAt || b.paymentExpiresAt || null,
+      rejectionReason: b.rejectionReason || b.rejectReason || "",
+      guest: b.guest || null,
+      rooms: Array.isArray(b.rooms) ? b.rooms : [],
+      totalAmount: b.totalAmount != null ? Number(b.totalAmount) : 0,
+      amountPaid: b.amountPaid != null ? Number(b.amountPaid) : 0,
+      prepaidOptions: b.prepaidOptions || [],
+      raw: b,
+    });
+  }
+
   function adaptBookings(payload) {
     var root = unwrapData(payload);
     var list =
@@ -319,7 +337,20 @@
       (root && root.bookings) ||
       (payload && payload.bookings) ||
       [];
-    return Array.isArray(list) ? list : [];
+    if (!Array.isArray(list)) return [];
+    return list.map(adaptBooking);
+  }
+
+  function adaptBookingRequest(payload) {
+    var root = unwrapData(payload) || {};
+    var booking = adaptBooking(root.booking || root);
+    return {
+      booking: booking,
+      bookingId: booking.bookingId || booking.id || "",
+      status: booking.status || "requested",
+      message: (payload && payload.message) || root.message || "",
+      raw: root,
+    };
   }
 
   function adaptPaymentOrder(payload) {
@@ -585,21 +616,55 @@
         };
       });
     },
+
+    /**
+     * Submit a room booking request from the current cart.
+     * Body: { name, email, phone }
+     * Creates status "requested", clears cart; no Razorpay / no date hold.
+     */
+    createBookingRequest: function (body) {
+      return request(guestUrl("/bookings/requests"), {
+        method: "POST",
+        body: body,
+      }).then(function (r) {
+        var adapted = adaptBookingRequest(r.data);
+        return {
+          ok: r.ok && (r.status === 200 || r.status === 201),
+          status: r.status,
+          booking: adapted.booking,
+          bookingId: adapted.bookingId,
+          message: (r.data && r.data.message) || adapted.message || "",
+          raw: r.data,
+        };
+      });
+    },
   };
 
   // ─── Guest room payments ────────────────────────────────────────────────────
 
   var guestPayments = {
+    /**
+     * Create Razorpay order for an approved booking.
+     * Body: { bookingId, prepaidOptionId?, prepaidPercent? }
+     * Do NOT send name/email/phone or cart rooms.
+     */
     createOrder: function (body) {
       return request(guestUrl("/payments/order"), {
         method: "POST",
         body: body,
       }).then(function (r) {
         var order = adaptPaymentOrder(r.data);
+        var ok =
+          r.ok &&
+          (r.status === 200 || r.status === 201) &&
+          order.razorpayOrderId &&
+          order.key;
         return {
-          ok: r.ok && r.status === 201 && order.razorpayOrderId && order.key,
+          ok: ok,
           status: r.status,
           order: order,
+          expired: r.status === 410,
+          notPayable: r.status === 400,
           message: (r.data && r.data.message) || "",
           raw: r.data,
         };
@@ -703,6 +768,8 @@
       quote: adaptQuote,
       cart: adaptCart,
       bookings: adaptBookings,
+      booking: adaptBooking,
+      bookingRequest: adaptBookingRequest,
       paymentOrder: adaptPaymentOrder,
       eventBookingCreate: adaptEventBookingCreate,
       siteGallery: adaptSiteGallery,

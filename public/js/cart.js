@@ -255,11 +255,11 @@
       .join("");
     var range =
       room.lowerPrepaidAmount != null && room.upperPrepaidAmount != null
-        ? '<p class="cart__item-prepaid__range">Pay ' +
+        ? '<p class="cart__item-prepaid__range">Upfront after approval: ' +
           formatINR(room.lowerPrepaidAmount) +
           " – " +
           formatINR(room.upperPrepaidAmount) +
-          " upfront</p>"
+          "</p>"
         : "";
     return (
       '<div class="cart__item-prepaid">' +
@@ -376,7 +376,7 @@
       ) {
         payableEl.style.display = "block";
         payableEl.innerHTML =
-          "Pay now: <strong>" +
+          "Upfront after approval: <strong>" +
           formatINR(cartSummary.lowerPayableTotal) +
           "</strong>" +
           (cartSummary.lowerPercent != null
@@ -542,109 +542,42 @@
 
         termsProceedBtn.disabled = true;
 
-        var rooms = serverCart.map(function (r) {
-          return {
-            roomId: r.roomId,
-            checkIn: formatDate(r.checkIn),
-            checkOut: formatDate(r.checkOut),
-            adults: r.adults != null ? r.adults : 1,
-            children: r.children != null ? r.children : 0,
-          };
-        });
-
         if (!Vara) {
           alert("Booking service unavailable. Please refresh.");
           termsProceedBtn.disabled = false;
           return;
         }
 
-        Vara.payments
-          .createOrder({
+        Vara.bookings
+          .createBookingRequest({
             name: name,
             email: email,
             phone: phone,
-            rooms: rooms,
           })
           .then(function (result) {
-            if (result.ok && result.order && result.order.razorpayOrderId && result.order.key) {
+            if (result.ok) {
               closeTermsModal();
-
-              if (!window.Razorpay) {
-                alert(
-                  "Razorpay checkout script not loaded. Please refresh the page and try again."
-                );
-                termsProceedBtn.disabled = false;
-                return;
-              }
-
-              var bookingData = result.order;
-
-              var options = {
-                key: bookingData.key,
-                amount: Math.round(Number(bookingData.totalAmount || 0) * 100),
-                currency: "INR",
-                order_id: bookingData.razorpayOrderId,
-                name: "Prathibhimba",
-                description: "Room Booking",
-                prefill: {
-                  name: name,
-                  email: email,
-                  contact: phone,
-                },
-
-                handler: function (response) {
-                  Vara.payments
-                    .verify({
-                      razorpay_order_id: response.razorpay_order_id,
-                      razorpay_payment_id: response.razorpay_payment_id,
-                      razorpay_signature: response.razorpay_signature,
-                    })
-                    .then(function (vr) {
-                      if (vr.ok) {
-                        window.location.href = "/?payment=success";
-                      } else {
-                        alert(
-                          "Payment verification failed. Please contact support with your payment ID: " +
-                          response.razorpay_payment_id
-                        );
-                        termsProceedBtn.disabled = false;
-                      }
-                    })
-                    .catch(function () {
-                      alert(
-                        "Could not verify payment. Please contact support with your payment ID: " +
-                        response.razorpay_payment_id
-                      );
-                      termsProceedBtn.disabled = false;
-                    });
-                },
-
-                modal: {
-                  ondismiss: function () {
-                    termsProceedBtn.disabled = false;
-                  },
-                },
+              serverCart = [];
+              cartSummary = {
+                totalPrice: 0,
+                lowerPayableTotal: 0,
+                upperPayableTotal: 0,
+                lowerPercent: 0,
+                upperPercent: 0,
               };
-
-              var rzp = new window.Razorpay(options);
-
-              rzp.on("payment.failed", function (response) {
-                console.error("Payment failed:", response.error);
-                alert(
-                  "Payment failed: " +
-                  (response.error.description || "Please try again.")
-                );
-                termsProceedBtn.disabled = false;
-              });
-
-              rzp.open();
-            } else {
-              alert(
-                result.message ||
-                "Could not create payment order. Please try again."
-              );
-              termsProceedBtn.disabled = false;
+              updateNavCartCount(0);
+              var msgEl = $("#requestSuccessMessage");
+              if (msgEl && result.message) {
+                msgEl.textContent = result.message;
+              }
+              showStep("stepRequestSuccess");
+              return;
             }
+            alert(
+              result.message ||
+                "Could not submit booking request. Please try again."
+            );
+            termsProceedBtn.disabled = false;
           })
           .catch(function () {
             alert("Something went wrong. Please try again.");

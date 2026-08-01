@@ -6,6 +6,8 @@
   let validRoomIdsFromBackend = [];
   /** Per-room guest limits from GET /api/booking/rooms (capacity synced from config/room.js). Key: roomId e.g. "R1". */
   let roomsCapacityByRoomId = {};
+  var myBookingsModalOpen = false;
+  var myBookingsRefreshInFlight = false;
 
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
@@ -448,6 +450,7 @@
       e.textContent = "";
       e.classList.remove("form__availability--ok", "form__availability--error");
     });
+    myBookingsModalOpen = false;
   }
 
   $$(".modal__overlay, .modal__close, [data-close]").forEach((el) => {
@@ -521,6 +524,58 @@
   function escapeBookingHtml(s) {
     return String(s == null ? "" : s).replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
+  function formatBookingDate(value) {
+    if (!value) return "—";
+    try {
+      return new Date(value).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    } catch (_) {
+      return "—";
+    }
+  }
+  function formatBookingDeadline(value) {
+    if (!value) return "";
+    try {
+      return new Date(value).toLocaleString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+    } catch (_) {
+      return "";
+    }
+  }
+  function roomBookingStatusCopy(b) {
+    var status = (b.status || "").toLowerCase();
+    if (status === "requested") {
+      return "Request pending — waiting for property confirmation";
+    }
+    if (status === "approved") {
+      var deadline = formatBookingDeadline(b.expiresAt);
+      return deadline
+        ? "Approved — complete payment by " + deadline
+        : "Approved — complete payment to confirm";
+    }
+    if (status === "rejected") {
+      var reason = b.rejectionReason ? String(b.rejectionReason).trim() : "";
+      return reason
+        ? "Request declined — " + reason
+        : "Request declined";
+    }
+    if (status === "confirmed") return "Confirmed";
+    if (status === "cancelled") return "Cancelled";
+    return status || "—";
+  }
+  function isApprovedPaymentExpired(b) {
+    if (!b || !b.expiresAt) return false;
+    var t = new Date(b.expiresAt).getTime();
+    return !isNaN(t) && t < Date.now();
+  }
   function renderMyBookingsRoomRow(b) {
     var status = (b.status || "pending").toLowerCase();
     var guestName = b.guest && b.guest.name ? b.guest.name : "—";
@@ -534,22 +589,48 @@
       : "—";
     var checkIn =
       rooms[0] && rooms[0].checkIn
-        ? new Date(rooms[0].checkIn).toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
+        ? formatBookingDate(rooms[0].checkIn)
         : "—";
     var checkOut =
       rooms[0] && rooms[0].checkOut
-        ? new Date(rooms[0].checkOut).toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })
+        ? formatBookingDate(rooms[0].checkOut)
         : "—";
+    var bookingId = b.bookingId || b.id || "";
+    var statusCopy = roomBookingStatusCopy(b);
+    var expired = status === "approved" && isApprovedPaymentExpired(b);
+    var canPay = status === "approved" && !expired && bookingId;
+    var actionsHtml = "";
+    if (canPay) {
+      actionsHtml =
+        '<div class="my-bookings__actions">' +
+        '<button type="button" class="btn btn--primary btn--sm my-bookings__pay-btn" data-pay-booking-id="' +
+        escapeBookingHtml(bookingId) +
+        '">Pay now</button>' +
+        "</div>";
+    } else if (status === "approved" && expired) {
+      actionsHtml =
+        '<div class="my-bookings__actions">' +
+        '<p class="my-bookings__hint">Payment window expired. Submit a new booking request from your cart.</p>' +
+        '<a class="btn btn--primary btn--sm" href="/cart">Request again</a>' +
+        "</div>";
+    } else if (status === "requested") {
+      actionsHtml =
+        '<div class="my-bookings__actions">' +
+        '<p class="my-bookings__hint">Payment unlocks after the property approves your request.</p>' +
+        "</div>";
+    } else if (status === "rejected") {
+      actionsHtml =
+        '<div class="my-bookings__actions">' +
+        '<p class="my-bookings__hint">This request cannot be paid. You may submit a new request from your cart.</p>' +
+        '<a class="btn btn--primary btn--sm" href="/cart">Request again</a>' +
+        "</div>";
+    }
     return (
-      '<div class="my-bookings__item">' +
+      '<div class="my-bookings__item" data-booking-id="' +
+      escapeBookingHtml(bookingId) +
+      '" data-booking-status="' +
+      escapeBookingHtml(status) +
+      '">' +
       '<span class="my-bookings__guest">' +
       escapeBookingHtml(guestName) +
       "</span>" +
@@ -565,10 +646,14 @@
       (b.totalAmount != null ? Number(b.totalAmount).toLocaleString("en-IN") : "0") +
       "</span>" +
       '<span class="my-bookings__status my-bookings__status--' +
-      status +
+      escapeBookingHtml(status) +
       '">' +
-      status +
+      escapeBookingHtml(status) +
       "</span>" +
+      '<p class="my-bookings__status-copy">' +
+      escapeBookingHtml(statusCopy) +
+      "</p>" +
+      actionsHtml +
       "</div>"
     );
   }
@@ -631,6 +716,7 @@
     var events = eventBookings || [];
     if (listRoomsEl) {
       listRoomsEl.innerHTML = rooms.map(renderMyBookingsRoomRow).join("");
+      bindMyBookingsPayButtons(listRoomsEl);
     }
     if (emptyRoomsEl) {
       emptyRoomsEl.style.display = rooms.length === 0 ? "block" : "none";
@@ -643,6 +729,186 @@
     }
   }
 
+  function setMyBookingsError(message) {
+    var emptyEl = $("#myBookingsError");
+    if (!emptyEl) return;
+    if (message) {
+      emptyEl.textContent = message;
+      emptyEl.style.display = "block";
+    } else {
+      emptyEl.textContent = "";
+      emptyEl.style.display = "none";
+    }
+  }
+
+  function loadMyBookings(opts) {
+    opts = opts || {};
+    if (!Vara) {
+      setMyBookingsError("Booking service unavailable.");
+      fillMyBookingsModal([], []);
+      if (opts.open !== false) openModal("#myBookingsModal");
+      myBookingsModalOpen = true;
+      return Promise.resolve();
+    }
+    if (myBookingsRefreshInFlight) return Promise.resolve();
+    myBookingsRefreshInFlight = true;
+    return Promise.all([Vara.bookings.listBookings(), Vara.events.listBookings()])
+      .then(function (results) {
+        var roomsResult = results[0];
+        var eventsResult = results[1];
+        if (!roomsResult.ok && roomsResult.status === 401) {
+          setMyBookingsError(
+            roomsResult.message || "Please sign in to view bookings."
+          );
+          fillMyBookingsModal([], []);
+          if (opts.open !== false) openModal("#myBookingsModal");
+          myBookingsModalOpen = true;
+          return;
+        }
+        setMyBookingsError("");
+        fillMyBookingsModal(
+          roomsResult.ok ? roomsResult.bookings : [],
+          eventsResult.ok ? eventsResult.bookings : []
+        );
+        if (opts.open !== false) openModal("#myBookingsModal");
+        myBookingsModalOpen = true;
+      })
+      .catch(function () {
+        setMyBookingsError("Could not load bookings.");
+        fillMyBookingsModal([], []);
+        if (opts.open !== false) openModal("#myBookingsModal");
+        myBookingsModalOpen = true;
+      })
+      .then(function () {
+        myBookingsRefreshInFlight = false;
+      });
+  }
+
+  function paymentOrderErrorMessage(result) {
+    if (!result) return "Could not start payment. Please try again.";
+    if (result.expired || result.status === 410) {
+      return (
+        result.message ||
+        "Payment window expired. Please submit a new booking request from your cart."
+      );
+    }
+    if (result.notPayable || result.status === 400) {
+      return (
+        result.message ||
+        "This booking is not payable yet. Wait for property approval, then try again."
+      );
+    }
+    return result.message || "Could not create payment order. Please try again.";
+  }
+
+  function payApprovedBooking(bookingId, triggerBtn) {
+    if (!bookingId || !Vara) return;
+    if (triggerBtn) triggerBtn.disabled = true;
+
+    Vara.payments
+      .createOrder({ bookingId: bookingId })
+      .then(function (result) {
+        if (
+          !(
+            result.ok &&
+            result.order &&
+            result.order.razorpayOrderId &&
+            result.order.key
+          )
+        ) {
+          alert(paymentOrderErrorMessage(result));
+          if (triggerBtn) triggerBtn.disabled = false;
+          if (result.expired || result.status === 410) {
+            loadMyBookings({ open: false });
+          }
+          return;
+        }
+
+        if (!window.Razorpay) {
+          alert(
+            "Razorpay checkout script not loaded. Please refresh the page and try again."
+          );
+          if (triggerBtn) triggerBtn.disabled = false;
+          return;
+        }
+
+        var bookingData = result.order;
+        var guest = (currentUser && currentUser.name) || "";
+        var options = {
+          key: bookingData.key,
+          amount: Math.round(Number(bookingData.totalAmount || 0) * 100),
+          currency: "INR",
+          order_id: bookingData.razorpayOrderId,
+          name: "Prathibhimba",
+          description: "Room Booking",
+          prefill: {
+            name: guest,
+            email: (currentUser && currentUser.email) || "",
+            contact: "",
+          },
+          handler: function (response) {
+            Vara.payments
+              .verify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              })
+              .then(function (vr) {
+                if (vr.ok) {
+                  loadMyBookings({ open: false }).then(function () {
+                    alert("Payment successful. Your booking is confirmed.");
+                  });
+                } else {
+                  alert(
+                    "Payment verification failed. Please contact support with your payment ID: " +
+                      response.razorpay_payment_id
+                  );
+                  if (triggerBtn) triggerBtn.disabled = false;
+                }
+              })
+              .catch(function () {
+                alert(
+                  "Could not verify payment. Please contact support with your payment ID: " +
+                    response.razorpay_payment_id
+                );
+                if (triggerBtn) triggerBtn.disabled = false;
+              });
+          },
+          modal: {
+            ondismiss: function () {
+              if (triggerBtn) triggerBtn.disabled = false;
+            },
+          },
+        };
+
+        var rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function (response) {
+          console.error("Payment failed:", response.error);
+          alert(
+            "Payment failed: " +
+              ((response.error && response.error.description) ||
+                "Please try again.")
+          );
+          if (triggerBtn) triggerBtn.disabled = false;
+        });
+        rzp.open();
+      })
+      .catch(function () {
+        alert("Something went wrong starting payment. Please try again.");
+        if (triggerBtn) triggerBtn.disabled = false;
+      });
+  }
+
+  function bindMyBookingsPayButtons(listEl) {
+    if (!listEl) return;
+    listEl.querySelectorAll("[data-pay-booking-id]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-pay-booking-id");
+        payApprovedBooking(id, btn);
+      });
+    });
+  }
+
   const navProfileBookings = $("#navProfileBookings");
   if (navProfileBookings) {
     navProfileBookings.addEventListener("click", (e) => {
@@ -650,53 +916,38 @@
       if (navProfileDropdown) navProfileDropdown.classList.remove("is-open");
       const navLinks = $("#navLinks");
       if (navLinks) navLinks.classList.remove("open");
-
-      var emptyEl = $("#myBookingsError");
-      if (emptyEl) {
-        emptyEl.style.display = "none";
-        emptyEl.textContent = "";
-      }
-
-      if (!Vara) {
-        if (emptyEl) {
-          emptyEl.textContent = "Booking service unavailable.";
-          emptyEl.style.display = "block";
-        }
-        fillMyBookingsModal([], []);
-        openModal("#myBookingsModal");
-        return;
-      }
-
-      Promise.all([Vara.bookings.listBookings(), Vara.events.listBookings()])
-        .then(function (results) {
-          var roomsResult = results[0];
-          var eventsResult = results[1];
-          if (!roomsResult.ok && roomsResult.status === 401) {
-            if (emptyEl) {
-              emptyEl.textContent =
-                roomsResult.message || "Please sign in to view bookings.";
-              emptyEl.style.display = "block";
-            }
-            fillMyBookingsModal([], []);
-            openModal("#myBookingsModal");
-            return;
-          }
-          fillMyBookingsModal(
-            roomsResult.ok ? roomsResult.bookings : [],
-            eventsResult.ok ? eventsResult.bookings : []
-          );
-          openModal("#myBookingsModal");
-        })
-        .catch(function () {
-          if (emptyEl) {
-            emptyEl.textContent = "Could not load bookings.";
-            emptyEl.style.display = "block";
-          }
-          fillMyBookingsModal([], []);
-          openModal("#myBookingsModal");
-        });
+      setMyBookingsError("");
+      loadMyBookings({ open: true });
     });
   }
+
+  // Refresh bookings when returning to the tab so requested → approved appears
+  // without a hard reload (simple refetch while My Bookings is open).
+  function maybeRefreshMyBookings() {
+    var modal = $("#myBookingsModal");
+    if (!myBookingsModalOpen || !modal || !modal.classList.contains("active")) {
+      return;
+    }
+    loadMyBookings({ open: false });
+  }
+  window.addEventListener("focus", maybeRefreshMyBookings);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") maybeRefreshMyBookings();
+  });
+
+  // Deep-link from cart success: /?openBookings=1
+  try {
+    var openBookingsParam = new URLSearchParams(window.location.search).get(
+      "openBookings"
+    );
+    if (openBookingsParam === "1" && getGuestToken()) {
+      loadMyBookings({ open: true });
+      if (window.history && window.history.replaceState) {
+        var cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, "", cleanUrl || "/");
+      }
+    }
+  } catch (_) {}
 
   // --- Google Sign In ---
   // Eagerly initialise and render the button once the async GSI script resolves.

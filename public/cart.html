@@ -9,7 +9,7 @@
     <title>Booking cart | Prathibhimba Coorg homestay</title>
     <meta
       name="description"
-      content="Review your Prathibhimba room selection and complete booking—boutique Coorg homestay near Madikeri with lake views. Secure checkout for private rooms and dorms."
+      content="Review your Prathibhimba room selection and submit a booking request—boutique Coorg homestay near Madikeri with lake views. Private rooms and dorms."
     />
     <link rel="canonical" href="https://prathibhimbastays.com/cart" />
     <meta property="og:type" content="website" />
@@ -20,7 +20,7 @@
     />
     <meta
       property="og:description"
-      content="Review your Prathibhimba room selection and complete booking—boutique Coorg homestay near Madikeri with lake views. Secure checkout for private rooms and dorms."
+      content="Review your Prathibhimba room selection and submit a booking request—boutique Coorg homestay near Madikeri with lake views. Private rooms and dorms."
     />
     <meta
       property="og:image"
@@ -34,7 +34,7 @@
     />
     <meta
       name="twitter:description"
-      content="Review your Prathibhimba room selection and complete booking—boutique Coorg homestay near Madikeri with lake views. Secure checkout for private rooms and dorms."
+      content="Review your Prathibhimba room selection and submit a booking request—boutique Coorg homestay near Madikeri with lake views. Private rooms and dorms."
     />
     <meta
       name="twitter:image"
@@ -167,14 +167,30 @@
               class="btn btn--primary btn--full cursor-target"
               id="checkoutSubmitBtn"
             >
-              Proceed to payment
+              Request booking
             </button>
           </form>
+        </section>
+
+        <!-- Step 3: Request submitted (awaiting manager confirmation) -->
+        <section class="cart-step cart-step--hidden" id="stepRequestSuccess">
+          <h2 class="cart-step__heading">Request submitted</h2>
+          <p class="cart__request-success" id="requestSuccessMessage">
+            Your booking request has been sent. We&rsquo;ll email you when the
+            property confirms. Payment is only needed after approval.
+          </p>
+          <p class="cart__request-success-hint">
+            Track status anytime under
+            <a href="/?openBookings=1">My Bookings</a>.
+          </p>
+          <a href="/" class="btn btn--primary btn--full cursor-target"
+            >Back to home</a
+          >
         </section>
       </div>
     </main>
 
-    <!-- Terms & conditions popup (shown before Razorpay redirect) -->
+    <!-- Terms & conditions popup (shown before submitting booking request) -->
     <div
       class="modal"
       id="termsModal"
@@ -222,7 +238,7 @@
           disabled
           style="margin-top: 1rem"
         >
-          Proceed to Checkout
+          Submit request
         </button>
       </div>
     </div>
